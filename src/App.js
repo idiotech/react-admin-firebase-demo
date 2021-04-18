@@ -1,6 +1,7 @@
 import * as React from "react";
 import { PostList, PostShow, PostCreate, PostEdit } from "./posts";
 import { CommentList, CommentShow, CommentCreate, CommentEdit } from "./comments";
+import { LocationList, LocationShow, LocationCreate, LocationEdit } from "./locations";
 import { Admin, Resource } from "react-admin";
 import {
   FirebaseDataProvider,
@@ -26,6 +27,13 @@ class App extends React.Component {
         dataProvider={dataProvider}
         authProvider={authProvider}
       >
+        <Resource
+          name="locations"
+          list={LocationList}
+          show={LocationShow}
+          create={LocationCreate}
+          edit={LocationEdit}
+        />
         <Resource
           name="posts"
           list={PostList}
