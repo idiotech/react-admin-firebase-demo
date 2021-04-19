@@ -19,6 +19,8 @@ import {
   NumberInput,
 } from "react-admin";
 
+import CoordinateInput from "./coordinates"
+
 const LocationFilter = (props) => (
   <Filter {...props}>
     <TextInput label="Search" source="name" alwaysOn />
@@ -70,8 +72,7 @@ export const LocationEdit = (props) => (
       <TextInput disabled source="createdate" />
       <TextInput disabled source="lastupdate" />
       <TextInput source="name" />
-      <NumberInput source="latitide" />
-      <NumberInput source="longitude" />
+      <CoordinateInput />
       <TextInput multiline source="description" />
     </SimpleForm>
   </Edit>
