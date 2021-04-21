@@ -1,4 +1,5 @@
 import * as React from "react";
+import { ActionList, ActionCreate } from "./actions";
 import { PostList, PostShow, PostCreate, PostEdit } from "./posts";
 import { CommentList, CommentShow, CommentCreate, CommentEdit } from "./comments";
 import { LocationList, LocationShow, LocationCreate, LocationEdit } from "./locations";
@@ -32,6 +33,13 @@ class App extends React.Component {
           list={LocationList}
           show={LocationShow}
           create={LocationCreate}
+          edit={LocationEdit}
+        />
+        <Resource
+          name="actions"
+          list={ActionList}
+          show={LocationShow}
+          create={ActionCreate}
           edit={LocationEdit}
         />
         <Resource

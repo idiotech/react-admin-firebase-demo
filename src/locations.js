@@ -15,11 +15,9 @@ import {
   ShowButton,
   EditButton,
   DeleteButton,
-  NumberField,
-  NumberInput,
 } from "react-admin";
 
-import CoordinateInput from "./coordinates"
+import {CoordinateInput, CoordinateField} from "./coordinates"
 
 const LocationFilter = (props) => (
   <Filter {...props}>
@@ -31,8 +29,7 @@ export const LocationList = (props) => (
   <List {...props} filters={<LocationFilter />}>
     <Datagrid>
       <TextField source="name" />
-      <NumberField source="latitide" />
-      <NumberField source="longitude" />
+      <CoordinateField source="coordinates" label="Coordinates"  />
       <ShowButton label="" />
       <EditButton label="" />
       <DeleteButton label="" redirect={false}/>
@@ -45,8 +42,7 @@ export const LocationShow = (props) => (
     <SimpleShowLayout>
       <TextField source="id" />
       <TextField source="name" />
-      <NumberField source="latitide" />
-      <NumberField source="longitude" />
+      <CoordinateField source="coordinates" label="Coordinates" />
       <TextField multiline source="description" />
       <TextField source="createdate" />
       <TextField source="lastupdate" />
@@ -58,8 +54,7 @@ export const LocationCreate = (props) => (
   <Create {...props} >
     <SimpleForm>
       <TextInput source="name" />
-      <NumberInput source="latitide" />
-      <NumberInput source="longitude" />
+      <CoordinateInput />
       <TextInput multiline source="description" />
     </SimpleForm>
   </Create>
