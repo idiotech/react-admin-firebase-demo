@@ -1,7 +1,6 @@
 import * as React from "react";
 import { ActionList, ActionCreate, ActionShow, ActionEdit } from "./actions";
-import { PostList, PostShow, PostCreate, PostEdit } from "./posts";
-import { CommentList, CommentShow, CommentCreate, CommentEdit } from "./comments";
+import { NodeList, NodeShow, NodeCreate, NodeEdit } from "./nodes";
 import { LocationList, LocationShow, LocationCreate, LocationEdit } from "./locations";
 import { Admin, Resource } from "react-admin";
 import {
@@ -43,19 +42,11 @@ class App extends React.Component {
           edit={ActionEdit}
         />
         <Resource
-          name="posts"
-          list={PostList}
-          show={PostShow}
-          create={PostCreate}
-          edit={PostEdit}
-        />
-        <Resource
-          name="comments"
-          icon={CommentIcon}
-          list={CommentList}
-          show={CommentShow}
-          create={CommentCreate}
-          edit={CommentEdit}
+          name="nodes"
+          list={NodeList}
+          show={NodeShow}
+          create={NodeCreate}
+          edit={NodeEdit}
         />
       </Admin>
     );

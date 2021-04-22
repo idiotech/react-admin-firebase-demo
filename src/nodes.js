@@ -10,6 +10,7 @@ import {
   Filter,
   SimpleShowLayout,
   SimpleForm,
+  SingleFieldList,
   ReferenceField,
   ReferenceArrayField,
   ReferenceInput,
@@ -40,8 +41,10 @@ export const NodeList = (props) => (
     <Datagrid>
       <TextField source="name" />
       <ReferenceArrayField label="Actions" source="actionIds" reference="actions">
-         <TextField source="name" />
-      </ReferenceField>
+        <SingleFieldList>
+          <TextField source="name" />
+        </SingleFieldList>
+      </ReferenceArrayField>
       <ShowButton label="" />
       <EditButton label="" />
       <DeleteButton label="" redirect={false}/>
@@ -56,7 +59,7 @@ export const NodeShow = (props) => (
       <TextField source="name" />
       <ReferenceArrayField label="Actions" source="actionIds" reference="actions">
          <TextField source="name" />
-      </ReferenceField>
+      </ReferenceArrayField>
     </SimpleShowLayout>
   </Show>
 );
@@ -64,7 +67,7 @@ export const NodeShow = (props) => (
 export const NodeCreate = (props) => (
   <Create {...props} >
     <SimpleForm>
-      <TextField source="name" />
+      <TextInput source="name" />
       <ReferenceArrayInput source="actionIds" reference="actions">
         <AutocompleteArrayInput optionText="name" />
       </ReferenceArrayInput>
@@ -72,25 +75,14 @@ export const NodeCreate = (props) => (
   </Create>
 );
 
-export const PostEdit = (props) => (
+export const NodeEdit = (props) => (
   <Edit {...props}>
     <SimpleForm>
-      <ReferenceInput source="id" options={{ disabled: true }} />
-      <ReferenceInput source="createdate" options={{ disabled: true }} />
-      <ReferenceInput source="lastupdate" options={{ disabled: true }} />
-      <ReferenceInput label="Comment" source="title" reference="comments">
-        <SelectInput optionText="title" />
-      </ReferenceInput>
-      <TextInput source="title" />
-      <RichTextInput source="body" />
-      <SelectInput source="rating" choices={[
-        { id: 1, name: 'Good' },
-        { id: 2, name: 'Okay' },
-        { id: 3, name: 'Bad' },
-      ]} />
-      <FileInput source="file" label="File" accept="application/pdf">
-        <FileField source="src" title="title" />
-      </FileInput>
+      <TextInput source="id" options={{ disabled: true }}/>
+      <TextInput source="name" />
+      <ReferenceArrayInput source="actionIds" reference="actions">
+        <AutocompleteArrayInput optionText="name" />
+      </ReferenceArrayInput>
     </SimpleForm>
   </Edit>
 );
