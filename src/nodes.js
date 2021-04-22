@@ -11,7 +11,10 @@ import {
   SimpleShowLayout,
   SimpleForm,
   ReferenceField,
+  ReferenceArrayField,
   ReferenceInput,
+  ReferenceArrayInput,
+  AutocompleteArrayInput,
   TextField,
   TextInput,
   ShowButton,
@@ -24,19 +27,21 @@ import {
 } from "react-admin";
 import RichTextInput from "ra-input-rich-text";
 
-const PostFilter = (props) => (
+// node: trigger, actions, id
+
+const NodeFilter = (props) => (
   <Filter {...props}>
-    <TextInput label="Search" source="title" alwaysOn />
+    <TextInput label="Search" source="name" alwaysOn />
   </Filter>
 );
 
-export const PostList = (props) => (
-  <List {...props} filters={<PostFilter />}>
+export const NodeList = (props) => (
+  <List {...props} filters={<NodeFilter />}>
     <Datagrid>
-      <TextField source="title" />
-      <RichTextField source="body" />
-      <TextField source="createdate" />
-      <TextField source="lastupdate" />
+      <TextField source="name" />
+      <ReferenceArrayField label="Actions" source="actionIds" reference="actions">
+         <TextField source="name" />
+      </ReferenceField>
       <ShowButton label="" />
       <EditButton label="" />
       <DeleteButton label="" redirect={false}/>
@@ -44,33 +49,25 @@ export const PostList = (props) => (
   </List>
 );
 
-export const PostShow = (props) => (
+export const NodeShow = (props) => (
   <Show {...props}>
     <SimpleShowLayout>
       <TextField source="id" />
-      <TextField source="title" />
-      <ReferenceField label="Comment" source="title" reference="comments">
-        <TextField source="title" />
+      <TextField source="name" />
+      <ReferenceArrayField label="Actions" source="actionIds" reference="actions">
+         <TextField source="name" />
       </ReferenceField>
-      <TextField source="createdate" />
-      <TextField source="lastupdate" />
-      <RichTextField source="body" />
-      <FileField source="file.src" title="file.title" />
     </SimpleShowLayout>
   </Show>
 );
 
-export const PostCreate = (props) => (
+export const NodeCreate = (props) => (
   <Create {...props} >
     <SimpleForm>
-      <TextInput source="title" />
-      <RichTextInput source="body" />
-      <ReferenceInput label="Comment" source="title" reference="comments">
-        <SelectInput optionText="title" />
-      </ReferenceInput>
-      <FileInput source="file" label="File" accept="application/pdf">
-        <FileField source="src" title="title" />
-      </FileInput>
+      <TextField source="name" />
+      <ReferenceArrayInput source="actionIds" reference="actions">
+        <AutocompleteArrayInput optionText="name" />
+      </ReferenceArrayInput>
     </SimpleForm>
   </Create>
 );
