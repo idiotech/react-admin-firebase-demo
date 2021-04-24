@@ -1,14 +1,20 @@
 import * as React from "react";
 import PropTypes from 'prop-types';
 
-import { NumberInput } from 'react-admin';
+import { 
+    NumberInput,
+    required,
+    number
+} from 'react-admin';
+
+const validateCoordinate = [required(), number()];
 
 export const CoordinateInput = props => {
   return (
     <span>
-        <NumberInput source="lat" label="latitude" />
+        <NumberInput source="lat" label="latitude" validate={validateCoordinate}/>
         &nbsp;
-        <NumberInput source="lon" label="longitude" />
+        <NumberInput source="lon" label="longitude" validate={validateCoordinate}/>
     </span>
   )
 };
