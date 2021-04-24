@@ -12,9 +12,9 @@ const validateCoordinate = [required(), number()];
 export const CoordinateInput = props => {
   return (
     <span>
-        <NumberInput source="lat" label="latitude" validate={validateCoordinate}/>
+        <NumberInput source="lat" label="緯度" validate={validateCoordinate}/>
         &nbsp;
-        <NumberInput source="lon" label="longitude" validate={validateCoordinate}/>
+        <NumberInput source="lon" label="經度" validate={validateCoordinate}/>
     </span>
   )
 };

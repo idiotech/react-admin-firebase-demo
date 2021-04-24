@@ -15,6 +15,7 @@ import {
   ShowButton,
   EditButton,
   DeleteButton,
+  DateTimeInput
 } from "react-admin";
 
 import {CoordinateInput, CoordinateField} from "./coordinates"
@@ -25,12 +26,16 @@ const LocationFilter = (props) => (
   </Filter>
 );
 
+const Title = ({ record }) => {
+    return <span>地點{record && record.name ? `："${record.name}"` : ''}</span>;
+};
+
 export const LocationList = (props) => (
-  <List {...props} filters={<LocationFilter />}>
+  <List title={<Title/>} {...props}  filters={<LocationFilter />}>
     <Datagrid>
-      <TextField source="name" />
-      <CoordinateField source="coordinates" label="Coordinates"  />
-      <ShowButton label="" />
+      <TextField label="名稱" source="name" />
+      <CoordinateField label="座標" source="coordinates" label="座標"  />
+      <TextField label="說明" source="description" />
       <EditButton label="" />
       <DeleteButton label="" redirect={false}/>
     </Datagrid>
@@ -50,25 +55,26 @@ export const LocationShow = (props) => (
   </Show>
 );
 
+
 export const LocationCreate = (props) => (
-  <Create {...props} >
+  <Create title={<Title />} {...props} >
     <SimpleForm>
-      <TextInput source="name" />
+      <TextInput label="名稱" source="name" />
       <CoordinateInput />
-      <TextInput multiline source="description" />
+      <TextInput label="說明" source="description" />
     </SimpleForm>
   </Create>
 );
 
 export const LocationEdit = (props) => (
-  <Edit {...props}>
+  <Edit title={<Title />}  {...props}>
     <SimpleForm>
       <TextInput disabled source="id" />
-      <TextInput disabled source="createdate" />
-      <TextInput disabled source="lastupdate" />
-      <TextInput source="name" />
+      <DateTimeInput label="建立時間" disabled source="createdate" />
+      <DateTimeInput label="修改時間" disabled source="lastupdate" />
+      <TextInput label="名稱"  source="name" />
       <CoordinateInput />
-      <TextInput multiline source="description" />
+      <TextInput label="說明" source="description" />
     </SimpleForm>
   </Edit>
 );

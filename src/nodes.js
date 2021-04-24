@@ -56,7 +56,6 @@ export const NodeList = (props) => (
           <TextField source="name" />
         </SingleFieldList>
       </ReferenceArrayField>
-      <ShowButton label="" />
       <EditButton label="" />
       <DeleteButton label="" redirect={false}/>
     </Datagrid>

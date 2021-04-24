@@ -29,22 +29,22 @@ class App extends React.Component {
       >
         <Resource
           name="locations"
+          options={{ label: '地點' }}
           list={LocationList}
-          show={LocationShow}
           create={LocationCreate}
           edit={LocationEdit}
         />
         <Resource
           name="actions"
+          options={{ label: '動作' }}
           list={ActionList}
-          show={ActionShow}
           create={ActionCreate}
           edit={ActionEdit}
         />
         <Resource
           name="nodes"
+          options={{ label: '小節' }}
           list={NodeList}
-          show={NodeShow}
           create={NodeCreate}
           edit={NodeEdit}
         />
