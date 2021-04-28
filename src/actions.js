@@ -30,7 +30,6 @@ import {
   required
 } from "react-admin";
 
-
 const ActionFilter = (props) => (
   <Filter {...props}>
     <TextInput label="Search" source="name" alwaysOn />
@@ -119,7 +118,7 @@ export const ActionShow = props => (
 
 
 export const ActionCreate = (props) => (
-  <Create {...props} >
+  <Create title={<Title/>} {...props} >
       <TabbedForm>
         <FormTab label="基本資料">
           <TextInput label="名稱" source="name" validate={requiredField}/>
@@ -219,7 +218,7 @@ export const ActionCreate = (props) => (
 );
 
 export const ActionEdit = (props) => (
-  <Edit {...props}>
+  <Edit title={<Title/>} {...props}>
       <TabbedForm>
         <FormTab label="基本資料">
           <TextInput source="id" options={{ disabled: true }}/>

@@ -20,6 +20,7 @@ import {
   ArrayInput,
   TextField,
   TextInput,
+  ChipField,
   ShowButton,
   EditButton,
   DeleteButton,
@@ -32,7 +33,9 @@ import {
 } from "react-admin";
 import RichTextInput from "ra-input-rich-text";
 
-// node: trigger, actions, id
+const Title = ({ record }) => {
+    return <span>小節{record && record.name ? `："${record.name}"` : ''}</span>;
+};
 
 const NodeFilter = (props) => (
   <Filter {...props}>
@@ -48,12 +51,12 @@ const triggerTypes = [
 
 
 export const NodeList = (props) => (
-  <List {...props} filters={<NodeFilter />}>
+  <List title={<Title/>} {...props} filters={<NodeFilter />}>
     <Datagrid>
-      <TextField source="name" />
-      <ReferenceArrayField label="Actions" source="actionIds" reference="actions">
+      <TextField source="name" label="名稱" />
+      <ReferenceArrayField label="動作" source="actionIds" reference="actions">
         <SingleFieldList>
-          <TextField source="name" />
+          <ChipField source="name" />
         </SingleFieldList>
       </ReferenceArrayField>
       <EditButton label="" />
@@ -77,9 +80,9 @@ export const NodeShow = (props) => (
 );
 
 export const NodeCreate = (props) => (
-  <Create {...props} >
+  <Create title={<Title/>} {...props} >
     <SimpleForm>
-      <TextInput source="name" />
+      <TextInput source="name" label="名稱" />
       <ArrayInput label="觸發條件" source="triggers">
         <SimpleFormIterator>
           <ReferenceInput label="動作" source="replyTo" reference="actions">
@@ -109,9 +112,10 @@ export const NodeCreate = (props) => (
 );
 
 export const NodeEdit = (props) => (
-  <Edit {...props}>
+  <Edit title={<Title/>} {...props}>
     <SimpleForm>
       <TextInput source="id" options={{ disabled: true }}/>
+      <TextInput source="name" label="名稱" />
       <ArrayInput label="觸發條件" source="triggers">
         <SimpleFormIterator>
           <ReferenceInput label="動作" source="replyTo" reference="actions">
