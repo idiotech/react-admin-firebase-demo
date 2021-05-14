@@ -1,5 +1,7 @@
 // in src/posts.js
 import * as React from "react";
+
+import { useState, useEffect, useContext } from 'react';
 // tslint:disable-next-line:no-var-requires
 import {
   Datagrid,
@@ -16,7 +18,10 @@ import {
   EditButton,
   DeleteButton,
   DateTimeInput,
-  Button
+  Button,
+  useGetList,
+  DataProviderContext,
+  useRefresh
 } from "react-admin";
 import { createStore } from 'redux'
 import { useSelector, useDispatch } from 'react-redux';
@@ -43,9 +48,11 @@ const ScenarioFilter = (props) => (
 function UseButton(props) {
   const active = useSelector(state => state.currentScenario.value  === props.record.id);
   const dispatch = useDispatch();
+  const refresh = useRefresh();
   function handleClick() {
     console.log('click', props)
     dispatch({ type: 'setScenario', scenario: props.record.id })
+    refresh();
   }
   return (<Button label="設定為目前劇本"
                   onClick={handleClick}
@@ -55,27 +62,23 @@ function UseButton(props) {
   
 }
 
-class PublishButton extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = { disabled: false };
-  }
+function PublishButton(props) {
+  const disabled = useSelector(state => state.currentScenario.value !== props.record.id);
 
-  handleClick = () => {
-    const { editorAssign, record } = this.props
-    // editorAssign(record.id) //call the action
-    this.setState({
-      disabled: true
-    })
+  const { data, ids, total, loading, loaded, error } = useGetList(
+    'nodes',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  function handleClick() {
+    console.log('click', data, ids, total, loading, loaded, error)
   }
-  render() {
-    // const editorAssignStyle = React.styles.editorAssignStyle;
-    return (<Button label="發佈"
-                          onClick={this.handleClick}
-                          disabled={ this.state.disabled }
-                          primary="true"
-                          />)
-  }
+  return (<Button label="發佈"
+                  onClick={handleClick}
+                  disabled={ disabled }
+                  primary="true"
+                  />)
+  
 }
 
 const Title = ({ record }) => {

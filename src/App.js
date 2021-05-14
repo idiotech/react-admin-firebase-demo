@@ -38,7 +38,8 @@ function createDataProvider(scenario) {
   }
   return {
     dataProvider: FirebaseDataProvider(config, scenarioOtions),
-    resources: ["locations", "actions", "nodes"]
+    resources: ["locations", "actions", "nodes"],
+    name: scenario
   }
 }
 
@@ -92,12 +93,12 @@ function Main(props) {
   }
 
 function App() {
-  console.log('history = ', history)
   const store = createAdminStore({authProvider, dataProvider, history, customReducers})
   store.subscribe(() => {
     console.log('listener', store.getState())
     const scenario = store.getState().currentScenario.value
     if (scenario) {
+      console.log('setting data provider', store.getState())
       dataProvider.dataProviders = [
         adminProvider, createDataProvider(scenario)
       ]

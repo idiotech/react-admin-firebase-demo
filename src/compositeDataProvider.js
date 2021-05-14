@@ -1,5 +1,6 @@
 class CompositeDataProvider {
   constructor(dataProviders) {
+    this.time = Date.now()
     this.dataProviders = dataProviders;
   }
 
@@ -7,7 +8,10 @@ class CompositeDataProvider {
     const { dataProvider } = this.dataProviders.find((dp) =>
       dp.resources.includes(resource)
     );
-
+    const instance = this.dataProviders.find((dp) =>
+      dp.resources.includes(resource)
+    )
+    console.log(resource ,'active provider at', this.time, 'is', instance)
     return dataProvider[name](resource, params);
   }
 

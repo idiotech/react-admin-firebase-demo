@@ -14,7 +14,6 @@ export default ({
     history,
     customReducers
 }) => {
-    console.log('history here!', history)
     const reducer = combineReducers({
         admin: adminReducer,
         router: connectRouter(history),
