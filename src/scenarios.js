@@ -25,6 +25,7 @@ import {
 } from "react-admin";
 import { createStore } from 'redux'
 import { useSelector, useDispatch } from 'react-redux';
+import { NodeEdit } from "./nodes";
 
 export function scenarioReducer(state = { value: '' }, action) {
   switch (action.type) {
@@ -65,13 +66,91 @@ function UseButton(props) {
 function PublishButton(props) {
   const disabled = useSelector(state => state.currentScenario.value !== props.record.id);
 
-  const { data, ids, total, loading, loaded, error } = useGetList(
+  const nodeResult = useGetList(
     'nodes',
     { page: 1, perPage: 500 },
     { field: 'published_at', order: 'DESC' }
   );
+  const nodes = nodeResult.data
+
+  const actionResult = useGetList(
+    'actions',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const actions = actionResult.data
+
+  const locationResult = useGetList(
+    'locations',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const locations = locationResult.data
   function handleClick() {
-    console.log('click', data, ids, total, loading, loaded, error)
+    for (const id in nodes) {
+      const node = nodes[id]
+      console.log('node', node)
+      const scriptNode = {
+        name: id,
+        children: node.children || [],
+        triggers: node.triggers.map(t => {return {
+          id: "",
+          actionId: t.replyTo,
+          receiver: "ghost",
+          sender: "?u",
+          payload: {
+            type: t.category,
+            text: t.text
+          },
+          scenarioId: ""
+        }}),
+        actions: (node.actionIds || []).map(a => {
+          const action = actions[a]
+          console.log('action', action)
+          return {
+            id: action.id,
+            receiver: "?u",
+            sender: "ghost",
+            content: {
+              task: {
+                type: action.category,
+                destinations: action.destinations,
+                text: action.text,
+                url: action.url,
+                volumeSetting: {
+                  type: action.mode,
+                },
+                icon: action.icon,
+                location: action.locationId ? locations[action.locationId] : null,
+                choices: action.choices || [],
+                fadeoutSeconds: action.fadeoutSeconds,
+                fadeinSeconds: action.fadeinSeconds,
+                speechLength: action.speechLength,
+                title: action.title,
+                allowTextReply: (action.allowTextReply)? true : false,
+                markerId: action.markerId,
+
+              },
+              condition: {
+                type: action.conditionType,
+                id: action.beaconId,
+                threshold: action.beaconThreshold,
+                mode: action.beaconType,
+                location: action.geofenceCenter ? locations[action.geofenceCenter] : null,
+                radius: action.geofenceRadius
+              }
+            },
+            session: {
+              scenario: "",
+              chapter: ""
+            }
+          }
+        })
+      }
+      console.log('script node', scriptNode)
+    }
+    // console.log('locations', locations)
+    // console.log('actions', actions)
   }
   return (<Button label="發佈"
                   onClick={handleClick}
