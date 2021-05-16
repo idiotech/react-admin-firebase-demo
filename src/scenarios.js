@@ -1,31 +1,25 @@
 // in src/posts.js
 import * as React from "react";
 
-import { useState, useEffect, useContext } from 'react';
 // tslint:disable-next-line:no-var-requires
 import {
   Datagrid,
   List,
-  Show,
   Create,
   Edit,
   Filter,
-  SimpleShowLayout,
   SimpleForm,
   TextField,
   TextInput,
-  ShowButton,
   EditButton,
   DeleteButton,
   DateTimeInput,
   Button,
   useGetList,
-  DataProviderContext,
   useRefresh
 } from "react-admin";
 import { createStore } from 'redux'
 import { useSelector, useDispatch } from 'react-redux';
-import { NodeEdit } from "./nodes";
 
 export function scenarioReducer(state = { value: '' }, action) {
   switch (action.type) {
@@ -86,24 +80,42 @@ function PublishButton(props) {
     { field: 'published_at', order: 'DESC' }
   );
   const locations = locationResult.data
+
+  const beaconResult = useGetList(
+    'beacons',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const beacons = beaconResult.data
+
   function handleClick() {
-    for (const id in nodes) {
-      const node = nodes[id]
-      console.log('node', node)
+    const payload = Object.values(nodes).map( node => {
       const scriptNode = {
-        name: id,
+        name: node.initial ? 'initial' : node.id,
         children: node.children || [],
-        triggers: node.triggers.map(t => {return {
-          id: "",
-          actionId: t.replyTo,
-          receiver: "ghost",
-          sender: "?u",
-          payload: {
-            type: t.category,
-            text: t.text
-          },
-          scenarioId: ""
-        }}),
+        exclusiveWith: node.exclusiveWith || [],
+        triggers: node.initial 
+        ? [{
+            id: "",
+            actionId: null,
+            receiver: "ghost",
+            sender: "?u",
+            payload: {
+              type: 'JOIN',
+            },
+            scenarioId: ""
+        }]
+        : node.triggers.map(t => {return {
+            id: "",
+            actionId: t.replyTo,
+            receiver: "ghost",
+            sender: "?u",
+            payload: {
+              type: t.category,
+              text: t.text
+            },
+            scenarioId: ""
+          }}),
         actions: (node.actionIds || []).map(a => {
           const action = actions[a]
           console.log('action', action)
@@ -122,18 +134,20 @@ function PublishButton(props) {
                 },
                 icon: action.icon,
                 location: action.locationId ? locations[action.locationId] : null,
-                choices: action.choices || [],
+                choices: action.choices
+                  ? action.choices.map(c => c.choice) 
+                  : [],
                 fadeoutSeconds: action.fadeoutSeconds,
                 fadeinSeconds: action.fadeinSeconds,
                 speechLength: action.speechLength,
+                mode: action.soundType || 'MAIN',
                 title: action.title,
                 allowTextReply: (action.allowTextReply)? true : false,
-                markerId: action.markerId,
-
+                id: action.markerId,
               },
               condition: {
                 type: action.conditionType,
-                id: action.beaconId,
+                beaconId: action.beacon ? beacons[action.beacon].beaconId : null,
                 threshold: action.beaconThreshold,
                 mode: action.beaconType,
                 location: action.geofenceCenter ? locations[action.geofenceCenter] : null,
@@ -148,9 +162,9 @@ function PublishButton(props) {
         })
       }
       console.log('script node', scriptNode)
-    }
-    // console.log('locations', locations)
-    // console.log('actions', actions)
+      return scriptNode
+    })
+    console.log('payload', payload)
   }
   return (<Button label="發佈"
                   onClick={handleClick}

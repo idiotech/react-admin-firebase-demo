@@ -41,7 +41,7 @@ const requiredField = []
 const actionTypes = [
           { id: 'SOUND', name: '聲音' },
           { id: 'POPUP', name: '圖文訊息' },
-          { id: 'MARKER_ADD', name: '新增圖釘' },
+          { id: 'MARKER', name: '新增圖釘' },
           { id: 'MARKER_REMOVAL', name: '刪除圖釘' },
 ]
 
@@ -55,6 +55,11 @@ const destinations = [
 const soundModes = [
           { id: 'STATIC_VOLUME', name: '固定' },
           { id: 'DYNAMIC_VOLUME', name: '遠近調整' },
+]
+const soundTypes = [
+          { id: 'MAIN', name: '主劇情' },
+          { id: 'BACKGROUND', name: '背景單次' },
+          { id: 'LOOP', name: '背景循環' }
 ]
 const conditionTypes = [
           { id: 'ALWAYS', name: '立刻觸發' },
@@ -92,7 +97,7 @@ export const ActionShow = props => (
                     <TextField source="name" />
                     <SelectField source="category" choices={actionTypes} />
                     {
-                        controllerProps.record && controllerProps.record.category === 'MARKER_ADD' &&
+                        controllerProps.record && controllerProps.record.category === 'MARKER' &&
                         <SimpleShowLayout label="details">
                           <TextField source="title"/>
                           <TextField source="icon"/>
@@ -127,7 +132,7 @@ export const ActionCreate = (props) => (
         <FormTab label="內容">
           <SelectInput label="類型" source="category" initialValue="SOUND" choices={actionTypes} validate={requiredField} />
             <FormDataConsumer>
-                {({ formData, ...rest }) => formData.category === 'MARKER_ADD' &&
+                {({ formData, ...rest }) => formData.category === 'MARKER' &&
                 <div>
                 <TextInput label="標題" source="title" /><br/>
                 <TextInput source="圖示網址" /><br/>
@@ -139,7 +144,7 @@ export const ActionCreate = (props) => (
             </FormDataConsumer>
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.category === 'MARKER_REMOVAL' &&
-                <ReferenceInput label="圖釘" source="markerId" reference="actions" filter={{ category: 'MARKER_ADD' }}>
+                <ReferenceInput label="圖釘" source="markerId" reference="actions" filter={{ category: 'MARKER' }}>
                     <SelectInput optionText="name" />
                 </ReferenceInput>
                 }
@@ -167,6 +172,7 @@ export const ActionCreate = (props) => (
                 {({ formData, ...rest }) => formData.category === 'SOUND' &&
                 <div>
                     <TextInput multiline label="音檔網址" source="url" /><br/>
+                    <SelectInput label="聲音類型" source="soundType" choices={soundTypes} initialValue={'MAIN'}  />
                     <SelectInput label="音量模式" source="mode" choices={soundModes} initialValue={'STATIC_VOLUME'}  />
                     <FormDataConsumer>
                     {({ formData, ...rest }) => formData.mode === 'STATIC_VOLUME' &&
@@ -207,8 +213,11 @@ export const ActionCreate = (props) => (
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.conditionType === 'BEACON' &&
                 <div>
-                    <SelectInput label="模式" source="beaconType" choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
-                    <NumberInput label="訊號值" source="beaconThreshold" />
+                  <ReferenceInput label="Beacon" source="beacon" reference="beacons" >
+                    <AutocompleteInput optionText="name" />
+                  </ReferenceInput>
+                  <SelectInput label="模式" source="beaconType" choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
+                  <NumberInput label="訊號值" source="beaconThreshold" />
                 </div>
                 }
             </FormDataConsumer>
@@ -228,10 +237,10 @@ export const ActionEdit = (props) => (
         <FormTab label="內容">
           <SelectInput label="類型" source="category" initialValue="SOUND" choices={actionTypes} validate={requiredField} />
             <FormDataConsumer>
-                {({ formData, ...rest }) => formData.category === 'MARKER_ADD' &&
+                {({ formData, ...rest }) => formData.category === 'MARKER' &&
                 <div>
                 <TextInput label="標題" source="title" /><br/>
-                <TextInput source="圖示網址" /><br/>
+                <TextInput label="圖示網址" source="icon" /><br/>
                 <ReferenceInput label="座標" source="locationId" reference="locations">
                     <SelectInput optionText="name" />
                 </ReferenceInput>
@@ -240,7 +249,7 @@ export const ActionEdit = (props) => (
             </FormDataConsumer>
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.category === 'MARKER_REMOVAL' &&
-                <ReferenceInput label="圖釘" source="markerId" reference="actions" filter={{ category: 'MARKER_ADD' }}>
+                <ReferenceInput label="圖釘" source="markerId" reference="actions" filter={{ category: 'MARKER' }}>
                     <SelectInput optionText="name" />
                 </ReferenceInput>
                 }
@@ -268,6 +277,7 @@ export const ActionEdit = (props) => (
                 {({ formData, ...rest }) => formData.category === 'SOUND' &&
                 <div>
                     <TextInput multiline label="音檔網址" source="url" /><br/>
+                    <SelectInput label="聲音類型" source="soundType" choices={soundTypes} initialValue={'MAIN'}  /> <br/>
                     <SelectInput label="音量模式" source="mode" choices={soundModes} initialValue={'STATIC_VOLUME'}  />
                     <FormDataConsumer>
                     {({ formData, ...rest }) => formData.mode === 'STATIC_VOLUME' &&
@@ -308,8 +318,11 @@ export const ActionEdit = (props) => (
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.conditionType === 'BEACON' &&
                 <div>
-                    <SelectInput label="模式" source="beaconType" choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
-                    <NumberInput label="訊號值" source="beaconThreshold" />
+                  <ReferenceInput label="Beacon" source="beacon" reference="beacons" >
+                    <AutocompleteInput optionText="name" />
+                  </ReferenceInput>
+                  <SelectInput label="模式" source="beaconType" choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
+                  <NumberInput label="訊號值" source="beaconThreshold" />
                 </div>
                 }
             </FormDataConsumer>

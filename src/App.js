@@ -2,7 +2,8 @@ import * as React from "react";
 import { ActionList, ActionCreate, ActionShow, ActionEdit } from "./actions";
 import { ScenarioList, ScenarioCreate, ScenarioEdit, scenarioReducer } from "./scenarios";
 import { NodeList, NodeShow, NodeCreate, NodeEdit } from "./nodes";
-import { LocationList, LocationShow, LocationCreate, LocationEdit } from "./locations";
+import { LocationList, LocationCreate, LocationEdit } from "./locations";
+import { BeaconList, BeaconCreate, BeaconEdit } from "./beacons";
 import { Admin, Resource } from "react-admin";
 import {
   FirebaseDataProvider,
@@ -38,7 +39,7 @@ function createDataProvider(scenario) {
   }
   return {
     dataProvider: FirebaseDataProvider(config, scenarioOtions),
-    resources: ["locations", "actions", "nodes"],
+    resources: ["locations", "actions", "nodes", "beacons"],
     name: scenario
   }
 }
@@ -66,6 +67,13 @@ function Main(props) {
           list={ScenarioList}
           create={ScenarioCreate}
           edit={ScenarioEdit}
+        />
+        <Resource
+          name="beacons"
+          options={{ label: 'Beacon' }}
+          list={BeaconList}
+          create={BeaconCreate}
+          edit={BeaconEdit}
         />
         <Resource
           name="locations"

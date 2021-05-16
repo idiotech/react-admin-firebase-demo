@@ -29,7 +29,8 @@ import {
   SimpleFormIterator,
   FormDataConsumer,
   FileField,
-  FileInput
+  FileInput,
+  BooleanInput
 } from "react-admin";
 import RichTextInput from "ra-input-rich-text";
 
@@ -83,21 +84,25 @@ export const NodeCreate = (props) => (
   <Create title={<Title/>} {...props} >
     <SimpleForm>
       <TextInput source="name" label="名稱" />
-      <ArrayInput label="觸發條件" source="triggers">
-        <SimpleFormIterator>
-          <ReferenceInput label="動作" source="replyTo" reference="actions">
-            <AutocompleteInput optionText="name" />
-          </ReferenceInput>
-          <SelectInput label="狀態" source="category" choices={triggerTypes} />
-          <FormDataConsumer>
-            {({ getSource, scopedFormData }) => 
-              scopedFormData && scopedFormData.category === 'TEXT' && 
-              <TextInput label="內文" source={getSource('text')} />
-            }
-          </FormDataConsumer>
-        </SimpleFormIterator>
-      </ArrayInput>
-
+      <BooleanInput label="第一小節" source="initial" initialValue={false} />
+      <FormDataConsumer>
+        {({ formData, ...rest }) => formData.initial !== true &&
+            <ArrayInput label="觸發條件" source="triggers">
+              <SimpleFormIterator>
+                <ReferenceInput label="動作" source="replyTo" reference="actions">
+                  <AutocompleteInput optionText="name" />
+                </ReferenceInput>
+                <SelectInput label="狀態" source="category" choices={triggerTypes} />
+                <FormDataConsumer>
+                  {({ getSource, scopedFormData }) => 
+                    scopedFormData && scopedFormData.category === 'TEXT' && 
+                    <TextInput label="內文" source={getSource('text')} />
+                  }
+                </FormDataConsumer>
+              </SimpleFormIterator>
+            </ArrayInput>
+        }
+      </FormDataConsumer>
       <ReferenceArrayInput label="動作" source="actionIds" reference="actions">
         <AutocompleteArrayInput optionText="name" />
       </ReferenceArrayInput>
@@ -116,21 +121,25 @@ export const NodeEdit = (props) => (
     <SimpleForm>
       <TextInput source="id" options={{ disabled: true }}/>
       <TextInput source="name" label="名稱" />
-      <ArrayInput label="觸發條件" source="triggers">
-        <SimpleFormIterator>
-          <ReferenceInput label="動作" source="replyTo" reference="actions">
-            <AutocompleteInput optionText="name" />
-          </ReferenceInput>
-          <SelectInput label="狀態" source="category" choices={triggerTypes} />
-          <FormDataConsumer>
-            {({ getSource, scopedFormData }) => 
-              scopedFormData && scopedFormData.category === 'TEXT' && 
-              <TextInput label="內文" source={getSource('text')} />
-            }
-          </FormDataConsumer>
-        </SimpleFormIterator>
-      </ArrayInput>
-
+      <BooleanInput label="第一小節" source="initial" initialValue={false} />
+      <FormDataConsumer>
+        {({ formData, ...rest }) => formData.initial !== true &&
+            <ArrayInput label="觸發條件" source="triggers">
+              <SimpleFormIterator>
+                <ReferenceInput label="動作" source="replyTo" reference="actions">
+                  <AutocompleteInput optionText="name" />
+                </ReferenceInput>
+                <SelectInput label="狀態" source="category" choices={triggerTypes} />
+                <FormDataConsumer>
+                  {({ getSource, scopedFormData }) => 
+                    scopedFormData && scopedFormData.category === 'TEXT' && 
+                    <TextInput label="內文" source={getSource('text')} />
+                  }
+                </FormDataConsumer>
+              </SimpleFormIterator>
+            </ArrayInput>
+        }
+      </FormDataConsumer>
       <ReferenceArrayInput label="動作" source="actionIds" reference="actions">
         <AutocompleteArrayInput optionText="name" />
       </ReferenceArrayInput>
