@@ -16,9 +16,14 @@ import {
   DateTimeInput,
   Button,
   useGetList,
-  useRefresh
+  useRefresh,
+  useNotify,
+  fetchStart,
+  fetchEnd,
+  Confirm
 } from "react-admin";
 import { createStore } from 'redux'
+import { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 
 export function scenarioReducer(state = { value: '' }, action) {
@@ -54,12 +59,15 @@ function UseButton(props) {
                   disabled={ active }
                   primary="true"
                   />)
-  
 }
 
 function PublishButton(props) {
   const disabled = useSelector(state => state.currentScenario.value !== props.record.id);
-
+  const notify = useNotify()
+  const dispatch = useDispatch()
+  const [loading, setLoading] = useState(false);
+  const handleClick = () => setOpen(true);
+  const handleDialogClose = () => setOpen(false);
   const nodeResult = useGetList(
     'nodes',
     { page: 1, perPage: 500 },
@@ -88,7 +96,12 @@ function PublishButton(props) {
   );
   const beacons = beaconResult.data
 
-  function handleClick() {
+  const [open, setOpen] = useState(false);
+
+  function handleConfirm() {
+    setOpen(false);
+    setLoading(true);
+    dispatch(fetchStart());
     const payload = Object.values(nodes).map( node => {
       const scriptNode = {
         name: node.initial ? 'initial' : node.id,
@@ -165,12 +178,43 @@ function PublishButton(props) {
       return scriptNode
     })
     console.log('payload', payload)
+    const url = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
+    fetch(url, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+      headers: {
+        'content-type': 'application/json'
+      }
+    })
+    .then(() => {
+      notify("成功發佈" + props.record.name)
+    })
+    .catch(e => {
+      notify("發佈失敗；原因 =" + e)
+    })
+    .finally(() => {
+      setLoading(false)
+      setOpen(false);
+      dispatch(fetchEnd());
+    })
   }
-  return (<Button label="發佈"
-                  onClick={handleClick}
-                  disabled={ disabled }
-                  primary="true"
-                  />)
+  return (<>
+    <Button
+      label="發佈"
+      onClick={handleClick}
+      disabled={ disabled || loading }
+      primary="true"
+    />
+    <Confirm
+      isOpen={open}
+      title="確認發佈"
+      content= {`你即將發佈${props.record.name}；使用者的進度將被中斷。確定嗎？`}
+      onConfirm={handleConfirm}
+      onClose={handleDialogClose}
+      confirm="確認發佈"
+      cancel="取消"
+    />
+  </>)
   
 }
 
