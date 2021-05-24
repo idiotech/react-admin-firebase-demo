@@ -27,8 +27,12 @@ import {
   AutocompleteInput,
   TabbedForm,
   FormTab,
-  required
+  required,
+  ImageField
 } from "react-admin";
+
+import LocationReferenceInput from './LocationReferenceInput';
+import ImageReferenceInput from './ImageReferenceInput';
 
 const ActionFilter = (props) => (
   <Filter {...props}>
@@ -130,15 +134,15 @@ export const ActionCreate = (props) => (
           <TextInput multiline label="說明" source="description" />
         </FormTab>
         <FormTab label="內容">
-          <SelectInput label="類型" source="category" initialValue="SOUND" choices={actionTypes} validate={requiredField} />
+            <SelectInput label="類型" source="category" initialValue="SOUND" choices={actionTypes} validate={requiredField} />
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.category === 'MARKER' &&
                 <div>
                 <TextInput label="標題" source="title" /><br/>
-                <TextInput source="圖示網址" /><br/>
-                <ReferenceInput label="座標" source="locationId" reference="locations">
-                    <SelectInput optionText="name" />
-                </ReferenceInput>
+                <ImageReferenceInput source="markerIcon" reference="images" />
+                <LocationReferenceInput label="座標" source="locationId" reference="locations" >
+                  <AutocompleteInput optionText="name" />
+                </LocationReferenceInput>
                 </div>
                 }
             </FormDataConsumer>
@@ -186,9 +190,9 @@ export const ActionCreate = (props) => (
                     <FormDataConsumer>
                     {({ formData, ...rest }) => formData.mode === 'DYNAMIC_VOLUME' &&
                         <div>
-                        <ReferenceInput label="中心點" source="locationId" reference="locations">
-                            <AutocompleteInput optionText="name" />
-                        </ReferenceInput>
+                        <LocationReferenceInput label="中心點" source="locationId" reference="locations" >
+                          <AutocompleteInput optionText="name" />
+                        </LocationReferenceInput>
                         <NumberInput label="最小音量" source="minVolume" /> 0-1之間<br/>
                         <NumberInput label="範圍" source="range"  />公尺
                         </div>
@@ -203,9 +207,9 @@ export const ActionCreate = (props) => (
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.conditionType === 'GEOFENCE' &&
                 <div>
-                  <ReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
+                  <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
                     <AutocompleteInput optionText="name" />
-                  </ReferenceInput>
+                  </LocationReferenceInput>
                   <NumberInput label="範圍" source="geofenceRadius" />公尺
                 </div>
                 }
@@ -235,15 +239,15 @@ export const ActionEdit = (props) => (
           <TextInput multiline label="說明" source="description" />
         </FormTab>
         <FormTab label="內容">
-          <SelectInput label="類型" source="category" initialValue="SOUND" choices={actionTypes} validate={requiredField} />
+            <SelectInput label="類型" source="category" initialValue="SOUND" choices={actionTypes} validate={requiredField} />
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.category === 'MARKER' &&
                 <div>
                 <TextInput label="標題" source="title" /><br/>
-                <TextInput label="圖示網址" source="icon" /><br/>
-                <ReferenceInput label="座標" source="locationId" reference="locations">
-                    <SelectInput optionText="name" />
-                </ReferenceInput>
+                <ImageReferenceInput source="markerIcon" reference="images" />
+                <LocationReferenceInput label="座標" source="locationId" reference="locations" >
+                  <AutocompleteInput optionText="name" />
+                </LocationReferenceInput>
                 </div>
                 }
             </FormDataConsumer>
@@ -291,9 +295,9 @@ export const ActionEdit = (props) => (
                     <FormDataConsumer>
                     {({ formData, ...rest }) => formData.mode === 'DYNAMIC_VOLUME' &&
                         <div>
-                        <ReferenceInput label="中心點" source="locationId" reference="locations">
-                            <AutocompleteInput optionText="name" />
-                        </ReferenceInput>
+                        <LocationReferenceInput label="中心點" source="locationId" reference="locations" >
+                          <AutocompleteInput optionText="name" />
+                        </LocationReferenceInput>
                         <NumberInput label="最小音量" source="minVolume" /> 0-1之間<br/>
                         <NumberInput label="範圍" source="range"  />公尺
                         </div>
@@ -308,9 +312,9 @@ export const ActionEdit = (props) => (
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.conditionType === 'GEOFENCE' &&
                 <div>
-                  <ReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
+                  <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
                     <AutocompleteInput optionText="name" />
-                  </ReferenceInput>
+                  </LocationReferenceInput>
                   <NumberInput label="範圍" source="geofenceRadius" />公尺
                 </div>
                 }

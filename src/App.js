@@ -4,6 +4,7 @@ import { ScenarioList, ScenarioCreate, ScenarioEdit, scenarioReducer } from "./s
 import { NodeList, NodeShow, NodeCreate, NodeEdit } from "./nodes";
 import { LocationList, LocationCreate, LocationEdit } from "./locations";
 import { BeaconList, BeaconCreate, BeaconEdit } from "./beacons";
+import { ImageList, ImageCreate, ImageEdit } from "./images";
 import { Admin, Resource } from "react-admin";
 import {
   FirebaseDataProvider,
@@ -39,7 +40,7 @@ function createDataProvider(scenario) {
   }
   return {
     dataProvider: FirebaseDataProvider(config, scenarioOtions),
-    resources: ["locations", "actions", "nodes", "beacons"],
+    resources: ["locations", "actions", "nodes", "beacons", "images"],
     name: scenario
   }
 }
@@ -67,6 +68,13 @@ function Main(props) {
           list={ScenarioList}
           create={ScenarioCreate}
           edit={ScenarioEdit}
+        />
+        <Resource
+          name="images"
+          options={{ label: '圖片' }}
+          list={ImageList}
+          create={ImageCreate}
+          edit={ImageEdit}
         />
         <Resource
           name="beacons"
