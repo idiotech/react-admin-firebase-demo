@@ -32,6 +32,7 @@ import {
 } from "react-admin";
 
 import LocationReferenceInput from './LocationReferenceInput';
+import SoundReferenceInput from './SoundReferenceInput';
 import ImageReferenceInput from './ImageReferenceInput';
 
 const ActionFilter = (props) => (
@@ -175,7 +176,9 @@ export const ActionCreate = (props) => (
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.category === 'SOUND' &&
                 <div>
-                    <TextInput multiline label="音檔網址" source="url" /><br/>
+                    <SoundReferenceInput label="音檔" source="soundUrl" reference="sounds">
+                      <AutocompleteInput optionText="name" />
+                    </SoundReferenceInput>
                     <SelectInput label="聲音類型" source="soundType" choices={soundTypes} initialValue={'MAIN'}  />
                     <SelectInput label="音量模式" source="mode" choices={soundModes} initialValue={'STATIC_VOLUME'}  />
                     <FormDataConsumer>
@@ -280,7 +283,9 @@ export const ActionEdit = (props) => (
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.category === 'SOUND' &&
                 <div>
-                    <TextInput multiline label="音檔網址" source="url" /><br/>
+                    <SoundReferenceInput label="音檔" source="soundUrl" reference="sounds">
+                      <AutocompleteInput optionText="name" />
+                    </SoundReferenceInput>
                     <SelectInput label="聲音類型" source="soundType" choices={soundTypes} initialValue={'MAIN'}  /> <br/>
                     <SelectInput label="音量模式" source="mode" choices={soundModes} initialValue={'STATIC_VOLUME'}  />
                     <FormDataConsumer>

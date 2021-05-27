@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { useFormState } from 'react-final-form';
-import { ReferenceInput, AutocompleteInput, ImageField, FormDataConsumer, ReferenceField, TextField } from 'react-admin';
+import { ReferenceInput, AutocompleteInput, FileField, FormDataConsumer, ReferenceField, TextField } from 'react-admin';
 import { makeStyles } from '@material-ui/core/styles';
 
-import ImageQuickCreateButton from './ImageQuickCreateButton';
+import SoundQuickCreateButton from './SoundQuickCreateButton';
 
 const useStyles = makeStyles({
     root: {
@@ -17,7 +17,7 @@ const useStyles = makeStyles({
 
 const spySubscription = { values: true };
 
-const ImageReferenceInput = props => {
+const SoundReferenceInput = props => {
     const classes = useStyles();
     const [version, setVersion] = useState(0);
     const { values } = useFormState({ subscription: spySubscription });
@@ -29,14 +29,14 @@ const ImageReferenceInput = props => {
             <ReferenceInput key={version} {...props}>
                 <AutocompleteInput optionText="name" />
             </ReferenceInput>
-            <ImageQuickCreateButton onChange={handleChange} source={props.source} />
+            <SoundQuickCreateButton onChange={handleChange} source={props.source} />
         </div>
         <br/>
         <FormDataConsumer>
           {({ formData, ...rest }) => 
-            <ReferenceField key={version} label="image" record={formData} basePath="images" source={props.source} reference="images">
-              <ImageField source="image.src" />
-              </ReferenceField>
+            <ReferenceField key={version} label="sound" record={formData} basePath="sounds" source={props.source} reference="sounds">
+              <FileField title={"音檔"} source="sound.src" />
+            </ReferenceField>
           }
         </FormDataConsumer>
         <br/>
@@ -44,4 +44,4 @@ const ImageReferenceInput = props => {
     );
 };
 
-export default ImageReferenceInput;
+export default SoundReferenceInput;

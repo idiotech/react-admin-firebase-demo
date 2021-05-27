@@ -4,14 +4,15 @@ import { ScenarioList, ScenarioCreate, ScenarioEdit, scenarioReducer } from "./s
 import { NodeList, NodeShow, NodeCreate, NodeEdit } from "./nodes";
 import { LocationList, LocationCreate, LocationEdit } from "./locations";
 import { BeaconList, BeaconCreate, BeaconEdit } from "./beacons";
-import { ImageList, ImageCreate, ImageEdit } from "./images";
+import { ImageList, ImageCreate, ImageEdit} from "./images";
+import { SoundList, SoundCreate, SoundEdit} from "./sounds";
 import { Admin, Resource } from "react-admin";
 import {
   FirebaseDataProvider,
   FirebaseAuthProvider
 } from "react-admin-firebase";
 import { useSelector, Provider } from 'react-redux';
-import { createStore } from 'redux'
+import { createStore } from 'redux';
 
 import CommentIcon from '@material-ui/icons/Comment';
 import CustomLoginPage from './CustomLoginPage';
@@ -40,7 +41,7 @@ function createDataProvider(scenario) {
   }
   return {
     dataProvider: FirebaseDataProvider(config, scenarioOtions),
-    resources: ["locations", "actions", "nodes", "beacons", "images"],
+    resources: ["locations", "actions", "nodes", "beacons", "images", "sounds"],
     name: scenario
   }
 }
@@ -75,6 +76,13 @@ function Main(props) {
           list={ImageList}
           create={ImageCreate}
           edit={ImageEdit}
+        />
+        <Resource
+          name="sounds"
+          options={{ label: '聲音' }}
+          list={SoundList}
+          create={SoundCreate}
+          edit={SoundEdit}
         />
         <Resource
           name="beacons"
