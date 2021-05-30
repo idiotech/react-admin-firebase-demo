@@ -160,7 +160,7 @@ export const ActionCreate = (props) => (
                     <TextInput multiline label="文字" source="text" />
                     <ArrayInput label="圖片" source="pictures">
                       <SimpleFormIterator>
-                        <TextInput source="picture" label="圖片" />
+                        <ImageReferenceInput label="圖檔" source="pictureId" reference="images" />
                       </SimpleFormIterator>
                     </ArrayInput>
                     <ArrayInput label="回應按鈕" source="choices">
@@ -176,7 +176,7 @@ export const ActionCreate = (props) => (
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.category === 'SOUND' &&
                 <div>
-                    <SoundReferenceInput label="音檔" source="soundUrl" reference="sounds">
+                    <SoundReferenceInput label="音檔" source="soundId" reference="sounds">
                       <AutocompleteInput optionText="name" />
                     </SoundReferenceInput>
                     <SelectInput label="聲音類型" source="soundType" choices={soundTypes} initialValue={'MAIN'}  />
@@ -267,7 +267,7 @@ export const ActionEdit = (props) => (
                     <TextInput multiline label="文字" source="text" />
                     <ArrayInput label="圖片" source="pictures">
                       <SimpleFormIterator>
-                        <TextInput source="picture" label="圖片" />
+                        <ImageReferenceInput label="圖檔" source="pictureId" reference="images" />
                       </SimpleFormIterator>
                     </ArrayInput>
                     <ArrayInput label="回應按鈕" source="choices">
@@ -283,7 +283,7 @@ export const ActionEdit = (props) => (
             <FormDataConsumer>
                 {({ formData, ...rest }) => formData.category === 'SOUND' &&
                 <div>
-                    <SoundReferenceInput label="音檔" source="soundUrl" reference="sounds">
+                    <SoundReferenceInput label="音檔" source="soundId" reference="sounds">
                       <AutocompleteInput optionText="name" />
                     </SoundReferenceInput>
                     <SelectInput label="聲音類型" source="soundType" choices={soundTypes} initialValue={'MAIN'}  /> <br/>

@@ -96,6 +96,20 @@ function PublishButton(props) {
   );
   const beacons = beaconResult.data
 
+  const imageResult = useGetList(
+    'images',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const images = imageResult.data
+
+  const soundResult = useGetList(
+    'sounds',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const sounds = soundResult.data
+
   const [open, setOpen] = useState(false);
 
   function handleConfirm() {
@@ -141,14 +155,17 @@ function PublishButton(props) {
                 type: action.category,
                 destinations: action.destinations,
                 text: action.text,
-                url: action.url,
+                url: action.soundId ? sounds[action.soundId].sound.src : null,
                 volumeSetting: {
                   type: action.mode,
                 },
-                icon: action.icon,
+                icon: action.markerIcon ? images[action.markerIcon].image.src : null,
                 location: action.locationId ? locations[action.locationId] : null,
                 choices: action.choices
                   ? action.choices.map(c => c.choice) 
+                  : [],
+                pictures: action.pictures
+                  ? action.pictures.map(p => images[p.pictureId].image.src) 
                   : [],
                 fadeoutSeconds: action.fadeoutSeconds,
                 fadeinSeconds: action.fadeinSeconds,
@@ -178,7 +195,11 @@ function PublishButton(props) {
       return scriptNode
     })
     console.log('payload', payload)
-    const url = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
+    const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
+    const url = new URL(urlString)
+    const params = {name: props.record.name}
+    url.search = new URLSearchParams(params).toString();
+
     fetch(url, {
       method: 'PUT',
       body: JSON.stringify(payload),
@@ -186,8 +207,12 @@ function PublishButton(props) {
         'content-type': 'application/json'
       }
     })
-    .then(() => {
-      notify("成功發佈" + props.record.name)
+    .then((response) => {
+      if (response.ok) {
+        notify("成功發佈" + props.record.name)
+      } else {
+        notify("發佈失敗；原因 =" + response.body)
+      }
     })
     .catch(e => {
       notify("發佈失敗；原因 =" + e)
