@@ -197,7 +197,7 @@ function PublishButton(props) {
     console.log('payload', payload)
     const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
     const url = new URL(urlString)
-    const params = {name: props.record.name}
+    const params = {name: props.record.name, overwrite: true}
     url.search = new URLSearchParams(params).toString();
 
     fetch(url, {
@@ -211,7 +211,7 @@ function PublishButton(props) {
       if (response.ok) {
         notify("成功發佈" + props.record.name)
       } else {
-        notify("發佈失敗；原因 =" + response.body)
+        notify("發佈失敗；原因 =" + response.text)
       }
     })
     .catch(e => {
