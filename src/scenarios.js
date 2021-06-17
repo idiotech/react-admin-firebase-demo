@@ -146,6 +146,7 @@ function PublishButton(props) {
         actions: (node.actionIds || []).map(a => {
           const action = actions[a]
           console.log('action', action)
+          const cdnRoot = 'http://daqiaotou-storage.floraland.tw/root_collection'
           return {
             id: action.id,
             receiver: "?u",
@@ -155,21 +156,28 @@ function PublishButton(props) {
                 type: action.category,
                 destinations: action.destinations,
                 text: action.text,
-                url: action.soundId ? sounds[action.soundId].sound.src : null,
+                url: action.soundId
+                  ? `${cdnRoot}/${props.record.id}/sounds/${action.soundId}/sound`
+                  : null,
                 volumeSetting: {
                   type: action.mode,
+                  center: action.locationId ? locations[action.locationId] : null,
+                  fadeoutSeconds: action.fadeoutSeconds,
+                  fadeinSeconds: action.fadeinSeconds,
+                  speechLength: action.speechLength,
+                  radius: action.range,
+                  minVolume: action.minVolume
                 },
-                icon: action.markerIcon ? images[action.markerIcon].image.src : null,
+                icon: action.markerIcon
+                  ? `${cdnRoot}/${props.record.id}/images/${action.markerIcon}/image`
+                  : null,
                 location: action.locationId ? locations[action.locationId] : null,
                 choices: action.choices
                   ? action.choices.map(c => c.choice) 
                   : [],
                 pictures: action.pictures
-                  ? action.pictures.map(p => images[p.pictureId].image.src) 
+                  ? action.pictures.map(p => `${cdnRoot}/${props.record.id}/images/${p.pictureId}/image`)
                   : [],
-                fadeoutSeconds: action.fadeoutSeconds,
-                fadeinSeconds: action.fadeinSeconds,
-                speechLength: action.speechLength,
                 mode: action.soundType || 'MAIN',
                 title: action.title,
                 allowTextReply: (action.allowTextReply)? true : false,
