@@ -143,11 +143,11 @@ function PublishButton(props) {
             },
             scenarioId: ""
           }}),
-        actions: (node.actionIds || []).map(a => {
+        performances: (node.actionIds || []).map(a => {
           const action = actions[a]
           console.log('action', action)
           const cdnRoot = 'http://daqiaotou-storage.floraland.tw/root_collection'
-          return {
+          const serverAction = {
             id: action.id,
             receiver: "?u",
             sender: "ghost",
@@ -196,6 +196,10 @@ function PublishButton(props) {
               scenario: "",
               chapter: ""
             }
+          }
+          return {
+            action: serverAction,
+            delay: action.delay ? action.delay : 0
           }
         })
       }

@@ -132,6 +132,7 @@ export const ActionCreate = (props) => (
       <TabbedForm>
         <FormTab label="基本資料">
           <TextInput label="名稱" source="name" validate={requiredField}/>
+          <NumberInput label="延遲時間 (千分之一秒)" source="delay" />
           <TextInput multiline label="說明" source="description" />
         </FormTab>
         <FormTab label="內容">
@@ -239,6 +240,7 @@ export const ActionEdit = (props) => (
         <FormTab label="基本資料">
           <TextInput source="id" options={{ disabled: true }}/>
           <TextInput label="名稱" source="name" validate={requiredField}/>
+          <NumberInput label="延遲時間 (千分之一秒)" source="delay" />
           <TextInput multiline label="說明" source="description" />
         </FormTab>
         <FormTab label="內容">
