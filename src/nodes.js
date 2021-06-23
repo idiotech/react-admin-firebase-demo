@@ -30,7 +30,9 @@ import {
   FormDataConsumer,
   FileField,
   FileInput,
-  BooleanInput
+  BooleanInput,
+  TopToolbar,
+  Button
 } from "react-admin";
 import RichTextInput from "ra-input-rich-text";
 
@@ -50,11 +52,15 @@ const triggerTypes = [
           { id: 'TEXT', name: '文字回應' }
 ]
 
-
 export const NodeList = (props) => (
   <List title={<Title/>} {...props} filters={<NodeFilter />}>
     <Datagrid>
       <TextField source="name" label="名稱" />
+      <ReferenceArrayField label="接下來" source="children" reference="nodes">
+        <SingleFieldList>
+          <ChipField source="name" />
+        </SingleFieldList>
+      </ReferenceArrayField>
       <ReferenceArrayField label="動作" source="actionIds" reference="actions">
         <SingleFieldList>
           <ChipField source="name" />
@@ -80,8 +86,20 @@ export const NodeShow = (props) => (
   </Show>
 );
 
+const NodeEditActions = ({ basePath, data, resource }) => {
+  function handleClick() {
+    console.log('fuck click', data, resource)
+  }
+  return (
+     <TopToolbar>
+       <ShowButton basePath={basePath} record={data} />
+       <Button color="primary" onClick={handleClick} label="儲存" />
+     </TopToolbar>
+  )
+};
+
 export const NodeCreate = (props) => (
-  <Create title={<Title/>} {...props} >
+  <Create actions={<NodeEditActions />} title={<Title/>} {...props} >
     <SimpleForm>
       <TextInput source="name" label="名稱" />
       <BooleanInput label="第一小節" source="initial" initialValue={false} />
@@ -117,7 +135,7 @@ export const NodeCreate = (props) => (
 );
 
 export const NodeEdit = (props) => (
-  <Edit title={<Title/>} {...props}>
+  <Edit actions={<NodeEditActions />} title={<Title/>} {...props}>
     <SimpleForm>
       <TextInput source="id" options={{ disabled: true }}/>
       <TextInput source="name" label="名稱" />
