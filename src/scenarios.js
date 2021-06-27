@@ -1,5 +1,6 @@
 // in src/posts.js
 import * as React from "react";
+import { firebaseConfig as config } from './FIREBASE_CONFIG';
 
 // tslint:disable-next-line:no-var-requires
 import {
@@ -20,11 +21,17 @@ import {
   useNotify,
   fetchStart,
   fetchEnd,
-  Confirm
+  Confirm,
+  useMutation
 } from "react-admin";
 import { createStore } from 'redux'
 import { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
+import {
+  FirebaseDataProvider,
+  FirebaseAuthProvider
+} from "react-admin-firebase";
+const xid = require('xid-js');
 
 export function scenarioReducer(state = { value: '' }, action) {
   switch (action.type) {
@@ -255,6 +262,165 @@ function PublishButton(props) {
   
 }
 
+function CloneButton(props) {
+  const disabled = useSelector(state => state.currentScenario.value !== props.record.id);
+  const notify = useNotify()
+  const dispatch = useDispatch()
+  const [loading, setLoading] = useState(false);
+  const handleClick = () => setOpen(true);
+  const handleDialogClose = () => setOpen(false);
+  const nodeResult = useGetList(
+    'nodes',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const nodes = nodeResult.data
+
+  const actionResult = useGetList(
+    'actions',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const actions = actionResult.data
+
+  const locationResult = useGetList(
+    'locations',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const locations = locationResult.data
+
+  const beaconResult = useGetList(
+    'beacons',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const beacons = beaconResult.data
+
+  const imageResult = useGetList(
+    'images',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const images = imageResult.data
+
+  const soundResult = useGetList(
+    'sounds',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const sounds = soundResult.data
+
+
+
+  const [open, setOpen] = useState(false);
+  const createData = JSON.parse(JSON.stringify(props.record))
+  const cloneId = xid.next();
+  createData.id = cloneId
+  createData.name = props.record.name + '-' + cloneId
+  const [create, { creating }] = useMutation({
+    type: 'create',
+    resource: 'scenarios',
+    payload: { data: createData }
+  });
+  const scenarioOtions = {
+    logging: true,
+    rootRef: 'root_collection/' + createData.id
+  }
+  const baseProvider = FirebaseDataProvider(config, scenarioOtions)
+  const refresh = useRefresh();
+  const idMap = new Map()
+  Object.keys(actions).forEach(a => idMap.set(a, xid.next()))
+  Object.keys(nodes).forEach(a => idMap.set(a, xid.next()))
+  Object.keys(locations).forEach(a => idMap.set(a, xid.next()))
+  Object.keys(beacons).forEach(a => idMap.set(a, xid.next()))
+  Object.keys(images).forEach(a => idMap.set(a, xid.next()))
+  Object.keys(sounds).forEach(a => idMap.set(a, xid.next()))
+  async function handleConfirm() {
+    setOpen(false);
+    setLoading(true);
+    await create()
+    const locationValues = Object.values(locations)
+    await Promise.all(locationValues.map(a => {
+      const newA = JSON.parse(JSON.stringify(a))
+      newA.id = idMap.get(a.id)
+      return baseProvider.create('locations', {data: newA})
+    }))
+    const beaconValues = Object.values(beacons)
+    await Promise.all(beaconValues.map(a => {
+      const newA = JSON.parse(JSON.stringify(a))
+      newA.id = idMap.get(a.id)
+      return baseProvider.create('beacons', {data: newA})
+    }))
+    const imageValues = Object.values(images)
+    await Promise.all(imageValues.map(a => {
+      const newA = JSON.parse(JSON.stringify(a))
+      newA.id = idMap.get(a.id)
+      return baseProvider.create('images', {data: newA})
+    }))
+    const soundValues = Object.values(sounds)
+    await Promise.all(soundValues.map(a => {
+      const newA = JSON.parse(JSON.stringify(a))
+      newA.id = idMap.get(a.id)
+      return baseProvider.create('sounds', {data: newA})
+    }))
+    const actionValues = Object.values(actions)
+    await Promise.all(actionValues.map(a => {
+      const newA = JSON.parse(JSON.stringify(a))
+      newA.id = idMap.get(a.id)
+      newA.markerIcon = newA.markerIcon ? idMap.get(newA.markerIcon) : null
+      newA.pictureId = newA.pictureId ? idMap.get(newA.pictureId) : null
+      newA.soundId = newA.soundId ? idMap.get(newA.soundId) : null
+      newA.locationId = newA.locationId ? idMap.get(newA.locationId) : null
+      newA.geofenceCenter = newA.geofenceCenter ? idMap.get(newA.geofenceCenter) : null
+      newA.beacon = newA.beacon ? idMap.get(newA.beacon) : null
+      newA.markerId = newA.markerId ? idMap.get(newA.markerId) : null
+      return baseProvider.create('actions', {data: newA})
+    }))
+    const nodeValues = Object.values(nodes)
+    await Promise.all(nodeValues.map(a => {
+      const newA = JSON.parse(JSON.stringify(a))
+      if (newA.triggers) {
+        newA.triggers.map(t => t.replyTo = idMap.get(t.replyTo))
+      }
+      newA.id = idMap.get(a.id)
+      if (newA.actionIds) {
+        const test = newA.actionIds.map(id => idMap.get(id))
+        newA.actionIds = newA.actionIds.map(id => idMap.get(id))
+      }
+      if (newA.exclusiveWith) {
+        newA.exclusiveWith = newA.exclusiveWith.map(id => idMap.get(id))
+      }
+      if (newA.children) {
+        newA.children = newA.children.map(id => idMap.get(id))
+      }
+      return baseProvider.create('nodes', {data: newA})
+    }))
+
+    setLoading(false);
+    setOpen(false);
+    dispatch(fetchEnd());
+    refresh()
+  }
+  return (<>
+    <Button
+      label="複製"
+      onClick={handleClick}
+      disabled={ disabled || loading }
+      primary="true"
+    />
+    <Confirm
+      isOpen={open}
+      title="確認複製"
+      content= {`你即將複製一份《${props.record.name}》；確定嗎？`}
+      onConfirm={handleConfirm}
+      onClose={handleDialogClose}
+      confirm="確認複製"
+      cancel="取消"
+    />
+  </>)
+  };
+
 const Title = ({ record }) => {
     return <span>劇本：{record && record.name ? `："${record.name}"` : ''}</span>;
 };
@@ -266,6 +432,7 @@ export const ScenarioList = (props) => (
       <TextField label="說明" source="description" />
       <UseButton source="id" />
       <PublishButton />
+      <CloneButton />
       <EditButton label="" />
       <DeleteButton label="" redirect={false}/>
     </Datagrid>
