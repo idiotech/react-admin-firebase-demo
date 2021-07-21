@@ -51,6 +51,7 @@ const ScenarioFilter = (props) => (
     <TextInput label="Search" source="name" alwaysOn />
   </Filter>
 );
+const cdnRoot = 'http://daqiaotou-storage.floraland.tw/ghostspeak_editor'
 
 function UseButton(props) {
   const active = useSelector(state => state.currentScenario.value  === props.record.id);
@@ -75,13 +76,6 @@ function PublishButton(props) {
   const [loading, setLoading] = useState(false);
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
-  const nodeResult = useGetList(
-    'nodes',
-    { page: 1, perPage: 500 },
-    { field: 'published_at', order: 'DESC' }
-  );
-  const nodes = nodeResult.data
-
   const actionResult = useGetList(
     'actions',
     { page: 1, perPage: 500 },
@@ -123,96 +117,199 @@ function PublishButton(props) {
     setOpen(false);
     setLoading(true);
     dispatch(fetchStart());
-    const payload = Object.values(nodes).map( node => {
-      const scriptNode = {
-        name: node.initial ? 'initial' : node.id,
-        children: node.children || [],
-        exclusiveWith: node.exclusiveWith || [],
-        triggers: node.initial 
-        ? [{
+    const actionTree = getActionTree(Object.values(actions))
+    if (!actionTree) {
+        setLoading(false)
+        setOpen(false);
+        dispatch(fetchEnd());
+        notify("沒有初始動作，無法發佈！")
+        return
+    }
+    function getTriggers(currentNode, parentNode) {
+      if (currentNode.firstAction) {
+        return [{
+          id: "",
+          actionId: null,
+          receiver: "ghost",
+          sender: "?u",
+          payload: {
+            type: "JOIN",
+          },
+          scenarioId: ""
+        }]
+      } else {
+        const actionId = (currentNode.conditionType === "TEXT") 
+          ? parentNode.id + '-popup'
+          : parentNode.hasSound
+            ? parentNode.id + '-sound'
+            : parentNode.hasPopup
+              ? parentNode.id + '-popup'
+              : parentNode.hasMarker
+                ? parentNode.id + '-marker'
+                : parentNode.id + '-marker-removal'
+        return [{
             id: "",
-            actionId: null,
+            actionId: actionId,
             receiver: "ghost",
             sender: "?u",
             payload: {
-              type: 'JOIN',
+              // TODO
+              type: currentNode.conditionType === "TEXT" ? "TEXT" : "END",
+              text: currentNode.userReply
             },
             scenarioId: ""
         }]
-        : node.triggers.map(t => {return {
-            id: "",
-            actionId: t.replyTo,
-            receiver: "ghost",
-            sender: "?u",
-            payload: {
-              type: t.category,
-              text: t.text
-            },
-            scenarioId: ""
-          }}),
-        performances: (node.actionIds || []).map(a => {
-          const action = actions[a]
-          console.log('action', action)
-          const cdnRoot = 'http://daqiaotou-storage.floraland.tw/root_collection'
-          const serverAction = {
-            id: action.id,
-            receiver: "?u",
-            sender: "ghost",
-            content: {
-              task: {
-                type: action.category,
-                destinations: action.destinations,
-                text: action.text,
-                url: action.soundId
-                  ? `${cdnRoot}/${props.record.id}/sounds/${action.soundId}/sound`
-                  : null,
-                volumeSetting: {
-                  type: action.mode,
-                  center: action.locationId ? locations[action.locationId] : null,
-                  fadeoutSeconds: action.fadeoutSeconds,
-                  fadeinSeconds: action.fadeinSeconds,
-                  speechLength: action.speechLength,
-                  radius: action.range,
-                  minVolume: action.minVolume
-                },
-                icon: action.markerIcon
-                  ? `${cdnRoot}/${props.record.id}/images/${action.markerIcon}/image`
-                  : null,
-                location: action.locationId ? locations[action.locationId] : null,
-                choices: action.choices
-                  ? action.choices.map(c => c.choice) 
-                  : [],
-                pictures: action.pictures
-                  ? action.pictures.map(p => `${cdnRoot}/${props.record.id}/images/${p.pictureId}/image`)
-                  : [],
-                mode: action.soundType || 'MAIN',
-                title: action.title,
-                allowTextReply: (action.allowTextReply)? true : false,
-                id: action.markerId,
-              },
-              condition: {
-                type: action.conditionType,
-                beaconId: action.beacon ? beacons[action.beacon].beaconId : null,
-                threshold: action.beaconThreshold,
-                mode: action.beaconType,
-                location: action.geofenceCenter ? locations[action.geofenceCenter] : null,
-                radius: action.geofenceRadius
-              }
-            },
-            session: {
-              scenario: "",
-              chapter: ""
-            }
-          }
-          return {
-            action: serverAction,
-            delay: action.delay ? action.delay : 0
-          }
-        })
       }
-      console.log('script node', scriptNode)
-      return scriptNode
-    })
+    }
+
+    function getCondition(currentNode) {
+      const conditionType = currentNode.conditionType === 'TEXT' ? 'ALWAYS' : currentNode.conditionType
+        return {
+          type: conditionType,
+          beaconId: currentNode.beacon ? beacons[currentNode.beacon].beaconId : null,
+          threshold: currentNode.beaconThreshold,
+          mode: currentNode.beaconType,
+          location: currentNode.geofenceCenter ? locations[currentNode.geofenceCenter] : null,
+          radius: currentNode.geofenceRadius
+        }
+    }
+
+    function getActions(currentNode) {
+      const condition = getCondition(currentNode)
+      const ret = []
+      if (currentNode.hasSound) {
+        const soundAction = {
+          id: currentNode.id + '-sound',
+          receiver: "?u",
+          sender: "ghost",
+          content: {
+            task: {
+              type: 'SOUND',
+              url: currentNode.soundId
+                ? `${cdnRoot}/${props.record.id}/sounds/${currentNode.soundId}/sound`
+                : null,
+              volumeSetting: {
+                type: currentNode.mode,
+                center: currentNode.locationId ? locations[currentNode.locationId] : null,
+                fadeoutSeconds: currentNode.fadeoutSeconds,
+                fadeinSeconds: currentNode.fadeinSeconds,
+                speechLength: currentNode.speechLength,
+                radius: currentNode.range,
+                minVolume: currentNode.minVolume
+              },
+              mode: currentNode.soundType || 'MAIN',
+            },
+            condition: condition
+          }
+        }
+        ret.push(soundAction)
+      }
+      if (currentNode.hasPopup) {
+        const popupAction = {
+          id: currentNode.id + '-popup',
+          receiver: "?u",
+          sender: "ghost",
+          content: {
+            task: {
+              type: 'POPUP',
+              destinations: currentNode.destinations,
+              text: currentNode.text,
+              choices: currentNode.choices
+                ? currentNode.choices.map(c => c.choice) 
+                : [],
+              pictures: currentNode.pictures
+                ? currentNode.pictures.map(p => `${cdnRoot}/${props.record.id}/images/${p.pictureId}/image`)
+                : [],
+              allowTextReply: (currentNode.allowTextReply)? true : false,
+            },
+            condition: condition
+          }
+        }
+        ret.push(popupAction)
+      }
+      if (currentNode.hasMarker) {
+        const markerAction = {
+          id: currentNode.id + '-marker',
+          receiver: "?u",
+          sender: "ghost",
+          content: {
+            task: {
+              type: 'MARKER',
+              icon: currentNode.markerIcon
+                ? `${cdnRoot}/${props.record.id}/images/${currentNode.markerIcon}/image`
+                : null,
+              location: currentNode.locationId ? locations[currentNode.locationId] : null,
+              title: currentNode.title,
+              id: currentNode.markerId,
+            },
+            condition: condition
+          }
+        }
+        ret.push(markerAction)
+      }
+      if (currentNode.hasMarker) {
+        const markerAction = {
+          id: currentNode.id + '-marker',
+          receiver: "?u",
+          sender: "ghost",
+          content: {
+            task: {
+              type: 'MARKER',
+              icon: currentNode.markerIcon
+                ? `${cdnRoot}/${props.record.id}/images/${currentNode.markerIcon}/image`
+                : null,
+              location: currentNode.locationId ? locations[currentNode.locationId] : null,
+              title: currentNode.title,
+            },
+            condition: condition
+          }
+        }
+        ret.push(markerAction)
+      }
+      if (currentNode.hasMarkerRemoval) {
+        const markerRemovalAction = {
+          id: currentNode.id + '-marker-removal',
+          receiver: "?u",
+          sender: "ghost",
+          content: {
+            task: {
+              type: 'MARKER_REMOVAL',
+              id: currentNode.markerId,
+            },
+            condition: condition
+          }
+        }
+        ret.push(markerRemovalAction)
+      }
+      return ret.map(a => ({
+        ...a,
+        session: {
+          scenario: "",
+          chapter: ""
+        }
+      }))
+    }
+
+    function getNode(tree, parent) {
+      return {
+        name: tree.node.firstAction ? 'initial' : tree.node.id,
+        children: tree.children ? tree.children.map(c => c.node.id) : [],
+        exclusiveWith: [],
+        triggers: getTriggers(tree.node, parent? parent.node : null),
+        performances: getActions(tree.node).map(a => ({
+          action: a,
+          delay: tree.node.delay
+        }))
+      }
+    }
+
+    function getNodes(tree, parent) {
+      return tree.children.reduce((agg, c) => 
+        [...agg, ...getNodes(c, tree)], [getNode(tree, parent)]
+      )
+    }
+
+    const payload = getNodes(actionTree, null)
     console.log('payload', payload)
     const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
     const url = new URL(urlString)
@@ -460,3 +557,29 @@ export const ScenarioEdit = (props) => (
   </Edit>
 );
 
+export function getActionTree(actions) {
+  const initial = actions.find(a => a.firstAction)
+  const actionMap = new Map(actions.map(a => [a.id, a]))
+  const parentMap = 
+    actions.reduce(function(m, a) {
+      if (a.parent) {
+        const orig = m.get(a.parent) || []
+        m.set(a.parent, [...orig, a])
+        return m
+      } else {
+        return m
+      }
+    }, new Map())
+
+  console.log('parentMap', parentMap)
+  function createTree(root) {
+    const childNodes = parentMap.get(root.id) || []
+    console.log('childNodes', childNodes)
+    return {
+      node: root,
+      children: childNodes.filter(c => c).map(c => createTree(c))
+    }
+  }
+  if (initial) return createTree(initial) 
+  else return null
+}

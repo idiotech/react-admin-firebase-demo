@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ActionList, ActionCreate, ActionShow, ActionEdit } from "./actions";
-import { ScenarioList, ScenarioCreate, ScenarioEdit, scenarioReducer } from "./scenarios";
+import { ScenarioList, ScenarioCreate, ScenarioEdit, scenarioReducer, getActionTree } from "./scenarios";
 import { NodeList, NodeShow, NodeCreate, NodeEdit } from "./nodes";
 import { LocationList, LocationCreate, LocationEdit } from "./locations";
 import { BeaconList, BeaconCreate, BeaconEdit } from "./beacons";
@@ -24,7 +24,7 @@ import { firebaseConfig as config } from './FIREBASE_CONFIG';
 
 const adminOptions = {
   logging: true,
-  rootRef: 'root_collection/admin'
+  rootRef: 'ghostspeak_editor/admin'
 }
 
 const authProvider = FirebaseAuthProvider(config, adminOptions);
@@ -37,47 +37,32 @@ const adminProvider = {
 function createDataProvider(scenario) {
   const scenarioOtions = {
     logging: true,
-    rootRef: 'root_collection/' + scenario
+    rootRef: 'ghostspeak_editor/' + scenario
   }
   const baseProvider = FirebaseDataProvider(config, scenarioOtions)
   return {
     dataProvider: {
       ...baseProvider,
       getList: (resource, params) => {
-        if (resource !== 'nodes') return baseProvider.getList(resource, params);
+        if (resource !== 'actions') return baseProvider.getList(resource, params);
         else {
-          console.log('getting nodes with params', params)
+          console.log('getting actions with params', params)
           const newParams = JSON.parse(JSON.stringify(params))
           newParams.pagination.page = 1
           newParams.pagination.perPage = 10000
           return baseProvider.getList(resource, newParams).then(list =>
             {
               console.log('list', list)
-              const nodes = list.data
-              const initial = list.data.find(n => n.initial)
-              const nodeMap = new Map(list.data.map(n => [n.id, n]))
-              console.log('node map', nodeMap)
-              function createTree(root) {
-                const children = root.children || []
-                const childNodes = children.map(c => nodeMap.get(c))
-                console.log('children', children)
-                console.log('childNodes', childNodes)
-                return {
-                  node: root,
-                  children: children.map(c => nodeMap.get(c)).filter(c => c).map(c => createTree(c))
-                }
-              }
+              const actions = list.data
+              const actionTree = getActionTree(actions)
               function getMembers(tree) {
                 return tree.children.reduce((agg, c) => [...agg, ...getMembers(c)], [tree.node])
               }
-              if (initial) {
-                const tree = createTree(initial)
-                console.log('tree', tree)
-                const members = getMembers(tree)
+              if (actionTree) {
+                const members = getMembers(actionTree)
                 const memberIds = new Set(members.map(m => m.id))
                 const page = params.pagination.page - 1
                 const perPage = params.pagination.perPage
-                console.log('members', getMembers(tree))
                 return {
                   data: [...members, ...list.data.filter(n => !memberIds.has(n.id))].slice(page * perPage, (page + 1) * perPage),
                   total: list.data.length
@@ -151,13 +136,6 @@ function Main(props) {
           list={ActionList}
           create={ActionCreate}
           edit={ActionEdit}
-        />
-        <Resource
-          name="nodes"
-          options={{ label: '小節' }}
-          list={NodeList}
-          create={NodeCreate}
-          edit={NodeEdit}
         />
       </Admin>
     );

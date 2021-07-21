@@ -2,6 +2,7 @@ class CompositeDataProvider {
   constructor(dataProviders) {
     this.time = Date.now()
     this.dataProviders = dataProviders;
+    console.log('providers', dataProviders)
   }
 
   _delegate(name, resource, params) {

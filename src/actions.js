@@ -13,9 +13,11 @@ import {
   SimpleForm,
   TextField,
   TextInput,
+  Button,
   ShowButton,
   EditButton,
   DeleteButton,
+  CreateButton,
   ShowController,
   SelectInput,
   SelectField,
@@ -31,6 +33,8 @@ import {
   ImageField
 } from "react-admin";
 
+import { Link } from 'react-router-dom';
+
 import LocationReferenceInput from './LocationReferenceInput';
 import SoundReferenceInput from './SoundReferenceInput';
 import ImageReferenceInput from './ImageReferenceInput';
@@ -42,13 +46,6 @@ const ActionFilter = (props) => (
 );
 
 const requiredField = []
-
-const actionTypes = [
-          { id: 'SOUND', name: '聲音' },
-          { id: 'POPUP', name: '圖文訊息' },
-          { id: 'MARKER', name: '新增圖釘' },
-          { id: 'MARKER_REMOVAL', name: '刪除圖釘' },
-]
 
 const destinations = [
           { id: 'NOTIFICATION', name: '通知列' },
@@ -67,7 +64,8 @@ const soundTypes = [
           { id: 'LOOP', name: '背景循環' }
 ]
 const conditionTypes = [
-          { id: 'ALWAYS', name: '立刻觸發' },
+          { id: 'ALWAYS', name: '上個動作結束' },
+          { id: 'TEXT', name: '文字回應' },
           { id: 'GEOFENCE', name: 'GPS觸發' },
           { id: 'BEACON', name: 'Beacon觸發' },
 ]
@@ -84,99 +82,60 @@ export const ActionList = (props) => (
   <List title={<Title />} {...props} filters={<ActionFilter/>}>
     <Datagrid>
       <TextField label="名稱" source="name" />
-      <SelectField label="類型" source="category" choices={actionTypes} />
       <SelectField label="觸發條件" source="conditionType" choices={conditionTypes} />
-      <EditButton label="" />
+      <EditButton label="編輯" />
+      <NextButton source="id" label="下一步" />
       <DeleteButton label="" redirect={false}/>
     </Datagrid>
   </List>
 );
 
-
-export const ActionShow = props => (
-    <ShowController {...props}>
-        {controllerProps =>
-            <ShowView {...props} {...controllerProps}>
-                <SimpleShowLayout>
-                    <TextField source="id" />
-                    <TextField source="name" />
-                    <SelectField source="category" choices={actionTypes} />
-                    {
-                        controllerProps.record && controllerProps.record.category === 'MARKER' &&
-                        <SimpleShowLayout label="details">
-                          <TextField source="title"/>
-                          <TextField source="icon"/>
-                          <ReferenceField label="Location" source="locationId" reference="locations">
-                            <TextField source="name" />
-                          </ReferenceField>
-                        </SimpleShowLayout>
-                    }
-                    {
-                        controllerProps.record && controllerProps.record.category === 'SOUND' &&
-                        <TextField source="url" />
-                    }
-                    {
-                        controllerProps.record && controllerProps.record.category === 'POPUP' &&
-                        <TextField source="text" />
-                    }
-                    <TextField multiline source="description" />
-                </SimpleShowLayout>
-            </ShowView>
-        }
-    </ShowController>
-);
-
-
-export const ActionCreate = (props) => (
-  <Create title={<Title/>} {...props} >
-      <TabbedForm>
-        <FormTab label="基本資料">
+function inputForm(props, showId) {
+  return (
+  <SimpleForm>
+    {showId ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
+          <BooleanInput label="開頭" source="firstAction" />
+          <FormDataConsumer>
+               {({ formData, ...rest }) => 
+                !formData.firstAction &&
+              <ReferenceInput label="上一步" source="parent" reference="actions">
+                <AutocompleteInput optionText="name" />
+              </ReferenceInput>
+                }
+          </FormDataConsumer>
           <TextInput label="名稱" source="name" validate={requiredField}/>
           <NumberInput label="延遲時間 (千分之一秒)" source="delay" />
-          <TextInput multiline label="說明" source="description" />
-        </FormTab>
-        <FormTab label="內容">
-            <SelectInput label="類型" source="category" initialValue="SOUND" choices={actionTypes} validate={requiredField} />
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.category === 'MARKER' &&
-                <div>
-                <TextInput label="標題" source="title" /><br/>
-                <ImageReferenceInput source="markerIcon" reference="images" />
-                <LocationReferenceInput label="座標" source="locationId" reference="locations" >
+          <SelectInput label="觸發條件" source="conditionType" choices={conditionTypes} initialValue={'ALWAYS'} />
+          <FormDataConsumer>
+              {({ formData, ...rest }) => formData.conditionType === 'GEOFENCE' &&
+              <div>
+                <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
                   <AutocompleteInput optionText="name" />
                 </LocationReferenceInput>
-                </div>
-                }
-            </FormDataConsumer>
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.category === 'MARKER_REMOVAL' &&
-                <ReferenceInput label="圖釘" source="markerId" reference="actions" filter={{ category: 'MARKER' }}>
-                    <SelectInput optionText="name" />
+                <NumberInput label="範圍" source="geofenceRadius" />公尺
+              </div>
+              }
+          </FormDataConsumer>
+          <FormDataConsumer>
+              {({ formData, ...rest }) => formData.conditionType === 'BEACON' &&
+              <div>
+                <ReferenceInput label="Beacon" source="beacon" reference="beacons" >
+                  <AutocompleteInput optionText="name" />
                 </ReferenceInput>
-                }
-            </FormDataConsumer>
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.category === 'POPUP' &&
-                <div>
-                    <TextInput multiline label="文字" source="text" />
-                    <ArrayInput label="圖片" source="pictures">
-                      <SimpleFormIterator>
-                        <ImageReferenceInput label="圖檔" source="pictureId" reference="images" />
-                      </SimpleFormIterator>
-                    </ArrayInput>
-                    <ArrayInput label="回應按鈕" source="choices">
-                      <SimpleFormIterator>
-                        <TextInput source="choice" label="選擇" />
-                      </SimpleFormIterator>
-                    </ArrayInput>
-                    <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
-                    <SelectArrayInput label="顯示於" source="destinations" choices={destinations} />
-                </div>
-                }
-            </FormDataConsumer>
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.category === 'SOUND' &&
-                <div>
+                <SelectInput label="模式" source="beaconType" choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
+                <NumberInput label="訊號值" source="beaconThreshold" />
+              </div>
+              }
+          </FormDataConsumer>
+          <FormDataConsumer>
+              {({ formData, ...rest }) => formData.conditionType === 'TEXT' &&
+              <TextInput multiline label="文字" source="userReply" />
+              }
+          </FormDataConsumer>
+          <BooleanInput label="聲音" source="hasSound" />
+          <FormDataConsumer>
+               {({ formData, ...rest }) => formData.hasSound &&
+                <>
                     <SoundReferenceInput label="音檔" source="soundId" reference="sounds">
                       <AutocompleteInput optionText="name" />
                     </SoundReferenceInput>
@@ -202,70 +161,13 @@ export const ActionCreate = (props) => (
                         </div>
                     }
                     </FormDataConsumer>
-                </div>
+                </>
                 }
-            </FormDataConsumer>
-        </FormTab>
-        <FormTab label="觸發條件">
-            <SelectInput label="觸發條件" source="conditionType" choices={conditionTypes} initialValue={'ALWAYS'} />
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.conditionType === 'GEOFENCE' &&
-                <div>
-                  <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
-                    <AutocompleteInput optionText="name" />
-                  </LocationReferenceInput>
-                  <NumberInput label="範圍" source="geofenceRadius" />公尺
-                </div>
-                }
-            </FormDataConsumer>
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.conditionType === 'BEACON' &&
-                <div>
-                  <ReferenceInput label="Beacon" source="beacon" reference="beacons" >
-                    <AutocompleteInput optionText="name" />
-                  </ReferenceInput>
-                  <SelectInput label="模式" source="beaconType" choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
-                  <NumberInput label="訊號值" source="beaconThreshold" />
-                </div>
-                }
-            </FormDataConsumer>
-        </FormTab>
-      </TabbedForm>
-  </Create>
-);
-
-export const ActionEdit = (props) => (
-  <Edit title={<Title/>} {...props}>
-      <TabbedForm>
-        <FormTab label="基本資料">
-          <TextInput source="id" options={{ disabled: true }}/>
-          <TextInput label="名稱" source="name" validate={requiredField}/>
-          <NumberInput label="延遲時間 (千分之一秒)" source="delay" />
-          <TextInput multiline label="說明" source="description" />
-        </FormTab>
-        <FormTab label="內容">
-            <SelectInput label="類型" source="category" initialValue="SOUND" choices={actionTypes} validate={requiredField} />
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.category === 'MARKER' &&
-                <div>
-                <TextInput label="標題" source="title" /><br/>
-                <ImageReferenceInput source="markerIcon" reference="images" />
-                <LocationReferenceInput label="座標" source="locationId" reference="locations" >
-                  <AutocompleteInput optionText="name" />
-                </LocationReferenceInput>
-                </div>
-                }
-            </FormDataConsumer>
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.category === 'MARKER_REMOVAL' &&
-                <ReferenceInput label="圖釘" source="markerId" reference="actions" filter={{ category: 'MARKER' }}>
-                    <SelectInput optionText="name" />
-                </ReferenceInput>
-                }
-            </FormDataConsumer>
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.category === 'POPUP' &&
-                <div>
+          </FormDataConsumer>
+          <BooleanInput label="圖文訊息" source="hasPopup" />
+          <FormDataConsumer>
+               {({ formData, ...rest }) => formData.hasPopup &&
+                <>
                     <TextInput multiline label="文字" source="text" />
                     <ArrayInput label="圖片" source="pictures">
                       <SimpleFormIterator>
@@ -279,65 +181,52 @@ export const ActionEdit = (props) => (
                     </ArrayInput>
                     <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
                     <SelectArrayInput label="顯示於" source="destinations" choices={destinations} />
-                </div>
+                </>
                 }
-            </FormDataConsumer>
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.category === 'SOUND' &&
-                <div>
-                    <SoundReferenceInput label="音檔" source="soundId" reference="sounds">
-                      <AutocompleteInput optionText="name" />
-                    </SoundReferenceInput>
-                    <SelectInput label="聲音類型" source="soundType" choices={soundTypes} initialValue={'MAIN'}  /> <br/>
-                    <SelectInput label="音量模式" source="mode" choices={soundModes} initialValue={'STATIC_VOLUME'}  />
-                    <FormDataConsumer>
-                    {({ formData, ...rest }) => formData.mode === 'STATIC_VOLUME' &&
-                        <div>
-                          <NumberInput label="淡出秒數" source="fadeOutSeconds" /><br/>
-                          <NumberInput label="淡入秒數" source="fadeInSeconds" /><br/>
-                          <NumberInput label="正文秒數" source="speechLength" />
-                        </div>
-                    }
-                    </FormDataConsumer>
-                    <FormDataConsumer>
-                    {({ formData, ...rest }) => formData.mode === 'DYNAMIC_VOLUME' &&
-                        <div>
-                        <LocationReferenceInput label="中心點" source="locationId" reference="locations" >
-                          <AutocompleteInput optionText="name" />
-                        </LocationReferenceInput>
-                        <NumberInput label="最小音量" source="minVolume" /> 0-1之間<br/>
-                        <NumberInput label="範圍" source="range"  />公尺
-                        </div>
-                    }
-                    </FormDataConsumer>
-                </div>
+          </FormDataConsumer>
+          <BooleanInput label="新圖釘" source="hasMarker" />
+          <FormDataConsumer>
+               {({ formData, ...rest }) => formData.hasMarker &&
+                <>
+                <TextInput label="標題" source="title" /><br/>
+                <ImageReferenceInput label="圖示檔案" source="markerIcon" reference="images" />
+                <LocationReferenceInput label="座標" source="locationId" reference="locations" >
+                  <AutocompleteInput optionText="name" />
+                </LocationReferenceInput>
+                </>
                 }
-            </FormDataConsumer>
-        </FormTab>
-        <FormTab label="觸發條件">
-            <SelectInput label="觸發條件" source="conditionType" choices={conditionTypes} initialValue={'ALWAYS'} />
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.conditionType === 'GEOFENCE' &&
-                <div>
-                  <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
-                    <AutocompleteInput optionText="name" />
-                  </LocationReferenceInput>
-                  <NumberInput label="範圍" source="geofenceRadius" />公尺
-                </div>
+          </FormDataConsumer>
+          <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
+          <FormDataConsumer>
+               {({ formData, ...rest }) => formData.hasMarkerRemoval &&
+                <ReferenceInput label="圖釘" source="markerId" reference="actions" filter={{ hasMarker: true }}>
+                    <SelectInput optionText="name" />
+                </ReferenceInput>
                 }
-            </FormDataConsumer>
-            <FormDataConsumer>
-                {({ formData, ...rest }) => formData.conditionType === 'BEACON' &&
-                <div>
-                  <ReferenceInput label="Beacon" source="beacon" reference="beacons" >
-                    <AutocompleteInput optionText="name" />
-                  </ReferenceInput>
-                  <SelectInput label="模式" source="beaconType" choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
-                  <NumberInput label="訊號值" source="beaconThreshold" />
-                </div>
-                }
-            </FormDataConsumer>
-        </FormTab>
-      </TabbedForm>
+          </FormDataConsumer>
+      </SimpleForm>
+  )  
+}
+
+export const ActionCreate = (props) => (
+  <Create title={<Title/>} {...props} >
+    { inputForm(props, false) }
+  </Create>
+);
+
+export const ActionEdit = (props) => (
+  <Edit title={<Title/>} {...props}>
+    { inputForm(props, true) }
   </Edit>
 );
+
+function NextButton(props) {
+  return (
+    <CreateButton label="下一步"
+      to={{
+        pathname: '/actions/create',
+        state: { record: { parent: props.record.id  } }
+      }}
+    />
+  )
+}
