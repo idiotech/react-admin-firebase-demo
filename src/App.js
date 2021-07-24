@@ -53,18 +53,32 @@ function createDataProvider(scenario) {
           return baseProvider.getList(resource, newParams).then(list =>
             {
               console.log('list', list)
-              const nodes = list.data
+              const nodesSet = new Set()
               const initial = list.data.find(n => n.initial)
               const nodeMap = new Map(list.data.map(n => [n.id, n]))
               console.log('node map', nodeMap)
               function createTree(root) {
                 const children = root.children || []
-                const childNodes = children.map(c => nodeMap.get(c))
+                const childNodes = children.map(c => {
+                  if (nodesSet.has(c)) return null
+                  else {
+                    nodesSet.add(c)
+                    return nodeMap.get(c)
+                  }
+                })
                 console.log('children', children)
                 console.log('childNodes', childNodes)
-                return {
-                  node: root,
-                  children: children.map(c => nodeMap.get(c)).filter(c => c).map(c => createTree(c))
+                if (!nodesSet.has(root)) {
+                  nodesSet.add(root)
+                  return {
+                    node: root,
+                    children: childNodes.filter(c => c).map(c => createTree(c))
+                  }
+                } else {
+                  return {
+                    node: root,
+                    children: []
+                  }
                 }
               }
               function getMembers(tree) {
