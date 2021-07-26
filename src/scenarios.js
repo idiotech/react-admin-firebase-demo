@@ -408,8 +408,6 @@ function CloneButton(props) {
   );
   const sounds = soundResult.data
 
-
-
   const [open, setOpen] = useState(false);
   const createData = JSON.parse(JSON.stringify(props.record))
   const cloneId = xid.next();
@@ -559,12 +557,13 @@ export const ScenarioEdit = (props) => (
 
 export function getActionTree(actions) {
   const initial = actions.find(a => a.firstAction)
-  const actionMap = new Map(actions.map(a => [a.id, a]))
   const parentMap = 
     actions.reduce(function(m, a) {
-      if (a.parent) {
-        const orig = m.get(a.parent) || []
-        m.set(a.parent, [...orig, a])
+      if (a.parents) {
+        a.parents.forEach(p => {
+          const orig = m.get(p) || []
+          m.set(p, [...orig, a])
+        })
         return m
       } else {
         return m

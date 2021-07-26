@@ -23,6 +23,7 @@ import {
   SelectField,
   SelectArrayInput,
   ReferenceInput,
+  ReferenceArrayInput,
   ReferenceField,
   ShowView,
   FormDataConsumer,
@@ -98,40 +99,51 @@ function inputForm(props, showId) {
           <FormDataConsumer>
                {({ formData, ...rest }) => 
                 !formData.firstAction &&
-              <ReferenceInput label="上一步" source="parent" reference="actions">
-                <AutocompleteInput optionText="name" />
-              </ReferenceInput>
+                  <ReferenceArrayInput label="上一步" source="parents" reference="actions">
+                    <SelectArrayInput optionText="name" />
+                  </ReferenceArrayInput>
                 }
           </FormDataConsumer>
           <TextInput label="名稱" source="name" validate={requiredField}/>
           <NumberInput label="延遲時間 (千分之一秒)" source="delay" />
-          <SelectInput label="觸發條件" source="conditionType" choices={conditionTypes} initialValue={'ALWAYS'} />
-          <FormDataConsumer>
-              {({ formData, ...rest }) => formData.conditionType === 'GEOFENCE' &&
-              <div>
-                <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
-                  <AutocompleteInput optionText="name" />
-                </LocationReferenceInput>
-                <NumberInput label="範圍" source="geofenceRadius" />公尺
-              </div>
-              }
-          </FormDataConsumer>
-          <FormDataConsumer>
-              {({ formData, ...rest }) => formData.conditionType === 'BEACON' &&
-              <div>
-                <ReferenceInput label="Beacon" source="beacon" reference="beacons" >
-                  <AutocompleteInput optionText="name" />
-                </ReferenceInput>
-                <SelectInput label="模式" source="beaconType" choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
-                <NumberInput label="訊號值" source="beaconThreshold" />
-              </div>
-              }
-          </FormDataConsumer>
-          <FormDataConsumer>
-              {({ formData, ...rest }) => formData.conditionType === 'TEXT' &&
-              <TextInput multiline label="文字" source="userReply" />
-              }
-          </FormDataConsumer>
+          <ArrayInput label="觸發條件" source="triggers">
+              <SimpleFormIterator>
+                <FormDataConsumer>
+                    {({ formData, ...rest }) =>
+                      <ReferenceInput label="接續" source="triggeringAction" reference="actions"  filter={{"id": formData.parents}}>
+                        <SelectInput optionText="name" />
+                      </ReferenceInput>
+                    }
+                </FormDataConsumer>
+                <SelectInput label="類型" source="conditionType" choices={conditionTypes} initialValue={'ALWAYS'} />
+                <FormDataConsumer>
+                    {({ formData, ...rest }) => formData.conditionType === 'GEOFENCE' &&
+                    <div>
+                      <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
+                        <AutocompleteInput optionText="name" />
+                      </LocationReferenceInput>
+                      <NumberInput label="範圍" source="geofenceRadius" />公尺
+                    </div>
+                    }
+                </FormDataConsumer>
+                <FormDataConsumer>
+                    {({ formData, ...rest }) => formData.conditionType === 'BEACON' &&
+                    <div>
+                      <ReferenceInput label="Beacon" source="beacon" reference="beacons" >
+                        <AutocompleteInput optionText="name" />
+                      </ReferenceInput>
+                      <SelectInput label="模式" source="beaconType" choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
+                      <NumberInput label="訊號值" source="beaconThreshold" />
+                    </div>
+                    }
+                </FormDataConsumer>
+                <FormDataConsumer>
+                    {({ formData, ...rest }) => formData.conditionType === 'TEXT' &&
+                    <TextInput multiline label="文字" source="userReply" />
+                    }
+                </FormDataConsumer>
+              </SimpleFormIterator>
+          </ArrayInput>
           <BooleanInput label="聲音" source="hasSound" />
           <FormDataConsumer>
                {({ formData, ...rest }) => formData.hasSound &&
@@ -225,7 +237,7 @@ function NextButton(props) {
     <CreateButton label="下一步"
       to={{
         pathname: '/actions/create',
-        state: { record: { parent: props.record.id  } }
+        state: { record: { parents: [props.record.id]  } }
       }}
     />
   )
