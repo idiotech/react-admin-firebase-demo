@@ -35,6 +35,7 @@ import {
 } from "react-admin";
 
 import { Link } from 'react-router-dom';
+import { useForm } from 'react-final-form';
 
 import LocationReferenceInput from './LocationReferenceInput';
 import SoundReferenceInput from './SoundReferenceInput';
@@ -91,10 +92,48 @@ export const ActionList = (props) => (
   </List>
 );
 
-function inputForm(props, showId) {
+function shouldShow(formData, parent, t) {
+  console.log('compare', parent, 'triggers_' + parent + '_conditionType', formData['triggers_' + parent + '_conditionType'], t)
+  return formData['triggers_' + parent + '_conditionType'] === t
+}
+
+function createTrigger(parent, formData) {
+  console.log('trigger parent', parent)
+  function content() {
+    if (shouldShow(formData, parent, 'GEOFENCE')) {
+     return <div>
+        <LocationReferenceInput label="中心點" source={'triggers_' + parent + '_geofenceCenter'} reference="locations" >
+          <AutocompleteInput optionText="name" />
+        </LocationReferenceInput>
+        <NumberInput label="範圍" source={'triggers_' + parent + '_geofenceRadius'} />公尺
+      </div>
+    } else if (shouldShow(formData, parent, 'BEACON')) {
+      return <div>
+        <ReferenceInput label="Beacon" source={'triggers_' + parent + '_beacon'} reference="beacons" >
+          <AutocompleteInput optionText="name" />
+        </ReferenceInput>
+        <SelectInput label="模式" source={'triggers_' + parent + '_beaconType'}  choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
+        <NumberInput label="訊號值" source={'triggers_' + parent + '_beaconThreshold'}  />
+      </div>
+    } else if (shouldShow(formData, parent, 'TEXT')) {
+      return <TextInput multiline label="文字" source={'triggers_' + parent + '_userReply'}  />
+    }
+  }
+  return <div key={'triggers_' + parent}>
+    <ReferenceInput label="接續" source={'triggers_' + parent + '_id'} reference="actions" initialValue={parent} disabled>
+      <SelectInput optionText="name"  initialValue={parent} />
+    </ReferenceInput>
+    <SelectInput label="類型" source={'triggers_' + parent + '_conditionType'} choices={conditionTypes} initialValue="ALWAYS" />
+    { content() }
+    <br/>
+  </div>
+}
+
+const InputForm = (props) => {
+  console.log('props =', props)
   return (
-  <SimpleForm>
-    {showId ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
+  <SimpleForm {...props}>
+    {props.showid ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
           <BooleanInput label="開頭" source="firstAction" />
           <FormDataConsumer>
                {({ formData, ...rest }) => 
@@ -106,44 +145,22 @@ function inputForm(props, showId) {
           </FormDataConsumer>
           <TextInput label="名稱" source="name" validate={requiredField}/>
           <NumberInput label="延遲時間 (千分之一秒)" source="delay" />
-          <ArrayInput label="觸發條件" source="triggers">
-              <SimpleFormIterator>
-                <FormDataConsumer>
-                    {({ formData, ...rest }) =>
-                      <ReferenceInput label="接續" source="triggeringAction" reference="actions"  filter={{"id": formData.parents}}>
-                        <SelectInput optionText="name" />
-                      </ReferenceInput>
-                    }
-                </FormDataConsumer>
-                <SelectInput label="類型" source="conditionType" choices={conditionTypes} initialValue={'ALWAYS'} />
-                <FormDataConsumer>
-                    {({ formData, ...rest }) => formData.conditionType === 'GEOFENCE' &&
-                    <div>
-                      <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
-                        <AutocompleteInput optionText="name" />
-                      </LocationReferenceInput>
-                      <NumberInput label="範圍" source="geofenceRadius" />公尺
-                    </div>
-                    }
-                </FormDataConsumer>
-                <FormDataConsumer>
-                    {({ formData, ...rest }) => formData.conditionType === 'BEACON' &&
-                    <div>
-                      <ReferenceInput label="Beacon" source="beacon" reference="beacons" >
-                        <AutocompleteInput optionText="name" />
-                      </ReferenceInput>
-                      <SelectInput label="模式" source="beaconType" choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
-                      <NumberInput label="訊號值" source="beaconThreshold" />
-                    </div>
-                    }
-                </FormDataConsumer>
-                <FormDataConsumer>
-                    {({ formData, ...rest }) => formData.conditionType === 'TEXT' &&
-                    <TextInput multiline label="文字" source="userReply" />
-                    }
-                </FormDataConsumer>
-              </SimpleFormIterator>
-          </ArrayInput>
+          <FormDataConsumer>
+            {({ formData, ...rest }) => {
+              var err = new Error();
+              console.log('trigger formData.parents', formData, err.stack)
+              return <>
+                { (formData.parents) 
+                  ? formData.parents.map(p => {
+                    if (!formData['triggers_' + p + '_id']) formData['triggers_' + p + '_id'] = p
+                    if (!formData['triggers_' + p + '_conditionType']) formData['triggers_' + p + '_conditionType'] = 'ALWAYS'
+                    return createTrigger(p, formData)
+                  })
+                  : []
+                }
+              </>
+            }}
+          </FormDataConsumer>
           <BooleanInput label="聲音" source="hasSound" />
           <FormDataConsumer>
                {({ formData, ...rest }) => formData.hasSound &&
@@ -220,17 +237,18 @@ function inputForm(props, showId) {
   )  
 }
 
-export const ActionCreate = (props) => (
-  <Create title={<Title/>} {...props} >
-    { inputForm(props, false) }
-  </Create>
-);
 
-export const ActionEdit = (props) => (
-  <Edit title={<Title/>} {...props}>
-    { inputForm(props, true) }
+export const ActionCreate = (props) => {
+  return <Create title={<Title/>} {...props} >
+    <InputForm {...props} showid="false" />
+  </Create>
+};
+
+export const ActionEdit = (props) => {
+  return <Edit title={<Title/>} {...props}>
+    <InputForm {...props} showid="true" />
   </Edit>
-);
+};
 
 function NextButton(props) {
   return (
