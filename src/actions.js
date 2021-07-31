@@ -153,13 +153,16 @@ const InputForm = (props) => {
           <NumberInput label="延遲時間 (千分之一秒)" source="delay" />
           <FormDataConsumer>
             {({ formData, ...rest }) => {
-              var err = new Error();
-              console.log('trigger formData.parents', formData, err.stack)
+              console.log('trigger formData.parents', props)
               return <>
                 { (formData.parents) 
                   ? formData.parents.map(p => {
-                    if (!formData['triggers_' + p + '_id']) formData['triggers_' + p + '_id'] = p
-                    if (!formData['triggers_' + p + '_conditionType']) formData['triggers_' + p + '_conditionType'] = 'ALWAYS'
+                    if (!formData['triggers_' + p + '_id']) {
+                      props.record['triggers_' + p + '_id'] = p
+                    }
+                    if (!formData['triggers_' + p + '_conditionType']) {
+                      props.record['triggers_' + p + '_conditionType'] = 'ALWAYS'
+                    }
                     return createTrigger(p, formData)
                   })
                   : []
