@@ -24,7 +24,9 @@ import {
   SelectArrayInput,
   ReferenceInput,
   ReferenceArrayInput,
-  ReferenceField,
+  ReferenceArrayField,
+  SingleFieldList,
+  ChipField,
   ShowView,
   FormDataConsumer,
   AutocompleteInput,
@@ -84,7 +86,11 @@ export const ActionList = (props) => (
   <List title={<Title />} {...props} filters={<ActionFilter/>}>
     <Datagrid>
       <TextField label="名稱" source="name" />
-      <SelectField label="觸發條件" source="conditionType" choices={conditionTypes} />
+      <ReferenceArrayField label="上一步" source="parents" reference="actions">
+        <SingleFieldList>
+            <ChipField source="name" />
+        </SingleFieldList>
+      </ReferenceArrayField>
       <EditButton label="編輯" />
       <NextButton source="id" label="下一步" />
       <DeleteButton label="" redirect={false}/>

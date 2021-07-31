@@ -557,6 +557,8 @@ export const ScenarioEdit = (props) => (
 
 export function getActionTree(actions) {
   const initial = actions.find(a => a.firstAction)
+  const nodesSet = new Set()
+  const nodeMap = new Map(actions.map(a => [a.id, a]))
   const parentMap = 
     actions.reduce(function(m, a) {
       if (a.parents) {
@@ -572,11 +574,25 @@ export function getActionTree(actions) {
 
   console.log('parentMap', parentMap)
   function createTree(root) {
-    const childNodes = parentMap.get(root.id) || []
-    console.log('childNodes', childNodes)
-    return {
-      node: root,
-      children: childNodes.filter(c => c).map(c => createTree(c))
+    const children = root.children || []
+    const childNodes = children.map(c => {
+      if (nodesSet.has(c)) return null
+      else {
+        nodesSet.add(c)
+        return nodeMap.get(c)
+      }
+    })
+    if (!nodesSet.has(root)) {
+      nodesSet.add(root)
+      return {
+        node: root,
+        children: childNodes.filter(c => c).map(c => createTree(c))
+      }
+    } else {
+      return {
+        node: root,
+        children: []
+      }
     }
   }
   if (initial) return createTree(initial) 
