@@ -125,7 +125,7 @@ function PublishButton(props) {
         notify("沒有初始動作，無法發佈！")
         return
     }
-    function getTriggers(currentNode, parentNode) {
+    function getTriggers(currentNode, parents) {
       if (currentNode.firstAction) {
         return [{
           id: "",
@@ -137,8 +137,13 @@ function PublishButton(props) {
           },
           scenarioId: ""
         }]
-      } else {
-        const actionId = (currentNode.conditionType === "TEXT") 
+      } else return parents.map(p => getTrigger(currentNode, p))
+    }
+    function getTrigger(currentNode, parentNode) {
+        const parent = parentNode.id
+        const conditionType = currentNode[`triggers_${parent}_conditionType`]
+        console.log(currentNode.id,'cond type for', parentNode.id, conditionType)
+        const actionId = (conditionType === "TEXT") 
           ? parentNode.id + '-popup'
           : parentNode.hasSound
             ? parentNode.id + '-sound'
@@ -147,35 +152,39 @@ function PublishButton(props) {
               : parentNode.hasMarker
                 ? parentNode.id + '-marker'
                 : parentNode.id + '-marker-removal'
-        return [{
+        return {
             id: "",
             actionId: actionId,
             receiver: "ghost",
             sender: "?u",
             payload: {
               // TODO
-              type: currentNode.conditionType === "TEXT" ? "TEXT" : "END",
-              text: currentNode.userReply
+              type: conditionType === "TEXT" ? "TEXT" : "END",
+              text: currentNode[`triggers_${parent}_userReply`]
             },
             scenarioId: ""
-        }]
+        }
       }
-    }
-
-    function getCondition(currentNode) {
-      const conditionType = currentNode.conditionType === 'TEXT' ? 'ALWAYS' : currentNode.conditionType
+    
+    // TODO system hole: if there are multiple parents, and two of them are fence-triggered,
+    // which should work?
+    function getCondition(currentNode, parentNodes) {
+      const conditionTypes = parentNodes.map(p => currentNode[`triggers_${p.id}_conditionType`]).filter(c => c && c !== 'TEXT')
+      const conditionType = conditionTypes.length === 0 
+        ? 'ALWAYS'
+        : conditionTypes[0]
         return {
           type: conditionType,
           beaconId: currentNode.beacon ? beacons[currentNode.beacon].beaconId : null,
           threshold: currentNode.beaconThreshold,
           mode: currentNode.beaconType,
           location: currentNode.geofenceCenter ? locations[currentNode.geofenceCenter] : null,
-          radius: currentNode.geofenceRadius
+          radius: currentNode.geofenceRadius || 14
         }
     }
 
-    function getActions(currentNode) {
-      const condition = getCondition(currentNode)
+    function getActions(currentNode, parentsNodes) {
+      const condition = getCondition(currentNode, parentsNodes)
       const ret = []
       if (currentNode.hasSound) {
         const soundAction = {
@@ -191,10 +200,9 @@ function PublishButton(props) {
               volumeSetting: {
                 type: currentNode.mode,
                 center: currentNode.locationId ? locations[currentNode.locationId] : null,
-                fadeoutSeconds: currentNode.fadeoutSeconds,
-                fadeinSeconds: currentNode.fadeinSeconds,
+                fadeOutSeconds: currentNode.fadeOutSeconds,
                 speechLength: currentNode.speechLength,
-                radius: currentNode.range,
+                radius: currentNode.range || 30,
                 minVolume: currentNode.minVolume
               },
               mode: currentNode.soundType || 'MAIN',
@@ -274,7 +282,7 @@ function PublishButton(props) {
           content: {
             task: {
               type: 'MARKER_REMOVAL',
-              id: currentNode.markerId,
+              id: currentNode.markerId + '-marker',
             },
             condition: condition
           }
@@ -290,26 +298,29 @@ function PublishButton(props) {
       }))
     }
 
-    function getNode(tree, parent) {
+    function getNode(tree) {
+      const parents = tree.node.parents ? tree.node.parents.map(p => actions[p]) : []
+      console.log('parents', tree.node.id, tree.node.parents)
+      console.log('children', tree.node)
       return {
         name: tree.node.firstAction ? 'initial' : tree.node.id,
-        children: tree.children ? tree.children.map(c => c.node.id) : [],
+        children: tree.node.children || [],
         exclusiveWith: [],
-        triggers: getTriggers(tree.node, parent? parent.node : null),
-        performances: getActions(tree.node).map(a => ({
+        triggers: getTriggers(tree.node, parents),
+        performances: getActions(tree.node, parents).map(a => ({
           action: a,
-          delay: tree.node.delay
+          delay: tree.node.delay || 0
         }))
       }
     }
 
-    function getNodes(tree, parent) {
+    function getNodes(tree) {
       return tree.children.reduce((agg, c) => 
-        [...agg, ...getNodes(c, tree)], [getNode(tree, parent)]
+        [...agg, ...getNodes(c)], [getNode(tree)]
       )
     }
-
-    const payload = getNodes(actionTree, null)
+    console.log('payload tree', actionTree)
+    const payload = getNodes(actionTree)
     console.log('payload', payload)
     const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
     const url = new URL(urlString)
@@ -558,7 +569,6 @@ export const ScenarioEdit = (props) => (
 export function getActionTree(actions) {
   const initial = actions.find(a => a.firstAction)
   const nodesSet = new Set()
-  const nodeMap = new Map(actions.map(a => [a.id, a]))
   const parentMap = 
     actions.reduce(function(m, a) {
       if (a.parents) {
@@ -574,26 +584,32 @@ export function getActionTree(actions) {
 
   console.log('parentMap', parentMap)
   function createTree(root) {
-    const children = root.children || []
+    console.log('creating tree for', root.id)
+    const children = parentMap.get(root.id) || []
     const childNodes = children.map(c => {
-      if (nodesSet.has(c)) return null
-      else {
-        nodesSet.add(c)
-        return nodeMap.get(c)
+      if (nodesSet.has(c.id)) {
+        console.log('creating tree: bypassing', c.id)
+        return null
+      } else {
+        console.log('creating tree: adding', c.id)
+        nodesSet.add(c.id)
+        return c
       }
     })
-    if (!nodesSet.has(root)) {
-      nodesSet.add(root)
+    root.children = children.map(c => c.id)
+    console.log('creating tree for child', root.id, children, childNodes)
+    // if (!nodesSet.has(root.id)) {
+      // nodesSet.add(root.id)
       return {
         node: root,
         children: childNodes.filter(c => c).map(c => createTree(c))
       }
-    } else {
-      return {
-        node: root,
-        children: []
-      }
-    }
+    // } else {
+      // return {
+        // node: root,
+        // children: []
+      // }
+    // }
   }
   if (initial) return createTree(initial) 
   else return null

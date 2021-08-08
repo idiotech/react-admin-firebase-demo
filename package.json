@@ -16,7 +16,7 @@
   },
   "homepage": "https://benwinding.github.io/react-admin-firebase-demo/",
   "scripts": {
-    "start": "BROWSER=none PORT=3333 react-scripts start",
+    "start": "BROWSER=none PORT=4444 react-scripts start",
     "deploy": "gh-pages -d build",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",

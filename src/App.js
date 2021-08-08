@@ -54,6 +54,7 @@ function createDataProvider(scenario) {
             {
               console.log('list', list)
               const actions = list.data
+
               const actionTree = getActionTree(actions)
               console.log('actionTree', actionTree)
               function getMembers(tree) {

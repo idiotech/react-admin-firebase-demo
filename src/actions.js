@@ -33,11 +33,24 @@ import {
   TabbedForm,
   FormTab,
   required,
-  ImageField
+  ImageField,
+  FunctionField,
+  AutocompleteArrayInput,
+  BooleanField
 } from "react-admin";
 
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-final-form';
+
+import BluetoothIcon from '@material-ui/icons/Bluetooth';
+import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import MessageIcon from '@material-ui/icons/Message';
+import PinDropIcon from '@material-ui/icons/PinDrop';
+import MyLocationIcon from '@material-ui/icons/MyLocation';
+import LocationOffIcon from '@material-ui/icons/LocationOff';
+import AddLocationIcon from '@material-ui/icons/AddLocation';
+import ReplyIcon from '@material-ui/icons/Reply';
+import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 
 import LocationReferenceInput from './LocationReferenceInput';
 import SoundReferenceInput from './SoundReferenceInput';
@@ -82,8 +95,40 @@ const Title = ({ record }) => {
     return <span>動作{record && record.name ? `："${record.name}"` : ''}</span>;
 };
 
-export const ActionList = (props) => (
-  <List title={<Title />} {...props} filters={<ActionFilter/>}>
+const CheckField = ({ record = {}, source, TrueIcon}) => {
+  let theRecord = {...record};
+
+  theRecord[source + '-exist'] = !!record[source];
+
+  return <BooleanField record={theRecord} TrueIcon={TrueIcon} source={source + '-exist'} />
+}
+
+const getConditionIcon = (record) => {
+  console.log('cond entries', Object.entries(record))
+  const conds = new Set(Object.entries(record)
+    .filter(e => e[0].startsWith('triggers_') && e[0].endsWith('_conditionType'))
+    .map(e => e[1]))
+
+  return <>
+    { conds.has('TEXT') ? <ReplyIcon />: <></>}
+    { conds.has('BEACON') ? <BluetoothIcon/>: <></>}
+    { conds.has('GEOFENCE') ? <MyLocationIcon/>: <></>}
+    { conds.has('ALWAYS') ? <ArrowForwardIcon/>: <></>}
+  </>
+}
+
+
+const getContentIcon = (record) => {
+  return <>
+    { record.hasSound ? <AudiotrackIcon />: <></>}
+    { record.hasPopup ? <MessageIcon/>: <></>}
+    { record.hasMarker ? <AddLocationIcon/>: <></>}
+    { record.hasMarkerRemoval ? <LocationOffIcon/>: <></>}
+  </>
+}
+
+export const ActionList = (props) => {
+  return <List title={<Title />} {...props} filters={<ActionFilter/>}>
     <Datagrid>
       <TextField label="名稱" source="name" />
       <ReferenceArrayField label="上一步" source="parents" reference="actions">
@@ -91,12 +136,14 @@ export const ActionList = (props) => (
             <ChipField source="name" />
         </SingleFieldList>
       </ReferenceArrayField>
+      <FunctionField label="條件" render={getConditionIcon}/>
+      <FunctionField label="內容" render={getContentIcon}/>
       <EditButton label="編輯" />
       <NextButton source="id" label="下一步" />
       <DeleteButton label="" redirect={false}/>
     </Datagrid>
   </List>
-);
+};
 
 function shouldShow(formData, parent, t) {
   console.log('compare', parent, 'triggers_' + parent + '_conditionType', formData['triggers_' + parent + '_conditionType'], t)
@@ -104,22 +151,23 @@ function shouldShow(formData, parent, t) {
 }
 
 function createTrigger(parent, formData) {
+  
   console.log('trigger parent', parent)
   function content() {
     if (shouldShow(formData, parent, 'GEOFENCE')) {
      return <div>
-        <LocationReferenceInput label="中心點" source={'triggers_' + parent + '_geofenceCenter'} reference="locations" >
+        <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
           <AutocompleteInput optionText="name" />
         </LocationReferenceInput>
-        <NumberInput label="範圍" source={'triggers_' + parent + '_geofenceRadius'} />公尺
+        <NumberInput label="範圍" source="geofenceRadius" initialValue="14" />公尺
       </div>
     } else if (shouldShow(formData, parent, 'BEACON')) {
       return <div>
-        <ReferenceInput label="Beacon" source={'triggers_' + parent + '_beacon'} reference="beacons" >
+        <ReferenceInput label="Beacon" source="beacon" reference="beacons" >
           <AutocompleteInput optionText="name" />
         </ReferenceInput>
-        <SelectInput label="模式" source={'triggers_' + parent + '_beaconType'}  choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
-        <NumberInput label="訊號值" source={'triggers_' + parent + '_beaconThreshold'}  />
+        <SelectInput label="模式" source="beaconType"  choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
+        <NumberInput label="訊號值" source="beaconThreshold" initialValue="-50" />
       </div>
     } else if (shouldShow(formData, parent, 'TEXT')) {
       return <TextInput multiline label="文字" source={'triggers_' + parent + '_userReply'}  />
@@ -136,21 +184,20 @@ function createTrigger(parent, formData) {
 }
 
 const InputForm = (props) => {
-  console.log('props =', props)
   return (
   <SimpleForm {...props}>
-    {props.showid ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
+    {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
           <BooleanInput label="開頭" source="firstAction" />
           <FormDataConsumer>
                {({ formData, ...rest }) => 
                 !formData.firstAction &&
-                  <ReferenceArrayInput label="上一步" source="parents" reference="actions">
-                    <SelectArrayInput optionText="name" />
+                  <ReferenceArrayInput label="上一步" source="parents" reference="actions" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+                    <AutocompleteArrayInput optionText="name" />
                   </ReferenceArrayInput>
                 }
           </FormDataConsumer>
           <TextInput label="名稱" source="name" validate={requiredField}/>
-          <NumberInput label="延遲時間 (千分之一秒)" source="delay" />
+          <NumberInput label="延遲時間 (千分之一秒)" source="delay" initialValue="0"/>
           <FormDataConsumer>
             {({ formData, ...rest }) => {
               console.log('trigger formData.parents', props)
@@ -183,7 +230,6 @@ const InputForm = (props) => {
                     {({ formData, ...rest }) => formData.mode === 'STATIC_VOLUME' &&
                         <div>
                           <NumberInput label="淡出秒數" source="fadeOutSeconds" /><br/>
-                          <NumberInput label="淡入秒數" source="fadeInSeconds" /><br/>
                           <NumberInput label="正文秒數" source="speechLength" />
                         </div>
                     }
@@ -194,8 +240,8 @@ const InputForm = (props) => {
                         <LocationReferenceInput label="中心點" source="locationId" reference="locations" >
                           <AutocompleteInput optionText="name" />
                         </LocationReferenceInput>
-                        <NumberInput label="最小音量" source="minVolume" /> 0-1之間<br/>
-                        <NumberInput label="範圍" source="range"  />公尺
+                        <NumberInput label="最小音量" source="minVolume" initialValue="0" /> 0-1之間<br/>
+                        <NumberInput label="範圍" source="range" initialValue="30" />公尺
                         </div>
                     }
                     </FormDataConsumer>
@@ -238,7 +284,7 @@ const InputForm = (props) => {
           <FormDataConsumer>
                {({ formData, ...rest }) => formData.hasMarkerRemoval &&
                 <ReferenceInput label="圖釘" source="markerId" reference="actions" filter={{ hasMarker: true }}>
-                    <SelectInput optionText="name" />
+                    <SelectInput optionText="title" />
                 </ReferenceInput>
                 }
           </FormDataConsumer>
