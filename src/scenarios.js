@@ -300,12 +300,10 @@ function PublishButton(props) {
 
     function getNode(tree) {
       const parents = tree.node.parents ? tree.node.parents.map(p => actions[p]) : []
-      console.log('parents', tree.node.id, tree.node.parents)
-      console.log('children', tree.node)
       return {
         name: tree.node.firstAction ? 'initial' : tree.node.id,
         children: tree.node.children || [],
-        exclusiveWith: [],
+        exclusiveWith: tree.node.exclusiveWith || [],
         triggers: getTriggers(tree.node, parents),
         performances: getActions(tree.node, parents).map(a => ({
           action: a,

@@ -191,9 +191,14 @@ const InputForm = (props) => {
           <FormDataConsumer>
                {({ formData, ...rest }) => 
                 !formData.firstAction &&
-                  <ReferenceArrayInput label="上一步" source="parents" reference="actions" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
-                    <AutocompleteArrayInput optionText="name" />
-                  </ReferenceArrayInput>
+                  <>
+                    <ReferenceArrayInput label="上一步" source="parents" reference="actions" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+                      <AutocompleteArrayInput optionText="name" />
+                    </ReferenceArrayInput>
+                    <ReferenceArrayInput label="互斥於" source="exclusiveWith" reference="actions" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+                      <AutocompleteArrayInput optionText="name" />
+                    </ReferenceArrayInput>
+                  </>
                 }
           </FormDataConsumer>
           <TextInput label="名稱" source="name" validate={requiredField}/>
