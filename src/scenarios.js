@@ -42,6 +42,9 @@ export function scenarioReducer(state = { value: '' }, action) {
   }
 }
 
+const { buildGPX, BaseBuilder } = require('gpx-builder');
+const { Point, Track, Segment } = BaseBuilder.MODELS;
+
 const store = createStore(scenarioReducer)
 
 store.subscribe(() => console.log('listener', store.getState()))
@@ -195,7 +198,8 @@ function PublishButton(props) {
             task: {
               type: 'SOUND',
               url: currentNode.soundId
-                ? `${cdnRoot}/${props.record.id}/sounds/${currentNode.soundId}/sound`
+                // ? `${cdnRoot}/${props.record.id}/sounds/${currentNode.soundId}/sound`
+                ?  sounds[currentNode.soundId].sound.src
                 : null,
               volumeSetting: {
                 type: currentNode.mode,
@@ -226,7 +230,8 @@ function PublishButton(props) {
                 ? currentNode.choices.map(c => c.choice) 
                 : [],
               pictures: currentNode.pictures
-                ? currentNode.pictures.map(p => `${cdnRoot}/${props.record.id}/images/${p.pictureId}/image`)
+                ? currentNode.pictures.map(p => images[p.pictureId].image.src )
+                // ? currentNode.pictures.map(p => `${cdnRoot}/${props.record.id}/images/${p.pictureId}/image`)
                 : [],
               allowTextReply: (currentNode.allowTextReply)? true : false,
             },
@@ -244,7 +249,8 @@ function PublishButton(props) {
             task: {
               type: 'MARKER',
               icon: currentNode.markerIcon
-                ? `${cdnRoot}/${props.record.id}/images/${currentNode.markerIcon}/image`
+                ? images[currentNode.markerIcon].image.src
+                // ? `${cdnRoot}/${props.record.id}/images/${currentNode.markerIcon}/image`
                 : null,
               location: currentNode.locationId ? locations[currentNode.locationId] : null,
               title: currentNode.title,
@@ -325,6 +331,13 @@ function PublishButton(props) {
     const params = {name: props.record.name, overwrite: true}
     url.search = new URLSearchParams(params).toString();
 
+    const points = payload.map(n => 
+      n.performances.map(p => p.action.content.condition).find(c =>
+        c.type === 'GEOFENCE'
+      )
+    ).filter(c => c).map(c => c.location)
+    .map(l => new Point(l.lat, l.lon, {ele: 10}))
+
     fetch(url, {
       method: 'PUT',
       body: JSON.stringify(payload),
@@ -363,6 +376,302 @@ function PublishButton(props) {
       onClose={handleDialogClose}
       confirm="確認發佈"
       cancel="取消"
+    />
+  </>)
+  
+}
+
+function GpxButton(props) {
+  const disabled = useSelector(state => state.currentScenario.value !== props.record.id);
+  const notify = useNotify()
+  const dispatch = useDispatch()
+  const [loading, setLoading] = useState(false);
+  const actionResult = useGetList(
+    'actions',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const actions = actionResult.data
+
+  const locationResult = useGetList(
+    'locations',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const locations = locationResult.data
+
+  const beaconResult = useGetList(
+    'beacons',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const beacons = beaconResult.data
+
+  const imageResult = useGetList(
+    'images',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const images = imageResult.data
+
+  const soundResult = useGetList(
+    'sounds',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const sounds = soundResult.data
+
+  const [open, setOpen] = useState(false);
+
+  function handleConfirm() {
+    setOpen(false);
+    setLoading(true);
+    dispatch(fetchStart());
+    const actionTree = getActionTree(Object.values(actions))
+    if (!actionTree) {
+        setLoading(false)
+        setOpen(false);
+        dispatch(fetchEnd());
+        notify("沒有初始動作，無法發佈！")
+        return
+    }
+    function getTriggers(currentNode, parents) {
+      if (currentNode.firstAction) {
+        return [{
+          id: "",
+          actionId: null,
+          receiver: "ghost",
+          sender: "?u",
+          payload: {
+            type: "JOIN",
+          },
+          scenarioId: ""
+        }]
+      } else return parents.map(p => getTrigger(currentNode, p))
+    }
+    function getTrigger(currentNode, parentNode) {
+        const parent = parentNode.id
+        const conditionType = currentNode[`triggers_${parent}_conditionType`]
+        console.log(currentNode.id,'cond type for', parentNode.id, conditionType)
+        const actionId = (conditionType === "TEXT") 
+          ? parentNode.id + '-popup'
+          : parentNode.hasSound
+            ? parentNode.id + '-sound'
+            : parentNode.hasPopup
+              ? parentNode.id + '-popup'
+              : parentNode.hasMarker
+                ? parentNode.id + '-marker'
+                : parentNode.id + '-marker-removal'
+        return {
+            id: "",
+            actionId: actionId,
+            receiver: "ghost",
+            sender: "?u",
+            payload: {
+              // TODO
+              type: conditionType === "TEXT" ? "TEXT" : "END",
+              text: currentNode[`triggers_${parent}_userReply`]
+            },
+            scenarioId: ""
+        }
+      }
+    
+    // TODO system hole: if there are multiple parents, and two of them are fence-triggered,
+    // which should work?
+    function getCondition(currentNode, parentNodes) {
+      const conditionTypes = parentNodes.map(p => currentNode[`triggers_${p.id}_conditionType`]).filter(c => c && c !== 'TEXT')
+      const conditionType = conditionTypes.length === 0 
+        ? 'ALWAYS'
+        : conditionTypes[0]
+        return {
+          type: conditionType,
+          beaconId: currentNode.beacon ? beacons[currentNode.beacon].beaconId : null,
+          threshold: currentNode.beaconThreshold,
+          mode: currentNode.beaconType,
+          location: currentNode.geofenceCenter ? locations[currentNode.geofenceCenter] : null,
+          radius: currentNode.geofenceRadius || 14
+        }
+    }
+
+    function getActions(currentNode, parentsNodes) {
+      const condition = getCondition(currentNode, parentsNodes)
+      const ret = []
+      if (currentNode.hasSound) {
+        const soundAction = {
+          id: currentNode.id + '-sound',
+          receiver: "?u",
+          sender: "ghost",
+          content: {
+            task: {
+              type: 'SOUND',
+              url: currentNode.soundId
+                // ? `${cdnRoot}/${props.record.id}/sounds/${currentNode.soundId}/sound`
+                ?  sounds[currentNode.soundId].sound.src
+                : null,
+              volumeSetting: {
+                type: currentNode.mode,
+                center: currentNode.locationId ? locations[currentNode.locationId] : null,
+                fadeOutSeconds: currentNode.fadeOutSeconds,
+                speechLength: currentNode.speechLength,
+                radius: currentNode.range || 30,
+                minVolume: currentNode.minVolume
+              },
+              mode: currentNode.soundType || 'MAIN',
+            },
+            condition: condition
+          }
+        }
+        ret.push(soundAction)
+      }
+      if (currentNode.hasPopup) {
+        const popupAction = {
+          id: currentNode.id + '-popup',
+          receiver: "?u",
+          sender: "ghost",
+          content: {
+            task: {
+              type: 'POPUP',
+              destinations: currentNode.destinations,
+              text: currentNode.text,
+              choices: currentNode.choices
+                ? currentNode.choices.map(c => c.choice) 
+                : [],
+              pictures: currentNode.pictures
+                ? currentNode.pictures.map(p => images[p.pictureId].image.src )
+                // ? currentNode.pictures.map(p => `${cdnRoot}/${props.record.id}/images/${p.pictureId}/image`)
+                : [],
+              allowTextReply: (currentNode.allowTextReply)? true : false,
+            },
+            condition: condition
+          }
+        }
+        ret.push(popupAction)
+      }
+      if (currentNode.hasMarker) {
+        const markerAction = {
+          id: currentNode.id + '-marker',
+          receiver: "?u",
+          sender: "ghost",
+          content: {
+            task: {
+              type: 'MARKER',
+              icon: currentNode.markerIcon
+                ? images[currentNode.markerIcon].image.src
+                // ? `${cdnRoot}/${props.record.id}/images/${currentNode.markerIcon}/image`
+                : null,
+              location: currentNode.locationId ? locations[currentNode.locationId] : null,
+              title: currentNode.title,
+              id: currentNode.markerId,
+            },
+            condition: condition
+          }
+        }
+        ret.push(markerAction)
+      }
+      if (currentNode.hasMarker) {
+        const markerAction = {
+          id: currentNode.id + '-marker',
+          receiver: "?u",
+          sender: "ghost",
+          content: {
+            task: {
+              type: 'MARKER',
+              icon: currentNode.markerIcon
+                ? `${cdnRoot}/${props.record.id}/images/${currentNode.markerIcon}/image`
+                : null,
+              location: currentNode.locationId ? locations[currentNode.locationId] : null,
+              title: currentNode.title,
+            },
+            condition: condition
+          }
+        }
+        ret.push(markerAction)
+      }
+      if (currentNode.hasMarkerRemoval) {
+        const markerRemovalAction = {
+          id: currentNode.id + '-marker-removal',
+          receiver: "?u",
+          sender: "ghost",
+          content: {
+            task: {
+              type: 'MARKER_REMOVAL',
+              id: currentNode.markerId + '-marker',
+            },
+            condition: condition
+          }
+        }
+        ret.push(markerRemovalAction)
+      }
+      return ret.map(a => ({
+        ...a,
+        session: {
+          scenario: "",
+          chapter: ""
+        }
+      }))
+    }
+
+    function getNode(tree) {
+      const parents = tree.node.parents ? tree.node.parents.map(p => actions[p]) : []
+      return {
+        name: tree.node.firstAction ? 'initial' : tree.node.id,
+        children: tree.node.children || [],
+        exclusiveWith: tree.node.exclusiveWith || [],
+        triggers: getTriggers(tree.node, parents),
+        performances: getActions(tree.node, parents).map(a => ({
+          action: a,
+          delay: tree.node.delay || 0
+        }))
+      }
+    }
+
+    function getNodes(tree) {
+      return tree.children.reduce((agg, c) => 
+        [...agg, ...getNodes(c)], [getNode(tree)]
+      )
+    }
+    console.log('payload tree', actionTree)
+    const payload = getNodes(actionTree)
+    console.log('payload', payload)
+    const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
+    const url = new URL(urlString)
+    const params = {name: props.record.name, overwrite: true}
+    url.search = new URLSearchParams(params).toString();
+
+    const points = payload.map(n => 
+      n.performances.map(p => p.action.content.condition).find(c =>
+        c.type === 'GEOFENCE'
+      )
+    ).filter(c => c).map(c => c.location)
+    .map(l => new Point(l.lat, l.lon, {ele: 10, time: new Date(), hr: 121}))
+
+
+    const gpxData = new BaseBuilder()
+    const segs = []
+    for (var i = 1; i < points.length; i++) {
+      segs.push(new Segment([points[i-1], points[i]]))
+    }
+    const track = new Track(segs, {name: 'main', cmt: 'comment', desc:'desc'})
+    gpxData.setWayPoints(points)
+    gpxData.setTracks([track])
+    const gpx = buildGPX(gpxData.toObject())
+    const cleanGpx = gpx.split('\n').filter(l => !l.includes('<time')).join('\n')
+    const link = document.createElement('a');
+    const blob = new Blob([cleanGpx], {type: 'application/gpx+xml'}); 
+    const gpxUrl = window.URL.createObjectURL(blob);
+    link.href = gpxUrl;
+    link.download = props.record.name  + '.gpx';
+    setLoading(false);
+    setOpen(false);
+    dispatch(fetchEnd());
+    link.click();
+  }
+  return (<>
+    <Button
+      label="路線檔"
+      onClick={handleConfirm}
+      disabled={ disabled || loading }
+      primary="true"
     />
   </>)
   
@@ -537,6 +846,7 @@ export const ScenarioList = (props) => (
       <UseButton source="id" />
       <PublishButton />
       <CloneButton />
+      <GpxButton />
       <EditButton label="" />
       <DeleteButton label="" redirect={false}/>
     </Datagrid>
