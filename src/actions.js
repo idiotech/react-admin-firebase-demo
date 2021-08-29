@@ -33,6 +33,7 @@ import {
   TabbedForm,
   FormTab,
   required,
+  number,
   ImageField,
   FunctionField,
   AutocompleteArrayInput,
@@ -61,8 +62,6 @@ const ActionFilter = (props) => (
     <TextInput label="Search" source="name" alwaysOn />
   </Filter>
 );
-
-const requiredField = []
 
 const destinations = [
           { id: 'NOTIFICATION', name: '通知列' },
@@ -128,7 +127,7 @@ const getContentIcon = (record) => {
 }
 
 export const ActionList = (props) => {
-  return <List title={<Title />} {...props} filters={<ActionFilter/>}>
+  return <List title={<Title />} {...props} perPage="100" filters={<ActionFilter/>}>
     <Datagrid>
       <TextField label="名稱" source="name" />
       <ReferenceArrayField label="上一步" source="parents" reference="actions">
@@ -156,25 +155,25 @@ function createTrigger(parent, formData) {
   function content() {
     if (shouldShow(formData, parent, 'GEOFENCE')) {
      return <div>
-        <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" >
+        <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" validate={[required()]}>
           <AutocompleteInput optionText="name" />
         </LocationReferenceInput>
-        <NumberInput label="範圍" source="geofenceRadius" initialValue="14" />公尺
+        <NumberInput label="範圍" source="geofenceRadius" initialValue="14" validate={[required(), number()]} />公尺
       </div>
     } else if (shouldShow(formData, parent, 'BEACON')) {
       return <div>
-        <ReferenceInput label="Beacon" source="beacon" reference="beacons" >
+        <ReferenceInput label="Beacon" source="beacon" reference="beacons" validate={[required()]} >
           <AutocompleteInput optionText="name" />
         </ReferenceInput>
         <SelectInput label="模式" source="beaconType"  choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
-        <NumberInput label="訊號值" source="beaconThreshold" initialValue="-50" />
+        <NumberInput label="訊號值" source="beaconThreshold" initialValue="-50" validate={[required(), number()]} />
       </div>
     } else if (shouldShow(formData, parent, 'TEXT')) {
-      return <TextInput multiline label="文字" source={'triggers_' + parent + '_userReply'}  />
+      return <TextInput multiline label="文字" source={'triggers_' + parent + '_userReply'} validate={[required()]} />
     }
   }
   return <div key={'triggers_' + parent}>
-    <ReferenceInput label="接續" source={'triggers_' + parent + '_id'} reference="actions" initialValue={parent} disabled>
+    <ReferenceInput label="接續" source={'triggers_' + parent + '_id'} reference="actions" initialValue={parent} disabled  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
       <SelectInput optionText="name"  initialValue={parent} />
     </ReferenceInput>
     <SelectInput label="類型" source={'triggers_' + parent + '_conditionType'} choices={conditionTypes} initialValue="ALWAYS" />
@@ -201,8 +200,8 @@ const InputForm = (props) => {
                   </>
                 }
           </FormDataConsumer>
-          <TextInput label="名稱" source="name" validate={requiredField}/>
-          <NumberInput label="延遲時間 (千分之一秒)" source="delay" initialValue="0"/>
+          <TextInput label="名稱" source="name" validate={[required()]}/>
+          <NumberInput label="延遲時間 (千分之一秒)" source="delay" initialValue="0" validate={[required(), number()]} />
           <FormDataConsumer>
             {({ formData, ...rest }) => {
               console.log('trigger formData.parents', props)
@@ -226,7 +225,7 @@ const InputForm = (props) => {
           <FormDataConsumer>
                {({ formData, ...rest }) => formData.hasSound &&
                 <>
-                    <SoundReferenceInput label="音檔" source="soundId" reference="sounds">
+                    <SoundReferenceInput label="音檔" source="soundId" reference="sounds" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} validate={[required()]}>
                       <AutocompleteInput optionText="name" />
                     </SoundReferenceInput>
                     <SelectInput label="聲音類型" source="soundType" choices={soundTypes} initialValue={'MAIN'}  />
@@ -234,19 +233,19 @@ const InputForm = (props) => {
                     <FormDataConsumer>
                     {({ formData, ...rest }) => formData.mode === 'STATIC_VOLUME' &&
                         <div>
-                          <NumberInput label="淡出秒數" source="fadeOutSeconds" /><br/>
-                          <NumberInput label="正文秒數" source="speechLength" />
+                          <NumberInput label="淡出秒數" source="fadeOutSeconds" validate={[number()]} /><br/>
+                          <NumberInput label="正文秒數" source="speechLength" validate={[number()]} />
                         </div>
                     }
                     </FormDataConsumer>
                     <FormDataConsumer>
                     {({ formData, ...rest }) => formData.mode === 'DYNAMIC_VOLUME' &&
                         <div>
-                        <LocationReferenceInput label="中心點" source="locationId" reference="locations" >
+                        <LocationReferenceInput label="中心點" source="soundCenterId" reference="locations" validate={[required()]}>
                           <AutocompleteInput optionText="name" />
                         </LocationReferenceInput>
-                        <NumberInput label="最小音量" source="minVolume" initialValue="0" /> 0-1之間<br/>
-                        <NumberInput label="範圍" source="range" initialValue="30" />公尺
+                        <NumberInput label="最小音量" source="minVolume" initialValue="0" validate={[required(), number()]} /> 0-1之間<br/>
+                        <NumberInput label="範圍" source="range" initialValue="30" validate={[required(), number()]}/>公尺
                         </div>
                     }
                     </FormDataConsumer>
@@ -260,7 +259,7 @@ const InputForm = (props) => {
                     <TextInput multiline label="文字" source="text" />
                     <ArrayInput label="圖片" source="pictures">
                       <SimpleFormIterator>
-                        <ImageReferenceInput label="圖檔" source="pictureId" reference="images" />
+                        <ImageReferenceInput label="圖檔" source="pictureId" reference="images"  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
                       </SimpleFormIterator>
                     </ArrayInput>
                     <ArrayInput label="回應按鈕" source="choices">
@@ -278,8 +277,8 @@ const InputForm = (props) => {
                {({ formData, ...rest }) => formData.hasMarker &&
                 <>
                 <TextInput label="標題" source="title" /><br/>
-                <ImageReferenceInput label="圖示檔案" source="markerIcon" reference="images" />
-                <LocationReferenceInput label="座標" source="locationId" reference="locations" >
+                <ImageReferenceInput label="圖示檔案" source="markerIcon" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+                <LocationReferenceInput label="座標" source="locationId" reference="locations" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} >
                   <AutocompleteInput optionText="name" />
                 </LocationReferenceInput>
                 </>
@@ -288,7 +287,7 @@ const InputForm = (props) => {
           <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
           <FormDataConsumer>
                {({ formData, ...rest }) => formData.hasMarkerRemoval &&
-                <ReferenceInput label="圖釘" source="markerId" reference="actions" filter={{ hasMarker: true }}>
+                <ReferenceInput label="圖釘" source="markerId" reference="actions" validate={[required()]} filter={{ hasMarker: true }}  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
                     <SelectInput optionText="title" />
                 </ReferenceInput>
                 }
@@ -296,7 +295,6 @@ const InputForm = (props) => {
       </SimpleForm>
   )  
 }
-
 
 export const ActionCreate = (props) => {
   return <Create title={<Title/>} {...props} >

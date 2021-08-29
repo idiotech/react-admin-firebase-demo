@@ -199,11 +199,11 @@ function PublishButton(props) {
               type: 'SOUND',
               url: currentNode.soundId
                 // ? `${cdnRoot}/${props.record.id}/sounds/${currentNode.soundId}/sound`
-                ?  sounds[currentNode.soundId].sound.src
-                : null,
+                ?  sounds[currentNode.soundId].sound.src || 'http://daqiaotou-storage.floraland.tw/sounds/entrance.mp3'
+                : 'http://daqiaotou-storage.floraland.tw/sounds/entrance.mp3',
               volumeSetting: {
                 type: currentNode.mode,
-                center: currentNode.locationId ? locations[currentNode.locationId] : null,
+                center: currentNode.soundCenterId ? locations[currentNode.soundCenterId] : null,
                 fadeOutSeconds: currentNode.fadeOutSeconds,
                 speechLength: currentNode.speechLength,
                 radius: currentNode.range || 30,
@@ -349,7 +349,7 @@ function PublishButton(props) {
       if (response.ok) {
         notify("成功發佈" + props.record.name)
       } else {
-        notify("發佈失敗；原因 =" + response.text)
+        notify("發佈失敗；原因 =" + response.body + " " + response.status)
       }
     })
     .catch(e => {
@@ -510,7 +510,7 @@ function GpxButton(props) {
                 : null,
               volumeSetting: {
                 type: currentNode.mode,
-                center: currentNode.locationId ? locations[currentNode.locationId] : null,
+                center: currentNode.soundCenterId ? locations[currentNode.soundCenterId] : null,
                 fadeOutSeconds: currentNode.fadeOutSeconds,
                 speechLength: currentNode.speechLength,
                 radius: currentNode.range || 30,
@@ -684,12 +684,6 @@ function CloneButton(props) {
   const [loading, setLoading] = useState(false);
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
-  const nodeResult = useGetList(
-    'nodes',
-    { page: 1, perPage: 500 },
-    { field: 'published_at', order: 'DESC' }
-  );
-  const nodes = nodeResult.data
 
   const actionResult = useGetList(
     'actions',
@@ -738,13 +732,12 @@ function CloneButton(props) {
   });
   const scenarioOtions = {
     logging: true,
-    rootRef: 'root_collection/' + createData.id
+    rootRef: 'ghostspeak_editor/' + createData.id
   }
   const baseProvider = FirebaseDataProvider(config, scenarioOtions)
   const refresh = useRefresh();
   const idMap = new Map()
   Object.keys(actions).forEach(a => idMap.set(a, xid.next()))
-  Object.keys(nodes).forEach(a => idMap.set(a, xid.next()))
   Object.keys(locations).forEach(a => idMap.set(a, xid.next()))
   Object.keys(beacons).forEach(a => idMap.set(a, xid.next()))
   Object.keys(images).forEach(a => idMap.set(a, xid.next()))
@@ -781,33 +774,36 @@ function CloneButton(props) {
     await Promise.all(actionValues.map(a => {
       const newA = JSON.parse(JSON.stringify(a))
       newA.id = idMap.get(a.id)
-      newA.markerIcon = newA.markerIcon ? idMap.get(newA.markerIcon) : null
-      newA.pictureId = newA.pictureId ? idMap.get(newA.pictureId) : null
-      newA.soundId = newA.soundId ? idMap.get(newA.soundId) : null
-      newA.locationId = newA.locationId ? idMap.get(newA.locationId) : null
+      if (newA.parents) {
+        const oldParents = newA.parents
+        newA.parents = newA.parents.map(id => idMap.get(id))
+        oldParents.map( oldId => {
+          const newId = idMap.get(oldId)
+          const cond = newA[`triggers_${oldId}_conditionType`];
+          newA[`triggers_${newId}_id`] = newId;
+          if (cond) {
+            delete(newA[`triggers_${oldId}_conditionType`]);
+            newA[`triggers_${newId}_conditionType`] = cond;
+          }
+          const reply = newA[`triggers_${oldId}_userReply`];
+          if (reply) {
+            delete(newA[`triggers_${oldId}_userReply`]);
+            newA[`triggers_${newId}_userReply`] = reply;
+          }
+        })
+      }
       newA.geofenceCenter = newA.geofenceCenter ? idMap.get(newA.geofenceCenter) : null
       newA.beacon = newA.beacon ? idMap.get(newA.beacon) : null
-      newA.markerId = newA.markerId ? idMap.get(newA.markerId) : null
-      return baseProvider.create('actions', {data: newA})
-    }))
-    const nodeValues = Object.values(nodes)
-    await Promise.all(nodeValues.map(a => {
-      const newA = JSON.parse(JSON.stringify(a))
-      if (newA.triggers) {
-        newA.triggers.map(t => t.replyTo = idMap.get(t.replyTo))
-      }
-      newA.id = idMap.get(a.id)
-      if (newA.actionIds) {
-        const test = newA.actionIds.map(id => idMap.get(id))
-        newA.actionIds = newA.actionIds.map(id => idMap.get(id))
-      }
       if (newA.exclusiveWith) {
         newA.exclusiveWith = newA.exclusiveWith.map(id => idMap.get(id))
       }
-      if (newA.children) {
-        newA.children = newA.children.map(id => idMap.get(id))
-      }
-      return baseProvider.create('nodes', {data: newA})
+      newA.soundId = newA.soundId ? idMap.get(newA.soundId) : null
+      newA.soundCenterId = newA.soundCenterId ? idMap.get(newA.soundCenterId) : null
+      newA.pictureId = newA.pictureId ? idMap.get(newA.pictureId) : null
+      newA.markerIcon = newA.markerIcon ? idMap.get(newA.markerIcon) : null
+      newA.locationId = newA.locationId ? idMap.get(newA.locationId) : null
+      newA.markerId = newA.markerId ? idMap.get(newA.markerId) : null
+      return baseProvider.create('actions', {data: newA})
     }))
 
     setLoading(false);
