@@ -212,7 +212,8 @@ function PublishButton(props) {
               mode: currentNode.soundType || 'MAIN',
             },
             condition: condition
-          }
+          },
+          delay: currentNode.soundDelay
         }
         ret.push(soundAction)
       }
@@ -236,7 +237,8 @@ function PublishButton(props) {
               allowTextReply: (currentNode.allowTextReply)? true : false,
             },
             condition: condition
-          }
+          },
+          delay: currentNode.popupDelay
         }
         ret.push(popupAction)
       }
@@ -257,26 +259,8 @@ function PublishButton(props) {
               id: currentNode.markerId,
             },
             condition: condition
-          }
-        }
-        ret.push(markerAction)
-      }
-      if (currentNode.hasMarker) {
-        const markerAction = {
-          id: currentNode.id + '-marker',
-          receiver: "?u",
-          sender: "ghost",
-          content: {
-            task: {
-              type: 'MARKER',
-              icon: currentNode.markerIcon
-                ? `${cdnRoot}/${props.record.id}/images/${currentNode.markerIcon}/image`
-                : null,
-              location: currentNode.locationId ? locations[currentNode.locationId] : null,
-              title: currentNode.title,
-            },
-            condition: condition
-          }
+          },
+          delay: currentNode.markerDelay
         }
         ret.push(markerAction)
       }
@@ -291,7 +275,8 @@ function PublishButton(props) {
               id: currentNode.markerId + '-marker',
             },
             condition: condition
-          }
+          },
+          delay: currentNode.markerRemovalDelay
         }
         ret.push(markerRemovalAction)
       }
@@ -306,14 +291,16 @@ function PublishButton(props) {
 
     function getNode(tree) {
       const parents = tree.node.parents ? tree.node.parents.map(p => actions[p]) : []
+      const serverActions = getActions(tree.node, parents);
+      console.log('marker', serverActions)
       return {
         name: tree.node.firstAction ? 'initial' : tree.node.id,
         children: tree.node.children || [],
         exclusiveWith: tree.node.exclusiveWith || [],
         triggers: getTriggers(tree.node, parents),
-        performances: getActions(tree.node, parents).map(a => ({
+        performances: serverActions.map(a => ({
           action: a,
-          delay: tree.node.delay || 0
+          delay: (a.delay === 0 || a.delay) ? a.delay : (tree.node.delay || 0)
         }))
       }
     }
@@ -519,7 +506,8 @@ function GpxButton(props) {
               mode: currentNode.soundType || 'MAIN',
             },
             condition: condition
-          }
+          },
+          delay: currentNode.soundDelay
         }
         ret.push(soundAction)
       }
@@ -543,7 +531,8 @@ function GpxButton(props) {
               allowTextReply: (currentNode.allowTextReply)? true : false,
             },
             condition: condition
-          }
+          },
+          delay: currentNode.popupDelay
         }
         ret.push(popupAction)
       }
@@ -564,26 +553,8 @@ function GpxButton(props) {
               id: currentNode.markerId,
             },
             condition: condition
-          }
-        }
-        ret.push(markerAction)
-      }
-      if (currentNode.hasMarker) {
-        const markerAction = {
-          id: currentNode.id + '-marker',
-          receiver: "?u",
-          sender: "ghost",
-          content: {
-            task: {
-              type: 'MARKER',
-              icon: currentNode.markerIcon
-                ? `${cdnRoot}/${props.record.id}/images/${currentNode.markerIcon}/image`
-                : null,
-              location: currentNode.locationId ? locations[currentNode.locationId] : null,
-              title: currentNode.title,
-            },
-            condition: condition
-          }
+          },
+          delay: currentNode.markerDelay
         }
         ret.push(markerAction)
       }
@@ -598,7 +569,8 @@ function GpxButton(props) {
               id: currentNode.markerId + '-marker',
             },
             condition: condition
-          }
+          },
+          delay: currentNode.markerRemovalDelay
         }
         ret.push(markerRemovalAction)
       }
@@ -620,7 +592,7 @@ function GpxButton(props) {
         triggers: getTriggers(tree.node, parents),
         performances: getActions(tree.node, parents).map(a => ({
           action: a,
-          delay: tree.node.delay || 0
+          delay: (a.delay === 0 || a.delay) ? a.delay : (tree.node.delay || 0)
         }))
       }
     }
@@ -630,7 +602,6 @@ function GpxButton(props) {
         [...agg, ...getNodes(c)], [getNode(tree)]
       )
     }
-    console.log('payload tree', actionTree)
     const payload = getNodes(actionTree)
     console.log('payload', payload)
     const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
@@ -888,7 +859,7 @@ export function getActionTree(actions) {
 
   console.log('parentMap', parentMap)
   function createTree(root) {
-    console.log('creating tree for', root.id)
+    // console.log('creating tree for', root.id)
     const children = parentMap.get(root.id) || []
     const childNodes = children.map(c => {
       if (nodesSet.has(c.id)) {
@@ -901,7 +872,7 @@ export function getActionTree(actions) {
       }
     })
     root.children = children.map(c => c.id)
-    console.log('creating tree for child', root.id, children, childNodes)
+    // console.log('creating tree for child', root.id, children, childNodes)
     // if (!nodesSet.has(root.id)) {
       // nodesSet.add(root.id)
       return {

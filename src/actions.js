@@ -249,6 +249,7 @@ const InputForm = (props) => {
                         </div>
                     }
                     </FormDataConsumer>
+                    <NumberInput label="延遲時間 (千分之一秒)" source="soundDelay" validate={[number()]} />
                 </>
                 }
           </FormDataConsumer>
@@ -269,6 +270,7 @@ const InputForm = (props) => {
                     </ArrayInput>
                     <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
                     <SelectArrayInput label="顯示於" source="destinations" choices={destinations} />
+                    <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[number()]} />
                 </>
                 }
           </FormDataConsumer>
@@ -281,15 +283,19 @@ const InputForm = (props) => {
                 <LocationReferenceInput label="座標" source="locationId" reference="locations" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} >
                   <AutocompleteInput optionText="name" />
                 </LocationReferenceInput>
+                <NumberInput label="延遲時間 (千分之一秒)" source="markerDelay" validate={[number()]} />
                 </>
                 }
           </FormDataConsumer>
           <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
           <FormDataConsumer>
                {({ formData, ...rest }) => formData.hasMarkerRemoval &&
-                <ReferenceInput label="圖釘" source="markerId" reference="actions" validate={[required()]} filter={{ hasMarker: true }}  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
-                    <SelectInput optionText="title" />
-                </ReferenceInput>
+                 <>
+                    <ReferenceInput label="圖釘" source="markerId" reference="actions" validate={[required()]} filter={{ hasMarker: true }}  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+                      <SelectInput optionText="title" />
+                    </ReferenceInput>
+                    <NumberInput label="延遲時間 (千分之一秒)" source="markerRemovalDelay" validate={[number()]} />
+                 </>
                 }
           </FormDataConsumer>
       </SimpleForm>
