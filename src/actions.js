@@ -27,7 +27,6 @@ import {
   ReferenceArrayField,
   SingleFieldList,
   ChipField,
-  ShowView,
   FormDataConsumer,
   AutocompleteInput,
   TabbedForm,
@@ -37,11 +36,10 @@ import {
   ImageField,
   FunctionField,
   AutocompleteArrayInput,
-  BooleanField
+  BooleanField,
+  useLoading
 } from "react-admin";
 
-import { Link } from 'react-router-dom';
-import { useForm } from 'react-final-form';
 
 import BluetoothIcon from '@material-ui/icons/Bluetooth';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
@@ -103,9 +101,14 @@ const CheckField = ({ record = {}, source, TrueIcon}) => {
 }
 
 const getConditionIcon = (record) => {
-  console.log('cond entries', Object.entries(record))
+  const parents = new Set(record.parents)
   const conds = new Set(Object.entries(record)
-    .filter(e => e[0].startsWith('triggers_') && e[0].endsWith('_conditionType'))
+    .filter(e =>
+      e[0].startsWith('triggers_') &&
+      e[0].endsWith('_conditionType') &&
+      parents.has(e[0].slice(9, e[0].length - 14))
+    )
+    // .filter(e => )
     .map(e => e[1]))
 
   return <>
@@ -127,17 +130,17 @@ const getContentIcon = (record) => {
 }
 
 export const ActionList = (props) => {
-  return <List title={<Title />} {...props} perPage="100" filters={<ActionFilter/>}>
+  return <List title={<Title />} {...props} perPage={100} filters={<ActionFilter/>}>
     <Datagrid>
       <TextField label="名稱" source="name" />
+      <FunctionField label="條件" render={getConditionIcon}/>
+      <FunctionField label="內容" render={getContentIcon}/>
+      <EditButton label="編輯" />
       <ReferenceArrayField label="上一步" source="parents" reference="actions">
         <SingleFieldList>
             <ChipField source="name" />
         </SingleFieldList>
       </ReferenceArrayField>
-      <FunctionField label="條件" render={getConditionIcon}/>
-      <FunctionField label="內容" render={getContentIcon}/>
-      <EditButton label="編輯" />
       <NextButton source="id" label="下一步" />
       <DeleteButton label="" redirect={false}/>
     </Datagrid>
@@ -145,23 +148,20 @@ export const ActionList = (props) => {
 };
 
 function shouldShow(formData, parent, t) {
-  console.log('compare', parent, 'triggers_' + parent + '_conditionType', formData['triggers_' + parent + '_conditionType'], t)
   return formData['triggers_' + parent + '_conditionType'] === t
 }
 
 function createTrigger(parent, formData) {
-  
-  console.log('trigger parent', parent)
   function content() {
     if (shouldShow(formData, parent, 'GEOFENCE')) {
-     return <div>
-        <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" validate={[required()]}>
+      return <div key={'triggers_' + parent + '_geofence'}>
+        <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" validate={[required()]} perPage={1000}>
           <AutocompleteInput optionText="name" />
         </LocationReferenceInput>
         <NumberInput label="範圍" source="geofenceRadius" initialValue="14" validate={[required(), number()]} />公尺
       </div>
     } else if (shouldShow(formData, parent, 'BEACON')) {
-      return <div>
+      return <div key={'triggers_' + parent + '_beacon'}>
         <ReferenceInput label="Beacon" source="beacon" reference="beacons" validate={[required()]} >
           <AutocompleteInput optionText="name" />
         </ReferenceInput>
@@ -183,6 +183,8 @@ function createTrigger(parent, formData) {
 }
 
 const InputForm = (props) => {
+  const loading = useLoading();
+
   return (
   <SimpleForm {...props}>
     {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
@@ -191,7 +193,7 @@ const InputForm = (props) => {
                {({ formData, ...rest }) => 
                 !formData.firstAction &&
                   <>
-                    <ReferenceArrayInput label="上一步" source="parents" reference="actions" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+                    <ReferenceArrayInput label="上一步" source="parents" reference="actions" disabled={loading} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
                       <AutocompleteArrayInput optionText="name" />
                     </ReferenceArrayInput>
                     <ReferenceArrayInput label="互斥於" source="exclusiveWith" reference="actions" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
@@ -204,7 +206,6 @@ const InputForm = (props) => {
           <NumberInput label="延遲時間 (千分之一秒)" source="delay" initialValue="0" validate={[required(), number()]} />
           <FormDataConsumer>
             {({ formData, ...rest }) => {
-              console.log('trigger formData.parents', props)
               return <>
                 { (formData.parents) 
                   ? formData.parents.map(p => {
@@ -241,7 +242,7 @@ const InputForm = (props) => {
                     <FormDataConsumer>
                     {({ formData, ...rest }) => formData.mode === 'DYNAMIC_VOLUME' &&
                         <div>
-                        <LocationReferenceInput label="中心點" source="soundCenterId" reference="locations" validate={[required()]}>
+                        <LocationReferenceInput label="中心點" source="soundCenterId" reference="locations" validate={[required()]} perPage={1000}>
                           <AutocompleteInput optionText="name" />
                         </LocationReferenceInput>
                         <NumberInput label="最小音量" source="minVolume" initialValue="0" validate={[required(), number()]} /> 0-1之間<br/>

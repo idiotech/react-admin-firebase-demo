@@ -46,23 +46,19 @@ function createDataProvider(scenario) {
       getList: (resource, params) => {
         if (resource !== 'actions') return baseProvider.getList(resource, params);
         else {
-          console.log('getting actions with params', params)
           const newParams = JSON.parse(JSON.stringify(params))
           newParams.pagination.page = 1
           newParams.pagination.perPage = 10000
           return baseProvider.getList(resource, newParams).then(list =>
             {
-              console.log('list', list)
               const actions = list.data
 
               const actionTree = getActionTree(actions)
-              console.log('actionTree', actionTree)
               function getMembers(tree) {
                 return tree.children.reduce((agg, c) => [...agg, ...getMembers(c)], [tree.node])
               }
               if (actionTree) {
                 const members = getMembers(actionTree)
-                console.log('members', members)
                 const memberIds = new Set(members.map(m => m.id))
                 const page = params.pagination.page - 1
                 const perPage = params.pagination.perPage

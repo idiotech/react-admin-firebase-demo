@@ -31,7 +31,7 @@ const Title = ({ record }) => {
 };
 
 export const LocationList = (props) => (
-  <List title={<Title/>} {...props}  filters={<LocationFilter />}>
+  <List title={<Title/>} {...props} sort={{ field: 'name', order: 'ASC' }} perPage="100" filters={<LocationFilter />}>
     <Datagrid>
       <TextField label="名稱" source="name" />
       <CoordinateField label="座標" source="coordinates" label="座標"  />

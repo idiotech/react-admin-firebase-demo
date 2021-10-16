@@ -30,7 +30,7 @@ const Title = ({ record }) => {
 };
 
 export const SoundList = (props) => (
-  <List title={<Title/>} {...props}  filters={<SoundFilter />}>
+  <List title={<Title/>} {...props} perPage="100" sort={{ field: 'name', order: 'ASC' }} filters={<SoundFilter />}>
     <Datagrid>
       <TextField label="名稱" source="name" />
       <FileField label="音檔" source="sound.src" title={"連結"}/>

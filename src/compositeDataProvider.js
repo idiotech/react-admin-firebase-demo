@@ -2,7 +2,6 @@ class CompositeDataProvider {
   constructor(dataProviders) {
     this.time = Date.now()
     this.dataProviders = dataProviders;
-    console.log('providers', dataProviders)
   }
 
   _delegate(name, resource, params) {
@@ -12,7 +11,6 @@ class CompositeDataProvider {
     const instance = this.dataProviders.find((dp) =>
       dp.resources.includes(resource)
     )
-    console.log(resource ,'active provider at', this.time, 'is', instance)
     return dataProvider[name](resource, params);
   }
 

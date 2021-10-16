@@ -61,7 +61,6 @@ function UseButton(props) {
   const dispatch = useDispatch();
   const refresh = useRefresh();
   function handleClick() {
-    console.log('click', props)
     dispatch({ type: 'setScenario', scenario: props.record.id })
     refresh();
   }
@@ -145,7 +144,6 @@ function PublishButton(props) {
     function getTrigger(currentNode, parentNode) {
         const parent = parentNode.id
         const conditionType = currentNode[`triggers_${parent}_conditionType`]
-        console.log(currentNode.id,'cond type for', parentNode.id, conditionType)
         const actionId = (conditionType === "TEXT") 
           ? parentNode.id + '-popup'
           : parentNode.hasSound
@@ -213,7 +211,8 @@ function PublishButton(props) {
             },
             condition: condition
           },
-          delay: currentNode.soundDelay
+          delay: currentNode.soundDelay,
+          description: currentNode.name
         }
         ret.push(soundAction)
       }
@@ -292,7 +291,6 @@ function PublishButton(props) {
     function getNode(tree) {
       const parents = tree.node.parents ? tree.node.parents.map(p => actions[p]) : []
       const serverActions = getActions(tree.node, parents);
-      console.log('marker', serverActions)
       return {
         name: tree.node.firstAction ? 'initial' : tree.node.id,
         children: tree.node.children || [],
@@ -310,20 +308,11 @@ function PublishButton(props) {
         [...agg, ...getNodes(c)], [getNode(tree)]
       )
     }
-    console.log('payload tree', actionTree)
     const payload = getNodes(actionTree)
-    console.log('payload', payload)
     const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
     const url = new URL(urlString)
     const params = {name: props.record.name, overwrite: true}
     url.search = new URLSearchParams(params).toString();
-
-    const points = payload.map(n => 
-      n.performances.map(p => p.action.content.condition).find(c =>
-        c.type === 'GEOFENCE'
-      )
-    ).filter(c => c).map(c => c.location)
-    .map(l => new Point(l.lat, l.lon, {ele: 10}))
 
     fetch(url, {
       method: 'PUT',
@@ -439,7 +428,6 @@ function GpxButton(props) {
     function getTrigger(currentNode, parentNode) {
         const parent = parentNode.id
         const conditionType = currentNode[`triggers_${parent}_conditionType`]
-        console.log(currentNode.id,'cond type for', parentNode.id, conditionType)
         const actionId = (conditionType === "TEXT") 
           ? parentNode.id + '-popup'
           : parentNode.hasSound
@@ -603,7 +591,6 @@ function GpxButton(props) {
       )
     }
     const payload = getNodes(actionTree)
-    console.log('payload', payload)
     const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
     const url = new URL(urlString)
     const params = {name: props.record.name, overwrite: true}
@@ -857,22 +844,18 @@ export function getActionTree(actions) {
       }
     }, new Map())
 
-  console.log('parentMap', parentMap)
   function createTree(root) {
-    // console.log('creating tree for', root.id)
     const children = parentMap.get(root.id) || []
     const childNodes = children.map(c => {
       if (nodesSet.has(c.id)) {
-        console.log('creating tree: bypassing', c.id)
         return null
       } else {
-        console.log('creating tree: adding', c.id)
         nodesSet.add(c.id)
         return c
       }
     })
     root.children = children.map(c => c.id)
-    // console.log('creating tree for child', root.id, children, childNodes)
+    // ('creating tree for child', root.id, children, childNodes)
     // if (!nodesSet.has(root.id)) {
       // nodesSet.add(root.id)
       return {
