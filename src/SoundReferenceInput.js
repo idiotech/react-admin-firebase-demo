@@ -24,7 +24,7 @@ const SoundReferenceInput = props => {
     const handleChange = useCallback(() => setVersion(version + 1), [version]);
 
     return (
-      <div>
+      <>
         <div className={classes.root}>
             <ReferenceInput key={version} {...props}>
                 <AutocompleteInput optionText="name" />
@@ -40,7 +40,7 @@ const SoundReferenceInput = props => {
           }
         </FormDataConsumer>
         <br/>
-      </div>
+      </>
     );
 };
 

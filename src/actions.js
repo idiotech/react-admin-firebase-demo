@@ -9,18 +9,13 @@ import {
   Create,
   Edit,
   Filter,
-  SimpleShowLayout,
   SimpleForm,
   TextField,
   TextInput,
-  Button,
-  ShowButton,
   EditButton,
   DeleteButton,
   CreateButton,
-  ShowController,
   SelectInput,
-  SelectField,
   SelectArrayInput,
   ReferenceInput,
   ReferenceArrayInput,
@@ -29,25 +24,24 @@ import {
   ChipField,
   FormDataConsumer,
   AutocompleteInput,
-  TabbedForm,
-  FormTab,
   required,
   number,
-  ImageField,
   FunctionField,
   AutocompleteArrayInput,
   BooleanField,
   useLoading
 } from "react-admin";
 
+import { useFormState } from 'react-final-form';
 
 import BluetoothIcon from '@material-ui/icons/Bluetooth';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import MessageIcon from '@material-ui/icons/Message';
-import PinDropIcon from '@material-ui/icons/PinDrop';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import LocationOffIcon from '@material-ui/icons/LocationOff';
 import AddLocationIcon from '@material-ui/icons/AddLocation';
+import CancelIcon from '@material-ui/icons/Cancel';
+import PhoneCallbackIcon from '@material-ui/icons/PhoneCallback';
 import ReplyIcon from '@material-ui/icons/Reply';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 
@@ -65,7 +59,7 @@ const destinations = [
           { id: 'NOTIFICATION', name: '通知列' },
           { id: 'APP', name: '對話視窗' },
           { id: 'INTRO', name: '前情提要' },
-          { id: 'WELCOME', name: '歡迎頁面' },
+          { id: 'WELCOME', name: '停用，請勿選擇' },
 ]
 
 const soundModes = [
@@ -88,6 +82,11 @@ const beaconTypes = [
           { id: 'EXIT', name: '離開' },
 ]
 
+const callTypes = [
+          { id: 'CONNECTING', name: '未接通' },
+          { id: 'CONNECTED', name: '接通' },
+          { id: 'DISCONNECTED', name: '掛斷' }
+]
 const Title = ({ record }) => {
     return <span>動作{record && record.name ? `："${record.name}"` : ''}</span>;
 };
@@ -103,8 +102,8 @@ const CheckField = ({ record = {}, source, TrueIcon}) => {
 const getConditionIcon = (record) => {
   const parents = new Set(record.parents)
   const conds = new Set(Object.entries(record)
-    .filter(e =>
-      e[0].startsWith('triggers_') &&
+    .filter(e => 
+      e[0].startsWith('triggers_') && 
       e[0].endsWith('_conditionType') &&
       parents.has(e[0].slice(9, e[0].length - 14))
     )
@@ -124,6 +123,8 @@ const getContentIcon = (record) => {
   return <>
     { record.hasSound ? <AudiotrackIcon />: <></>}
     { record.hasPopup ? <MessageIcon/>: <></>}
+    { record.hasIncomingCall ? <PhoneCallbackIcon/>: <></>}
+    { record.hasPopupDismissal ? <CancelIcon/>: <></>}
     { record.hasMarker ? <AddLocationIcon/>: <></>}
     { record.hasMarkerRemoval ? <LocationOffIcon/>: <></>}
   </>
@@ -148,11 +149,15 @@ export const ActionList = (props) => {
 };
 
 function shouldShow(formData, parent, t) {
+  console.log('compare', parent, 'triggers_' + parent + '_conditionType', formData['triggers_' + parent + '_conditionType'], t)
   return formData['triggers_' + parent + '_conditionType'] === t
 }
 
-function createTrigger(parent, formData) {
-  function content() {
+function TriggerList(props) {
+  const {values} = useFormState();
+  console.log('comparison', props.record.parents, values.parents)
+  const formData = values;
+  function content(parent) {
     if (shouldShow(formData, parent, 'GEOFENCE')) {
       return <div key={'triggers_' + parent + '_geofence'}>
         <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" validate={[required()]} perPage={1000}>
@@ -172,26 +177,33 @@ function createTrigger(parent, formData) {
       return <TextInput multiline label="文字" source={'triggers_' + parent + '_userReply'} validate={[required()]} />
     }
   }
-  return <div key={'triggers_' + parent}>
-    <ReferenceInput label="接續" source={'triggers_' + parent + '_id'} reference="actions" initialValue={parent} disabled  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
-      <SelectInput optionText="name"  initialValue={parent} />
-    </ReferenceInput>
-    <SelectInput label="類型" source={'triggers_' + parent + '_conditionType'} choices={conditionTypes} initialValue="ALWAYS" />
-    { content() }
-    <br/>
+  return <div>
+    { formData.parents.map(parent => 
+      <div key={'triggers_' + parent}>
+        <ReferenceInput label="接續" source={'triggers_' + parent + '_id'} reference="actions" initialValue={parent} disabled  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+          <SelectInput optionText="name" initialValue={parent} />
+        </ReferenceInput>
+        <SelectInput label="類型" source={'triggers_' + parent + '_conditionType'} choices={conditionTypes} initialValue="ALWAYS" />
+        { content(parent) }
+      </div>
+      )
+    }
   </div>
 }
 
 const InputForm = (props) => {
+  console.log(`rewrite with ${JSON.stringify(props)}`)
+  const [locked, setLocked] = React.useState(true)
   const loading = useLoading();
+
+  const parentMap = new Map()
 
   return (
   <SimpleForm {...props}>
     {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
           <BooleanInput label="開頭" source="firstAction" />
           <FormDataConsumer>
-               {({ formData, ...rest }) => 
-                !formData.firstAction &&
+               {({ formData, ...rest }) =>  !formData.firstAction &&
                   <>
                     <ReferenceArrayInput label="上一步" source="parents" reference="actions" disabled={loading} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
                       <AutocompleteArrayInput optionText="name" />
@@ -206,20 +218,20 @@ const InputForm = (props) => {
           <NumberInput label="延遲時間 (千分之一秒)" source="delay" initialValue="0" validate={[required(), number()]} />
           <FormDataConsumer>
             {({ formData, ...rest }) => {
-              return <>
-                { (formData.parents) 
-                  ? formData.parents.map(p => {
-                    if (!formData['triggers_' + p + '_id']) {
-                      props.record['triggers_' + p + '_id'] = p
-                    }
-                    if (!formData['triggers_' + p + '_conditionType']) {
-                      props.record['triggers_' + p + '_conditionType'] = 'ALWAYS'
-                    }
-                    return createTrigger(p, formData)
-                  })
-                  : []
-                }
-              </>
+              console.log(`trigger: rewriting records with form: ${formData.parents}, record: ${props.record.parents}`)
+              if (!formData.parents) {
+                return <></>
+              } else {
+                formData.parents.map(p => {
+                  if (!formData['triggers_' + p + '_id']) {
+                    props.record['triggers_' + p + '_id'] = p
+                  }
+                  if (!formData['triggers_' + p + '_conditionType']) {
+                    props.record['triggers_' + p + '_conditionType'] = 'ALWAYS'
+                  }
+                })
+                return <TriggerList {...props}/>
+              }
             }}
           </FormDataConsumer>
           <BooleanInput label="聲音" source="hasSound" />
@@ -271,7 +283,27 @@ const InputForm = (props) => {
                     </ArrayInput>
                     <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
                     <SelectArrayInput label="顯示於" source="destinations" choices={destinations} />
-                    <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[number()]} />
+                    <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[required()]} />
+                </>
+                }
+          </FormDataConsumer>
+          <BooleanInput label="關閉圖文框" source="hasPopupDismissal" />
+          <FormDataConsumer>
+               {({ formData, ...rest }) => formData.hasPopupDismissal &&
+                <>
+                    <SelectArrayInput label="關閉" source="dismissalDestinations" choices={destinations} /> <br/>
+                    <NumberInput label="延遲時間 (千分之一秒)" source="dismissalDelay" validate={[number()]} />
+                </>
+               }
+          </FormDataConsumer>
+          <BooleanInput label="來電" source="hasIncomingCall" />
+          <FormDataConsumer>
+               {({ formData, ...rest }) => formData.hasIncomingCall &&
+                <>
+                    <TextInput label="來電人" source="caller" validate={[required()]}/>
+                    <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+                    <SelectInput label="狀態" source="callStatus"  choices={callTypes} initialValue={'CALLING'} /> <br/>
+                    <NumberInput label="延遲時間 (千分之一秒)" source="incomingCallDelay" validate={[number()]} />
                 </>
                 }
           </FormDataConsumer>
@@ -284,6 +316,7 @@ const InputForm = (props) => {
                 <LocationReferenceInput label="座標" source="locationId" reference="locations" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} >
                   <AutocompleteInput optionText="name" />
                 </LocationReferenceInput>
+                <br/>
                 <NumberInput label="延遲時間 (千分之一秒)" source="markerDelay" validate={[number()]} />
                 </>
                 }
@@ -295,6 +328,7 @@ const InputForm = (props) => {
                     <ReferenceInput label="圖釘" source="markerId" reference="actions" validate={[required()]} filter={{ hasMarker: true }}  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
                       <SelectInput optionText="title" />
                     </ReferenceInput>
+                    <br/>
                     <NumberInput label="延遲時間 (千分之一秒)" source="markerRemovalDelay" validate={[number()]} />
                  </>
                 }

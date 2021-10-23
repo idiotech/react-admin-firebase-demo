@@ -11,6 +11,9 @@ COPY package.json yarn.lock /app/
 RUN yarn install --pure-lockfile && yarn cache clean
 COPY src /app/src
 COPY public /app/public
+
+#ENV NODE_OPTIONS=--max_old_space_size=3072
+
 RUN yarn build
 
 CMD [ "yarn", "start" ]

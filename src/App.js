@@ -140,16 +140,19 @@ function Main(props) {
     );
   }
 
+var prevScenario = null;
+
 function App() {
   const store = createAdminStore({authProvider, dataProvider, history, customReducers})
   store.subscribe(() => {
     console.log('listener', store.getState())
     const scenario = store.getState().currentScenario.value
-    if (scenario) {
+    if (scenario && scenario !== prevScenario) {
       console.log('setting data provider', store.getState())
       dataProvider.dataProviders = [
         adminProvider, createDataProvider(scenario)
       ]
+      prevScenario = scenario;
     }
   })
   return (
