@@ -206,7 +206,8 @@ function getActions(currentNode, parentsNodes, data) {
         },
         condition: condition
       },
-      delay: currentNode.soundDelay
+      delay: currentNode.soundDelay,
+      description: currentNode.name
     }
     ret.push(soundAction)
   }
@@ -231,7 +232,8 @@ function getActions(currentNode, parentsNodes, data) {
         },
         condition: condition
       },
-      delay: currentNode.popupDelay
+      delay: currentNode.popupDelay,
+      description: currentNode.name
     }
     ret.push(popupAction)
   }
@@ -249,7 +251,8 @@ function getActions(currentNode, parentsNodes, data) {
         },
         condition: condition
       },
-      delay: currentNode.incomingCallDelay
+      delay: currentNode.incomingCallDelay,
+      description: currentNode.name
     }
     ret.push(incomingCallAction)
   }
@@ -271,7 +274,8 @@ function getActions(currentNode, parentsNodes, data) {
         },
         condition: condition
       },
-      delay: currentNode.markerDelay
+      delay: currentNode.markerDelay,
+      description: currentNode.name
     }
     ret.push(markerAction)
   }
@@ -287,7 +291,8 @@ function getActions(currentNode, parentsNodes, data) {
         },
         condition: condition
       },
-      delay: currentNode.markerRemovalDelay
+      delay: currentNode.markerRemovalDelay,
+      description: currentNode.name
     }
     ret.push(markerRemovalAction)
   }
@@ -303,7 +308,8 @@ function getActions(currentNode, parentsNodes, data) {
         },
         condition: condition
       },
-      delay: currentNode.dismissalDelay
+      delay: currentNode.dismissalDelay,
+      description: currentNode.name
     }
     ret.push(popupDismissalAction)
   }
