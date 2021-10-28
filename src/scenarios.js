@@ -246,8 +246,10 @@ function getActions(currentNode, parentsNodes, data) {
         task: {
           type: 'INCOMING_CALL',
           caller: currentNode.caller,
-          portrait: currentNode.portrait,
-          status: currentNode.callerStatus
+          portrait: currentNode.portrait
+          ? images[currentNode.portrait].image.src
+          : null,
+          status: currentNode.callStatus
         },
         condition: condition
       },

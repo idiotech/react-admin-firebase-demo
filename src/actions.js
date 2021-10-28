@@ -302,7 +302,7 @@ const InputForm = (props) => {
                 <>
                     <TextInput label="來電人" source="caller" validate={[required()]}/>
                     <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
-                    <SelectInput label="狀態" source="callStatus"  choices={callTypes} initialValue={'CALLING'} /> <br/>
+                    <SelectInput label="狀態" source="callStatus"  choices={callTypes} initialValue={'CONNECTING'} /> <br/>
                     <NumberInput label="延遲時間 (千分之一秒)" source="incomingCallDelay" validate={[number()]} />
                 </>
                 }
