@@ -23,7 +23,7 @@ const LocationReferenceInput = props => {
     const [version, setVersion] = useState(0);
     const { values } = useFormState({ subscription: spySubscription });
     const handleChange = useCallback(() => setVersion(version + 1), [version]);
-
+    console.log('props test', props)
     return (
         <div>
 

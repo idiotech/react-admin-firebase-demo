@@ -28,11 +28,10 @@ import {
   number,
   FunctionField,
   AutocompleteArrayInput,
-  BooleanField,
-  useLoading
+  useLoading,
+  ArrayField,
+  ReferenceField
 } from "react-admin";
-
-import { useFormState } from 'react-final-form';
 
 import BluetoothIcon from '@material-ui/icons/Bluetooth';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
@@ -61,7 +60,6 @@ const destinations = [
           { id: 'INTRO', name: '前情提要' },
           { id: 'WELCOME', name: '停用，請勿選擇' },
 ]
-
 const soundModes = [
           { id: 'STATIC_VOLUME', name: '固定' },
           { id: 'DYNAMIC_VOLUME', name: '遠近調整' },
@@ -81,7 +79,6 @@ const beaconTypes = [
           { id: 'ENTER', name: '接近' },
           { id: 'EXIT', name: '離開' },
 ]
-
 const callTypes = [
           { id: 'CONNECTING', name: '未接通' },
           { id: 'CONNECTED', name: '接通' },
@@ -91,25 +88,11 @@ const Title = ({ record }) => {
     return <span>動作{record && record.name ? `："${record.name}"` : ''}</span>;
 };
 
-const CheckField = ({ record = {}, source, TrueIcon}) => {
-  let theRecord = {...record};
-
-  theRecord[source + '-exist'] = !!record[source];
-
-  return <BooleanField record={theRecord} TrueIcon={TrueIcon} source={source + '-exist'} />
-}
-
 const getConditionIcon = (record) => {
-  const parents = new Set(record.parents)
-  const conds = new Set(Object.entries(record)
-    .filter(e => 
-      e[0].startsWith('triggers_') && 
-      e[0].endsWith('_conditionType') &&
-      parents.has(e[0].slice(9, e[0].length - 14))
-    )
-    // .filter(e => )
-    .map(e => e[1]))
-
+  const conds = record.prevs 
+    ? new Set(record.prevs.flatMap(p => p.conditionType))
+    : new Set()
+   
   return <>
     { conds.has('TEXT') ? <ReplyIcon />: <></>}
     { conds.has('BEACON') ? <BluetoothIcon/>: <></>}
@@ -117,7 +100,6 @@ const getConditionIcon = (record) => {
     { conds.has('ALWAYS') ? <ArrowForwardIcon/>: <></>}
   </>
 }
-
 
 const getContentIcon = (record) => {
   return <>
@@ -137,202 +119,211 @@ export const ActionList = (props) => {
       <FunctionField label="條件" render={getConditionIcon}/>
       <FunctionField label="內容" render={getContentIcon}/>
       <EditButton label="編輯" />
-      <ReferenceArrayField label="上一步" source="parents" reference="actions">
-        <SingleFieldList>
+      <ArrayField label="上一步" source="prevs">
+        <Datagrid>
+          <ReferenceField label="" source="prev" reference="actions">
             <ChipField source="name" />
-        </SingleFieldList>
-      </ReferenceArrayField>
+          </ReferenceField>
+        </Datagrid>
+      </ArrayField>
       <NextButton source="id" label="下一步" />
       <DeleteButton label="" redirect={false}/>
     </Datagrid>
   </List>
 };
 
-function shouldShow(formData, parent, t) {
-  console.log('compare', parent, 'triggers_' + parent + '_conditionType', formData['triggers_' + parent + '_conditionType'], t)
-  return formData['triggers_' + parent + '_conditionType'] === t
-}
-
-function TriggerList(props) {
-  const {values} = useFormState();
-  console.log('comparison', props.record.parents, values.parents)
-  const formData = values;
-  function content(parent) {
-    if (shouldShow(formData, parent, 'GEOFENCE')) {
-      return <div key={'triggers_' + parent + '_geofence'}>
-        <LocationReferenceInput label="中心點" source="geofenceCenter" reference="locations" validate={[required()]} perPage={1000}>
-          <AutocompleteInput optionText="name" />
-        </LocationReferenceInput>
-        <NumberInput label="範圍" source="geofenceRadius" initialValue="14" validate={[required(), number()]} />公尺
-      </div>
-    } else if (shouldShow(formData, parent, 'BEACON')) {
-      return <div key={'triggers_' + parent + '_beacon'}>
-        <ReferenceInput label="Beacon" source="beacon" reference="beacons" validate={[required()]} >
-          <AutocompleteInput optionText="name" />
-        </ReferenceInput>
-        <SelectInput label="模式" source="beaconType"  choices={beaconTypes} initialValue={'ENTER'} />&nbsp;
-        <NumberInput label="訊號值" source="beaconThreshold" initialValue="-50" validate={[required(), number()]} />
-      </div>
-    } else if (shouldShow(formData, parent, 'TEXT')) {
-      return <TextInput multiline label="文字" source={'triggers_' + parent + '_userReply'} validate={[required()]} />
-    }
-  }
-  return <div>
-    { formData.parents.map(parent => 
-      <div key={'triggers_' + parent}>
-        <ReferenceInput label="接續" source={'triggers_' + parent + '_id'} reference="actions" initialValue={parent} disabled  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
-          <SelectInput optionText="name" initialValue={parent} />
-        </ReferenceInput>
-        <SelectInput label="類型" source={'triggers_' + parent + '_conditionType'} choices={conditionTypes} initialValue="ALWAYS" />
-        { content(parent) }
-      </div>
-      )
-    }
-  </div>
-}
-
 const InputForm = (props) => {
   console.log(`rewrite with ${JSON.stringify(props)}`)
   const [locked, setLocked] = React.useState(true)
   const loading = useLoading();
-
   const parentMap = new Map()
 
   return (
   <SimpleForm {...props}>
-    {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
+      <FormDataConsumer>
+      {({ formData, ...rest }) => {
+        return <>
+          {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
           <BooleanInput label="開頭" source="firstAction" />
-          <FormDataConsumer>
-               {({ formData, ...rest }) =>  !formData.firstAction &&
+          {formData.firstAction || <ArrayInput label="前一步" source="prevs">
+            <SimpleFormIterator>
+              <ReferenceInput label="接續" source="prev" reference="actions" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+                <SelectInput optionText="name" />
+              </ReferenceInput>
+              <SelectInput label="觸發條件" source="conditionType" choices={conditionTypes} initialValue="ALWAYS" />
+              <FormDataConsumer>
+                {({
+                  formData, // The whole form data
+                  scopedFormData, // The data for this item of the ArrayInput
+                  getSource, // A function to get the valid source inside an ArrayInput
+                  ...rest
+                }) => 
                   <>
-                    <ReferenceArrayInput label="上一步" source="parents" reference="actions" disabled={loading} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
-                      <AutocompleteArrayInput optionText="name" />
-                    </ReferenceArrayInput>
-                    <ReferenceArrayInput label="互斥於" source="exclusiveWith" reference="actions" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
-                      <AutocompleteArrayInput optionText="name" />
-                    </ReferenceArrayInput>
-                  </>
-                }
-          </FormDataConsumer>
-          <TextInput label="名稱" source="name" validate={[required()]}/>
-          <NumberInput label="延遲時間 (千分之一秒)" source="delay" initialValue="0" validate={[required(), number()]} />
-          <FormDataConsumer>
-            {({ formData, ...rest }) => {
-              console.log(`trigger: rewriting records with form: ${formData.parents}, record: ${props.record.parents}`)
-              if (!formData.parents) {
-                return <></>
-              } else {
-                formData.parents.map(p => {
-                  if (!formData['triggers_' + p + '_id']) {
-                    props.record['triggers_' + p + '_id'] = p
-                  }
-                  if (!formData['triggers_' + p + '_conditionType']) {
-                    props.record['triggers_' + p + '_conditionType'] = 'ALWAYS'
-                  }
-                })
-                return <TriggerList {...props}/>
-              }
-            }}
-          </FormDataConsumer>
-          <BooleanInput label="聲音" source="hasSound" />
-          <FormDataConsumer>
-               {({ formData, ...rest }) => formData.hasSound &&
-                <>
-                    <SoundReferenceInput label="音檔" source="soundId" reference="sounds" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} validate={[required()]}>
-                      <AutocompleteInput optionText="name" />
-                    </SoundReferenceInput>
-                    <SelectInput label="聲音類型" source="soundType" choices={soundTypes} initialValue={'MAIN'}  />
-                    <SelectInput label="音量模式" source="mode" choices={soundModes} initialValue={'STATIC_VOLUME'}  />
-                    <FormDataConsumer>
-                    {({ formData, ...rest }) => formData.mode === 'STATIC_VOLUME' &&
-                        <div>
-                          <NumberInput label="淡出秒數" source="fadeOutSeconds" validate={[number()]} /><br/>
-                          <NumberInput label="正文秒數" source="speechLength" validate={[number()]} />
-                        </div>
-                    }
-                    </FormDataConsumer>
-                    <FormDataConsumer>
-                    {({ formData, ...rest }) => formData.mode === 'DYNAMIC_VOLUME' &&
-                        <div>
-                        <LocationReferenceInput label="中心點" source="soundCenterId" reference="locations" validate={[required()]} perPage={1000}>
+                    {
+                      scopedFormData && scopedFormData.conditionType === 'GEOFENCE' &&
+                      <>
+                        <LocationReferenceInput
+                          label="中心點" 
+                          source={getSource("geofenceCenter")}
+                          reference="locations" 
+                          validate={[required()]} 
+                          perPage={1000}
+                        >
                           <AutocompleteInput optionText="name" />
                         </LocationReferenceInput>
-                        <NumberInput label="最小音量" source="minVolume" initialValue="0" validate={[required(), number()]} /> 0-1之間<br/>
-                        <NumberInput label="範圍" source="range" initialValue="30" validate={[required(), number()]}/>公尺
-                        </div>
+                        <br/>
+                        <NumberInput 
+                          label="範圍" 
+                          source={getSource("geofenceRadius")}
+                          initialValue={14}
+                          validate={[required(), number()]} 
+                        />公尺
+                      </>
                     }
-                    </FormDataConsumer>
-                    <NumberInput label="延遲時間 (千分之一秒)" source="soundDelay" validate={[number()]} />
-                </>
+                    {
+                      scopedFormData && scopedFormData.conditionType === 'BEACON' &&
+                      <>
+                        <ReferenceInput 
+                          label="Beacon" 
+                          source={getSource("beacon")}
+                          reference="beacons" 
+                          validate={[required()]}
+                        >
+                          <AutocompleteInput optionText="name" />
+                        </ReferenceInput>
+                        <SelectInput 
+                          label="模式" 
+                          source={getSource("beaconType")}
+                          choices={beaconTypes} 
+                          initialValue={'ENTER'} 
+                        />
+                        <br/>
+                        <NumberInput 
+                          label="訊號值"
+                          source={getSource("beaconThreshold")}
+                          initialValue={-85}
+                          validate={[required(), number()]}
+                        />
+                      </>
+                    }
+                    {
+                      scopedFormData && scopedFormData.conditionType === 'TEXT' &&
+                        <TextInput 
+                          multiline
+                          label="文字"
+                          source={getSource("userReply")}
+                          validate={[required()]}
+                        />
+                    }
+                  </>
                 }
-          </FormDataConsumer>
-          <BooleanInput label="圖文訊息" source="hasPopup" />
-          <FormDataConsumer>
-               {({ formData, ...rest }) => formData.hasPopup &&
-                <>
-                    <TextInput multiline label="文字" source="text" />
-                    <ArrayInput label="圖片" source="pictures">
-                      <SimpleFormIterator>
-                        <ImageReferenceInput label="圖檔" source="pictureId" reference="images"  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
-                      </SimpleFormIterator>
-                    </ArrayInput>
-                    <ArrayInput label="回應按鈕" source="choices">
-                      <SimpleFormIterator>
-                        <TextInput source="choice" label="選擇" />
-                      </SimpleFormIterator>
-                    </ArrayInput>
-                    <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
-                    <SelectArrayInput label="顯示於" source="destinations" choices={destinations} />
-                    <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[required()]} />
-                </>
-                }
-          </FormDataConsumer>
-          <BooleanInput label="關閉圖文框" source="hasPopupDismissal" />
-          <FormDataConsumer>
-               {({ formData, ...rest }) => formData.hasPopupDismissal &&
-                <>
-                    <SelectArrayInput label="關閉" source="dismissalDestinations" choices={destinations} /> <br/>
-                    <NumberInput label="延遲時間 (千分之一秒)" source="dismissalDelay" validate={[number()]} />
-                </>
-               }
-          </FormDataConsumer>
-          <BooleanInput label="來電" source="hasIncomingCall" />
-          <FormDataConsumer>
-               {({ formData, ...rest }) => formData.hasIncomingCall &&
-                <>
-                    <TextInput label="來電人" source="caller" validate={[required()]}/>
-                    <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
-                    <SelectInput label="狀態" source="callStatus"  choices={callTypes} initialValue={'CONNECTING'} /> <br/>
-                    <NumberInput label="延遲時間 (千分之一秒)" source="incomingCallDelay" validate={[number()]} />
-                </>
-                }
-          </FormDataConsumer>
-          <BooleanInput label="新圖釘" source="hasMarker" />
-          <FormDataConsumer>
-               {({ formData, ...rest }) => formData.hasMarker &&
-                <>
-                <TextInput label="標題" source="title" /><br/>
-                <ImageReferenceInput label="圖示檔案" source="markerIcon" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
-                <LocationReferenceInput label="座標" source="locationId" reference="locations" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} >
+              </FormDataConsumer>
+            </SimpleFormIterator>
+          </ArrayInput>}
+          {
+            !formData.firstAction &&
+            <>
+              <ReferenceArrayInput label="互斥於" source="exclusiveWith" reference="actions" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+                <AutocompleteArrayInput optionText="name" />
+              </ReferenceArrayInput>
+            </>
+          }
+          <TextInput label="名稱" source="name" validate={[required()]}/> <br/>
+          <NumberInput label="延遲時間 (千分之一秒)" source="delay" initialValue={0} validate={[required(), number()]} />
+          <BooleanInput label="聲音" source="hasSound" />
+          {
+            formData.hasSound &&
+            <>
+                <SoundReferenceInput label="音檔" source="soundId" reference="sounds" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} validate={[required()]}>
                   <AutocompleteInput optionText="name" />
-                </LocationReferenceInput>
-                <br/>
-                <NumberInput label="延遲時間 (千分之一秒)" source="markerDelay" validate={[number()]} />
-                </>
+                </SoundReferenceInput>
+                <SelectInput label="聲音類型" source="soundType" choices={soundTypes} initialValue={'MAIN'}  />
+                <SelectInput label="音量模式" source="mode" choices={soundModes} initialValue={'STATIC_VOLUME'}  />
+                {
+                  formData.mode === 'STATIC_VOLUME' &&
+                  <div>
+                    <NumberInput label="淡出秒數" source="fadeOutSeconds" validate={[number()]} /><br/>
+                    <NumberInput label="正文秒數" source="speechLength" validate={[number()]} />
+                  </div>
                 }
-          </FormDataConsumer>
+                {
+                  formData.mode === 'DYNAMIC_VOLUME' &&
+                  <div>
+                  <LocationReferenceInput label="中心點" source="soundCenterId" reference="locations" validate={[required()]} perPage={1000}>
+                    <AutocompleteInput optionText="name" />
+                  </LocationReferenceInput>
+                  <NumberInput label="最小音量" source="minVolume" initialValue={0} validate={[required(), number()]} /> 0-1之間<br/>
+                  <NumberInput label="範圍" source="range" initialValue={30} validate={[required(), number()]}/>公尺
+                  </div>
+                }
+                <NumberInput label="延遲時間 (千分之一秒)" source="soundDelay" validate={[number()]} />
+            </>
+          }
+          <BooleanInput label="圖文訊息" source="hasPopup" />
+          {
+            formData.hasPopup &&
+            <>
+                <TextInput multiline label="文字" source="text" />
+                <ArrayInput label="圖片" source="pictures">
+                  <SimpleFormIterator>
+                    <ImageReferenceInput label="圖檔" source="pictureId" reference="images"  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+                  </SimpleFormIterator>
+                </ArrayInput>
+                <ArrayInput label="回應按鈕" source="choices">
+                  <SimpleFormIterator>
+                    <TextInput source="choice" label="選擇" />
+                  </SimpleFormIterator>
+                </ArrayInput>
+                <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
+                <SelectArrayInput label="顯示於" source="destinations" choices={destinations} /> <br/>
+                <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[required()]} />
+            </>
+          }
+          <BooleanInput label="關閉圖文框" source="hasPopupDismissal" />
+          {
+            formData.hasPopupDismissal &&
+            <>
+                <SelectArrayInput label="關閉" source="dismissalDestinations" choices={destinations} /> <br/>
+                <NumberInput label="延遲時間 (千分之一秒)" source="dismissalDelay" validate={[number()]} />
+            </>
+          }
+          <BooleanInput label="來電" source="hasIncomingCall" />
+          {
+            formData.hasIncomingCall &&
+            <>
+                <TextInput label="來電人" source="caller" validate={[required()]}/>
+                <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+                <SelectInput label="狀態" source="callStatus"  choices={callTypes} initialValue={'CONNECTING'} /> <br/>
+                <NumberInput label="延遲時間 (千分之一秒)" source="incomingCallDelay" validate={[number()]} />
+            </>
+          }
+          <BooleanInput label="新圖釘" source="hasMarker" />
+          {
+            formData.hasMarker &&
+            <>
+            <TextInput label="標題" source="title" /><br/>
+            <ImageReferenceInput label="圖示檔案" source="markerIcon" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+            <LocationReferenceInput label="座標" source="locationId" reference="locations" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} >
+              <AutocompleteInput optionText="name" />
+            </LocationReferenceInput>
+            <br/>
+            <NumberInput label="延遲時間 (千分之一秒)" source="markerDelay" validate={[number()]} />
+            </>
+          }
           <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
-          <FormDataConsumer>
-               {({ formData, ...rest }) => formData.hasMarkerRemoval &&
-                 <>
-                    <ReferenceInput label="圖釘" source="markerId" reference="actions" validate={[required()]} filter={{ hasMarker: true }}  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
-                      <SelectInput optionText="title" />
-                    </ReferenceInput>
-                    <br/>
-                    <NumberInput label="延遲時間 (千分之一秒)" source="markerRemovalDelay" validate={[number()]} />
-                 </>
-                }
-          </FormDataConsumer>
+          {
+            formData.hasMarkerRemoval &&
+            <>
+               <ReferenceInput label="圖釘" source="markerId" reference="actions" validate={[required()]} filter={{ hasMarker: true }}  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+                 <SelectInput optionText="title" />
+               </ReferenceInput>
+               <br/>
+               <NumberInput label="延遲時間 (千分之一秒)" source="markerRemovalDelay" validate={[number()]} />
+            </>
+          }
+        </>
+      }}
+      </FormDataConsumer>
       </SimpleForm>
   )  
 }
@@ -354,7 +345,7 @@ function NextButton(props) {
     <CreateButton label="下一步"
       to={{
         pathname: '/actions/create',
-        state: { record: { parents: [props.record.id]  } }
+        state: { record: { prevs: [{prev: props.record.id, conditionType: 'ALWAYS'}] }}
       }}
     />
   )

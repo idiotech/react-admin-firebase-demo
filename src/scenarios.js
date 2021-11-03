@@ -131,9 +131,11 @@ function getTriggers(currentNode, parents) {
 }
 
 function getTrigger(currentNode, parentNode) {
-  const parent = parentNode.id
-  const conditionType = currentNode[`triggers_${parent}_conditionType`]
-  const actionId = (conditionType === "TEXT") 
+  const condition = currentNode.prevs.find(p => p.prev == parentNode.id);
+  if (!condition) {
+    console.log('bad parent', currentNode.name, parentNode.name, parentNode.id, currentNode.prevs.map(p => p.prev))
+  }
+  const actionId = (condition.conditionType === "TEXT") 
     ? parentNode.id + '-popup'
     : parentNode.hasSound
       ? parentNode.id + '-sound'
@@ -152,34 +154,34 @@ function getTrigger(currentNode, parentNode) {
       receiver: "ghost",
       sender: "?u",
       payload: {
-        // TODO
-        type: conditionType === "TEXT" ? "TEXT" : "END",
-        text: currentNode[`triggers_${parent}_userReply`]
+        type: condition.conditionType === "TEXT" ? "TEXT" : "END",
+        text: condition.userReply
       },
       scenarioId: ""
   }
 }
 
-// TODO system hole: if there are multiple parents, and two of them are fence-triggered,
-// which should work?
-function getCondition(currentNode, parentNodes, data) {
+// TODO: system hole
+// only one condition holds
+function getCondition(currentNode, data) {
   const {locations, beacons} = data;
-  const conditionTypes = parentNodes.map(p => currentNode[`triggers_${p.id}_conditionType`]).filter(c => c && c !== 'TEXT')
-  const conditionType = conditionTypes.length === 0 
-    ? 'ALWAYS'
-    : conditionTypes[0]
+  const active = currentNode.prevs && currentNode.prevs.find(p => p.conditionType != 'TEXT');
+  if (active) {
     return {
-      type: conditionType,
-      beaconId: currentNode.beacon ? beacons[currentNode.beacon].beaconId : null,
-      threshold: currentNode.beaconThreshold,
-      mode: currentNode.beaconType,
-      location: currentNode.geofenceCenter ? locations[currentNode.geofenceCenter] : null,
-      radius: currentNode.geofenceRadius || 14
+      type: active.conditionType,
+      beaconId: active.beacon ? beacons[active.beacon].beaconId : null,
+      threshold: active.beaconThreshold,
+      mode: active.beaconType,
+      location: active.geofenceCenter ? locations[active.geofenceCenter] : null,
+      radius: active.geofenceRadius || 14
     }
+  } else {
+    return {type: 'ALWAYS'};
+  }
 }
 
-function getActions(currentNode, parentsNodes, data) {
-  const condition = getCondition(currentNode, parentsNodes, data)
+function getActions(currentNode, data) {
+  const condition = getCondition(currentNode, data)
   const {sounds, locations, images} = data;
   const ret = []
   if (currentNode.hasSound) {
@@ -344,13 +346,17 @@ function PublishButton(props) {
         setLoading(false)
         setOpen(false);
         dispatch(fetchEnd());
-        notify("沒有初始動作，無法發佈！")
+        notify("沒有初始動作，無法發佈！", 'error')
         return
     }
     
     function getNode(tree) {
-      const parents = tree.node.parents ? tree.node.parents.map(p => actions[p]) : []
-      const serverActions = getActions(tree.node, parents, data);
+      const parents = tree.node.prevs ? tree.node.prevs.map(p => actions[p.prev]) : []
+      const serverActions = getActions(tree.node, data);
+      // if (tree.node.parents) {
+        // console.log('parent relation: debug parents = ', tree.node.parents);
+      // }
+      // console.log('parent relation: parents = ', parents.map(p => p.name), 'child = ', tree.node.name);
       return {
         name: tree.node.firstAction ? 'initial' : tree.node.id,
         children: tree.node.children || [],
@@ -373,7 +379,8 @@ function PublishButton(props) {
     const url = new URL(urlString)
     const params = {name: props.record.name, overwrite: true}
     url.search = new URLSearchParams(params).toString();
-    console.log('payload', payload)
+    // console.log('payload', payload)
+    console.log('payload', payload.map(p => p.performances.map(p => p.action.content.condition)))
 
     fetch(url, {
       method: 'PUT',
@@ -384,13 +391,13 @@ function PublishButton(props) {
     })
     .then((response) => {
       if (response.ok) {
-        notify("成功發佈" + props.record.name)
+        notify("成功發佈" + props.record.name, 'success');
       } else {
-        notify("發佈失敗；原因 =" + response.body + " " + response.status)
+        notify("發佈失敗；原因 =" + response.body + " " + response.status, 'error');
       }
     })
     .catch(e => {
-      notify("發佈失敗；原因 =" + e)
+      notify("發佈失敗；原因 =" + e, 'error');
     })
     .finally(() => {
       setLoading(false)
@@ -447,7 +454,7 @@ function GpxButton(props) {
         children: tree.node.children || [],
         exclusiveWith: tree.node.exclusiveWith || [],
         triggers: getTriggers(tree.node, parents),
-        performances: getActions(tree.node, parents, data).map(a => ({
+        performances: getActions(tree.node, data).map(a => ({
           action: a,
           delay: (a.delay === 0 || a.delay) ? a.delay : (tree.node.delay || 0)
         }))
@@ -501,7 +508,6 @@ function GpxButton(props) {
       primary="true"
     />
   </>)
-  
 }
 
 function Blocker(props) {
@@ -579,33 +585,18 @@ function CloneButton(props) {
 
       const newA = JSON.parse(JSON.stringify(a))
       newA.id = idMap.get(a.id)
-      if (newA.parents) {
-        const oldParents = newA.parents
-        newA.parents = newA.parents.map(id => idMap.get(id))
-        oldParents.map( oldId => {
-          const newId = idMap.get(oldId)
-          const cond = newA[`triggers_${oldId}_conditionType`];
-          newA[`triggers_${newId}_id`] = newId;
-          if (cond) {
-            delete(newA[`triggers_${oldId}_conditionType`]);
-            newA[`triggers_${newId}_conditionType`] = cond;
-          }
-          const reply = newA[`triggers_${oldId}_userReply`];
-          if (reply) {
-            delete(newA[`triggers_${oldId}_userReply`]);
-            newA[`triggers_${newId}_userReply`] = reply;
-          }
-        })
-      }
       if (newA.exclusiveWith) {
         newA.exclusiveWith = newA.exclusiveWith.map(id => idMap.get(id)).filter(e => e);
       }
-      function updateValue(field) {
-        const value = newA[field];
+      function updateValueFor(obj, field) {
+        const value = obj[field];
         if (value) {
           const newValue = idMap.get(value)
-          newA[field] = newValue ? newValue : null
+          obj[field] = newValue ? newValue : null
         }
+      }
+      function updateValue(field) {
+        updateValueFor(newA, field);
       }
       updateValue('geofenceCenter')
       updateValue('beacon')
@@ -615,13 +606,52 @@ function CloneButton(props) {
       updateValue('markerIcon')
       updateValue('locationId')
       updateValue('markerId')
+      // for new formats
+      if (newA.prevs) {
+        newA.prevs.forEach(p => {
+          updateValueFor(p, 'prev');
+          updateValueFor(p, 'beacon');
+          updateValueFor(p, 'geofenceCenter');
+        })
+      }
+      // for old formats
+      else if (newA.parents) {
+        const oldParents = newA.parents
+        newA.parents = newA.parents.map(id => idMap.get(id))
+        const prevs = oldParents.map( oldId => {
+          const newId = idMap.get(oldId)
+          const cond = newA[`triggers_${oldId}_conditionType`];
+          const rec = {}
+          rec.prev = newId;
+          newA[`triggers_${newId}_id`] = newId;
+          if (cond) {
+            delete(newA[`triggers_${oldId}_conditionType`]);
+            rec.conditionType = cond;
+          }
+          if (cond === 'BEACON') {
+            rec.beacon = newA.beacon;
+            rec.beaconThreshold = newA.beaconThreshold;
+            rec.beaconType = newA.beaconType;
+          }
+          if (cond === 'GEOFENCE') {
+            rec.geofenceCenter = newA.geofenceCenter;
+            rec.geofenceRadius = newA.geofenceRadius || 14;
+          }
+          const reply = newA[`triggers_${oldId}_userReply`];
+          if (reply) {
+            delete(newA[`triggers_${oldId}_userReply`]);
+            rec.userReply = reply;
+          }
+          return rec;
+        })
+        newA.prevs = prevs;
+      }
       return baseProvider.create('actions', {data: newA})
     }))
 
-    console.log('setloaded')
     setLoading(false);
     setOpen(false);
-    notify('複製成功')
+    notify('複製成功', 'success');
     dispatch(fetchEnd());
     refresh()
   }
@@ -691,10 +721,10 @@ export function getActionTree(actions) {
   const nodesSet = new Set()
   const parentMap = 
     actions.reduce(function(m, a) {
-      if (a.parents) {
-        a.parents.forEach(p => {
-          const orig = m.get(p) || []
-          m.set(p, [...orig, a])
+      if (a.prevs) {
+        a.prevs.forEach(p => {
+          const orig = m.get(p.prev) || []
+          m.set(p.prev, [...orig, a])
         })
         return m
       } else {
@@ -702,30 +732,29 @@ export function getActionTree(actions) {
       }
     }, new Map())
 
+  console.log('parent map:', parentMap)
   function createTree(root) {
     const children = parentMap.get(root.id) || []
     const childNodes = children.map(c => {
       if (nodesSet.has(c.id)) {
+        console.log('already added child!', c.name)
         return null
       } else {
+        console.log('adding child', c.name, 'to', root.name)
         nodesSet.add(c.id)
         return c
       }
     })
     root.children = children.map(c => c.id)
-    // console.log('creating tree for child', root.id, children, childNodes)
-    // if (!nodesSet.has(root.id)) {
-      // nodesSet.add(root.id)
-      return {
-        node: root,
-        children: childNodes.filter(c => c).map(c => createTree(c))
-      }
-    // } else {
-      // return {
-        // node: root,
-        // children: []
-      // }
-    // }
+    const treeChildren = childNodes.filter(c => c).map(c => createTree(c))
+    treeChildren.sort((a, b) => 
+      a.children.length > b.children.length
+    )
+    console.log('sort debug:', treeChildren.map(c => c.node.name))
+    return {
+      node: root,
+      children: treeChildren
+    }
   }
   if (initial) return createTree(initial) 
   else return null
