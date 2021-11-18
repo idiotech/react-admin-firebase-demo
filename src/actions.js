@@ -57,6 +57,7 @@ const ActionFilter = (props) => (
 const destinations = [
           { id: 'NOTIFICATION', name: '通知列' },
           { id: 'APP', name: '對話視窗' },
+          { id: 'ALERT', name: '提示視窗' },
           { id: 'INTRO', name: '前情提要' },
           { id: 'WELCOME', name: '停用，請勿選擇' },
 ]
@@ -81,8 +82,7 @@ const beaconTypes = [
 ]
 const callTypes = [
           { id: 'CONNECTING', name: '未接通' },
-          { id: 'CONNECTED', name: '接通' },
-          { id: 'DISCONNECTED', name: '掛斷' }
+          { id: 'CONNECTED', name: '接通' }
 ]
 const Title = ({ record }) => {
     return <span>動作{record && record.name ? `："${record.name}"` : ''}</span>;
@@ -276,7 +276,7 @@ const InputForm = (props) => {
                 </ArrayInput>
                 <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
                 <SelectArrayInput label="顯示於" source="destinations" choices={destinations} /> <br/>
-                <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[required()]} />
+                <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[number()]} />
             </>
           }
           <BooleanInput label="關閉圖文框" source="hasPopupDismissal" />
@@ -295,6 +295,15 @@ const InputForm = (props) => {
                 <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
                 <SelectInput label="狀態" source="callStatus"  choices={callTypes} initialValue={'CONNECTING'} /> <br/>
                 <NumberInput label="延遲時間 (千分之一秒)" source="incomingCallDelay" validate={[number()]} />
+            </>
+          }
+          <BooleanInput label="掛電話" source="hasHangUp" />
+          {
+            formData.hasHangUp &&
+            <>
+                <TextInput label="來電人" source="caller" validate={[required()]}/>
+                <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+                <NumberInput label="延遲時間 (千分之一秒)" source="hangUpDelay" validate={[number()]} />
             </>
           }
           <BooleanInput label="新圖釘" source="hasMarker" />
@@ -319,6 +328,17 @@ const InputForm = (props) => {
                </ReferenceInput>
                <br/>
                <NumberInput label="延遲時間 (千分之一秒)" source="markerRemovalDelay" validate={[number()]} />
+            </>
+          }
+          <BooleanInput label="地圖樣式" source="hasMapStyle" />
+          {
+            formData.hasMapStyle &&
+            <>
+               <ReferenceInput label="樣式" source="mapStyle" reference="mapStyles" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+                 <SelectInput optionText="name" />
+               </ReferenceInput>
+               <br/>
+               <NumberInput label="延遲時間 (千分之一秒)" source="mapStyleDelay" validate={[number()]} />
             </>
           }
         </>

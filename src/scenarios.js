@@ -96,7 +96,14 @@ function getAllData(getList) {
     { field: 'published_at', order: 'DESC' }
   );
   const sounds = soundResult.data
-  return {actions, locations, beacons, images, sounds};
+
+  const mapStyleResult = getList(
+    'mapStyles',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const mapStyles = mapStyleResult.data
+  return {actions, locations, beacons, images, sounds, mapStyles};
 
 }
 
@@ -143,11 +150,15 @@ function getTrigger(currentNode, parentNode) {
         ? parentNode.id + '-popup'
         : parentNode.hasIncomingCall
           ? parentNode.id + '-incoming-call'
-          : parentNode.hasMarker
-            ? parentNode.id + '-marker'
-            : parentNode.hasPopupDismissal
-              ? parentNode.id + '-popup-dismissal'
-              : parentNode.id + '-marker-removal'
+          : parentNode.hasHangUp
+            ? parentNode.id + '-hang-up'
+            : parentNode.hasMarker
+              ? parentNode.id + '-marker'
+              : parentNode.hasMarkerRemoval
+                ? parentNode.id + '-marker-removal'
+                : parentNode.hasMapStyle
+                  ? parentNode.id + '-map-style'
+                  : parentNode.id + '-popup-dismissal'
   return {
       id: "",
       actionId: actionId,
@@ -182,7 +193,7 @@ function getCondition(currentNode, data) {
 
 function getActions(currentNode, data) {
   const condition = getCondition(currentNode, data)
-  const {sounds, locations, images} = data;
+  const {sounds, locations, images, mapStyles} = data;
   const ret = []
   if (currentNode.hasSound) {
     const soundAction = {
@@ -260,6 +271,27 @@ function getActions(currentNode, data) {
     }
     ret.push(incomingCallAction)
   }
+  if (currentNode.hasHangUp) {
+    const hangUpAction = {
+      id: currentNode.id + '-hang-up',
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: 'INCOMING_CALL',
+          caller: currentNode.caller,
+          portrait: currentNode.portrait
+          ? images[currentNode.portrait].image.src
+          : null,
+          status: 'DISCONNECTED'
+        },
+        condition: condition
+      },
+      delay: currentNode.hangUpDelay,
+      description: currentNode.name
+    }
+    ret.push(hangUpAction)
+  }
   if (currentNode.hasMarker) {
     const markerAction = {
       id: currentNode.id + '-marker',
@@ -316,6 +348,23 @@ function getActions(currentNode, data) {
       description: currentNode.name
     }
     ret.push(popupDismissalAction)
+  }
+  if (currentNode.hasMapStyle) {
+    const mapStyleAction = {
+      id: currentNode.id + '-map-style',
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: 'MAP_STYLE',
+          url: mapStyles[currentNode.mapStyle].mapStyle.src,
+        },
+        condition: condition
+      },
+      delay: currentNode.mapStyleDelay,
+      description: currentNode.name
+    }
+    ret.push(mapStyleAction)
   }
   return ret.map(a => ({
     ...a,
@@ -379,8 +428,8 @@ function PublishButton(props) {
     const url = new URL(urlString)
     const params = {name: props.record.name, overwrite: true}
     url.search = new URLSearchParams(params).toString();
-    // console.log('payload', payload)
-    console.log('payload', payload.map(p => p.performances.map(p => p.action.content.condition)))
+    console.log('payload', payload)
+    // console.log('payload', payload.map(p => p.performances.map(p => p.action.content.condition)))
 
     fetch(url, {
       method: 'PUT',
@@ -536,7 +585,7 @@ function CloneButton(props) {
   const [open, setOpen] = useState(false);
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
-  const {actions, sounds, locations, beacons, images} = getAllData(useGetList)
+  const {actions, sounds, locations, beacons, images, mapStyles} = getAllData(useGetList)
   const createData = JSON.parse(JSON.stringify(props.record))
   const cloneId = xid.next();
   createData.id = cloneId
@@ -558,6 +607,7 @@ function CloneButton(props) {
   Object.keys(beacons).forEach(a => idMap.set(a, xid.next()))
   Object.keys(images).forEach(a => idMap.set(a, xid.next()))
   Object.keys(sounds).forEach(a => idMap.set(a, xid.next()))
+  Object.keys(mapStyles).forEach(a => idMap.set(a, xid.next()))
   async function handleConfirm() {
     setOpen(false);
     setLoading(true);
@@ -578,6 +628,7 @@ function CloneButton(props) {
       ...createFields(beacons, 'beacons'),
       ...createFields(images, 'images'),
       ...createFields(sounds, 'sounds'),
+      ...createFields(mapStyles, 'mapStyles'),
       ...createFields(locations, 'locations'),
     ])
     const actionValues = Object.values(actions)
@@ -601,9 +652,11 @@ function CloneButton(props) {
       updateValue('geofenceCenter')
       updateValue('beacon')
       updateValue('soundId')
+      updateValue('mapStyle')
       updateValue('soundCenterId')
       updateValue('pictureId')
       updateValue('markerIcon')
+      updateValue('portrait')
       updateValue('locationId')
       updateValue('markerId')
       // for new formats

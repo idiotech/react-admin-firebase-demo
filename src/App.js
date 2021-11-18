@@ -1,11 +1,11 @@
 import * as React from "react";
 import { ActionList, ActionCreate, ActionShow, ActionEdit } from "./actions";
 import { ScenarioList, ScenarioCreate, ScenarioEdit, scenarioReducer, getActionTree } from "./scenarios";
-import { NodeList, NodeShow, NodeCreate, NodeEdit } from "./nodes";
 import { LocationList, LocationCreate, LocationEdit } from "./locations";
 import { BeaconList, BeaconCreate, BeaconEdit } from "./beacons";
 import { ImageList, ImageCreate, ImageEdit} from "./images";
 import { SoundList, SoundCreate, SoundEdit} from "./sounds";
+import { MapStyleList, MapStyleCreate, MapStyleEdit} from "./mapStyles";
 import { Admin, Resource } from "react-admin";
 import {
   FirebaseDataProvider,
@@ -72,7 +72,7 @@ function createDataProvider(scenario) {
         }
       }
     },
-    resources: ["locations", "actions", "nodes", "beacons", "images", "sounds"],
+    resources: ["locations", "actions", "nodes", "beacons", "images", "sounds", "mapStyles"],
     name: scenario
   }
 }
@@ -128,6 +128,13 @@ function Main(props) {
           list={LocationList}
           create={LocationCreate}
           edit={LocationEdit}
+        />
+        <Resource
+          name="mapStyles"
+          options={{ label: '地圖樣式' }}
+          list={MapStyleList}
+          create={MapStyleCreate}
+          edit={MapStyleEdit}
         />
         <Resource
           name="actions"
