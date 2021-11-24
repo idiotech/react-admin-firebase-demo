@@ -41,6 +41,8 @@ import LocationOffIcon from '@material-ui/icons/LocationOff';
 import AddLocationIcon from '@material-ui/icons/AddLocation';
 import CancelIcon from '@material-ui/icons/Cancel';
 import PhoneCallbackIcon from '@material-ui/icons/PhoneCallback';
+import PhoneDisabledIcon from '@material-ui/icons/PhoneDisabled';
+import MapIcon from '@material-ui/icons/Map';
 import ReplyIcon from '@material-ui/icons/Reply';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 
@@ -109,6 +111,8 @@ const getContentIcon = (record) => {
     { record.hasPopupDismissal ? <CancelIcon/>: <></>}
     { record.hasMarker ? <AddLocationIcon/>: <></>}
     { record.hasMarkerRemoval ? <LocationOffIcon/>: <></>}
+    { record.hasHangUp ? <PhoneDisabledIcon/>: <></>}
+    { record.hasMapStyle ? <MapIcon/>: <></>}
   </>
 }
 
@@ -195,7 +199,7 @@ const InputForm = (props) => {
                           label="模式" 
                           source={getSource("beaconType")}
                           choices={beaconTypes} 
-                          initialValue={'ENTER'} 
+                          validate={[required()]}
                         />
                         <br/>
                         <NumberInput 
