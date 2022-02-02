@@ -64,8 +64,13 @@ const ScenarioFilter = (props) => (
 );
 const cdnRoot = 'http://daqiaotou-storage.floraland.tw/ghostspeak_editor'
 
+function isCurrentScenario(props) {
+  return useSelector(state => state.currentScenario.value  === props.record.id) ||
+    localStorage.getItem('scenario') === props.record.id
+}
+
 function UseButton(props) {
-  const active = useSelector(state => state.currentScenario.value  === props.record.id);
+  const active =  isCurrentScenario(props);
   const dispatch = useDispatch();
   const refresh = useRefresh();
   function handleClick() {
@@ -151,7 +156,7 @@ function getCondition(currentNode, data) {
 }
 
 function PublishButton(props) {
-  const disabled = useSelector(state => state.currentScenario.value !== props.record.id);
+  const disabled = !isCurrentScenario(props)
   const notify = useNotify()
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(false);
@@ -251,7 +256,7 @@ function PublishButton(props) {
 }
 
 function GpxButton(props) {
-  const disabled = useSelector(state => state.currentScenario.value !== props.record.id);
+  const disabled = !isCurrentScenario(props)
   const notify = useNotify()
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(false);
@@ -355,7 +360,7 @@ function Blocker(props) {
 }
 
 function CloneButton(props) {
-  const disabled = useSelector(state => state.currentScenario.value !== props.record.id);
+  const disabled = !isCurrentScenario(props)
   const notify = useNotify();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
