@@ -6,6 +6,7 @@ import { BeaconList, BeaconCreate, BeaconEdit } from "./beacons";
 import { ImageList, ImageCreate, ImageEdit} from "./images";
 import { SoundList, SoundCreate, SoundEdit} from "./sounds";
 import { MapStyleList, MapStyleCreate, MapStyleEdit} from "./mapStyles";
+import { BroadcastList, BroadcastCreate, BroadcastEdit} from "./broadcasts";
 import { Admin, Resource } from "react-admin";
 import {
   FirebaseDataProvider,
@@ -72,7 +73,7 @@ function createDataProvider(scenario) {
         }
       }
     },
-    resources: ["locations", "actions", "nodes", "beacons", "images", "sounds", "mapStyles"],
+    resources: ["locations", "actions", "nodes", "beacons", "images", "sounds", "mapStyles", "broadcasts"],
     name: scenario
   }
 }
@@ -143,6 +144,13 @@ function Main(props) {
           create={ActionCreate}
           edit={ActionEdit}
         />
+        <Resource
+          name="broadcasts"
+          options={{ label: '廣播' }}
+          list={BroadcastList}
+          create={BroadcastCreate}
+          edit={BroadcastEdit}
+        />
       </Admin>
     );
   }
@@ -151,6 +159,15 @@ var prevScenario = null;
 
 function App() {
   const store = createAdminStore({authProvider, dataProvider, history, customReducers})
+  const storedScenario = localStorage.getItem('scenario');
+  console.log('initial scenario', storedScenario);
+  if (storedScenario) {
+    console.log('setting initial data provider', storedScenario);
+    dataProvider.dataProviders = [
+      adminProvider, createDataProvider(storedScenario)
+    ]
+    prevScenario = storedScenario;
+  }
   store.subscribe(() => {
     console.log('listener', store.getState())
     const scenario = store.getState().currentScenario.value

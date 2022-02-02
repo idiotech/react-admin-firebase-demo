@@ -16,7 +16,6 @@ import {
   DeleteButton,
   DateTimeInput,
   Button,
-  useGetList,
   useRefresh,
   useNotify,
   fetchStart,
@@ -37,6 +36,10 @@ import {
   FirebaseAuthProvider
 } from "react-admin-firebase";
 const xid = require('xid-js');
+
+import {
+  getAllData, getActions
+} from "./serverCommon"
 
 export function scenarioReducer(state = { value: '' }, action) {
   switch (action.type) {
@@ -61,58 +64,14 @@ const ScenarioFilter = (props) => (
 );
 const cdnRoot = 'http://daqiaotou-storage.floraland.tw/ghostspeak_editor'
 
-function getAllData(getList) {
-  const actionResult = getList(
-    'actions',
-    { page: 1, perPage: 500 },
-    { field: 'published_at', order: 'DESC' }
-  );
-  const actions = actionResult.data
-
-  const locationResult = getList(
-    'locations',
-    { page: 1, perPage: 500 },
-    { field: 'published_at', order: 'DESC' }
-  );
-  const locations = locationResult.data
-
-  const beaconResult = getList(
-    'beacons',
-    { page: 1, perPage: 500 },
-    { field: 'published_at', order: 'DESC' }
-  );
-  const beacons = beaconResult.data
-
-  const imageResult = getList(
-    'images',
-    { page: 1, perPage: 500 },
-    { field: 'published_at', order: 'DESC' }
-  );
-  const images = imageResult.data
-
-  const soundResult = getList(
-    'sounds',
-    { page: 1, perPage: 500 },
-    { field: 'published_at', order: 'DESC' }
-  );
-  const sounds = soundResult.data
-
-  const mapStyleResult = getList(
-    'mapStyles',
-    { page: 1, perPage: 500 },
-    { field: 'published_at', order: 'DESC' }
-  );
-  const mapStyles = mapStyleResult.data
-  return {actions, locations, beacons, images, sounds, mapStyles};
-
-}
-
 function UseButton(props) {
   const active = useSelector(state => state.currentScenario.value  === props.record.id);
   const dispatch = useDispatch();
   const refresh = useRefresh();
   function handleClick() {
-    dispatch({ type: 'setScenario', scenario: props.record.id })
+    const scenario = props.record.id;
+    localStorage.setItem('scenario', scenario)
+    dispatch({ type: 'setScenario', scenario: scenario })
     refresh();
   }
   return (<Button label="設定為目前劇本"
@@ -191,190 +150,6 @@ function getCondition(currentNode, data) {
   }
 }
 
-function getActions(currentNode, data) {
-  const condition = getCondition(currentNode, data)
-  const {sounds, locations, images, mapStyles} = data;
-  const ret = []
-  if (currentNode.hasSound) {
-    const soundAction = {
-      id: currentNode.id + '-sound',
-      receiver: "?u",
-      sender: "ghost",
-      content: {
-        task: {
-          type: 'SOUND',
-          url: currentNode.soundId
-            // ? `${cdnRoot}/${props.record.id}/sounds/${currentNode.soundId}/sound`
-            ?  sounds[currentNode.soundId].sound.src || 'http://daqiaotou-storage.floraland.tw/sounds/entrance.mp3'
-            : 'http://daqiaotou-storage.floraland.tw/sounds/entrance.mp3',
-          volumeSetting: {
-            type: currentNode.mode,
-            center: currentNode.soundCenterId ? locations[currentNode.soundCenterId] : null,
-            fadeOutSeconds: currentNode.fadeOutSeconds,
-            speechLength: currentNode.speechLength,
-            radius: currentNode.range || 30,
-            minVolume: currentNode.minVolume
-          },
-          mode: currentNode.soundType || 'MAIN',
-        },
-        condition: condition
-      },
-      delay: currentNode.soundDelay,
-      description: currentNode.name
-    }
-    ret.push(soundAction)
-  }
-  if (currentNode.hasPopup) {
-    const popupAction = {
-      id: currentNode.id + '-popup',
-      receiver: "?u",
-      sender: "ghost",
-      content: {
-        task: {
-          type: 'POPUP',
-          destinations: currentNode.destinations,
-          text: currentNode.text,
-          choices: currentNode.choices
-            ? currentNode.choices.map(c => c.choice) 
-            : [],
-          pictures: currentNode.pictures
-            ? currentNode.pictures.map(p => images[p.pictureId].image.src )
-            // ? currentNode.pictures.map(p => `${cdnRoot}/${props.record.id}/images/${p.pictureId}/image`)
-            : [],
-          allowTextReply: (currentNode.allowTextReply)? true : false,
-        },
-        condition: condition
-      },
-      delay: currentNode.popupDelay,
-      description: currentNode.name
-    }
-    ret.push(popupAction)
-  }
-  if (currentNode.hasIncomingCall) {
-    const incomingCallAction = {
-      id: currentNode.id + '-incoming-call',
-      receiver: "?u",
-      sender: "ghost",
-      content: {
-        task: {
-          type: 'INCOMING_CALL',
-          caller: currentNode.caller,
-          portrait: currentNode.portrait
-          ? images[currentNode.portrait].image.src
-          : null,
-          status: currentNode.callStatus
-        },
-        condition: condition
-      },
-      delay: currentNode.incomingCallDelay,
-      description: currentNode.name
-    }
-    ret.push(incomingCallAction)
-  }
-  if (currentNode.hasHangUp) {
-    const hangUpAction = {
-      id: currentNode.id + '-hang-up',
-      receiver: "?u",
-      sender: "ghost",
-      content: {
-        task: {
-          type: 'INCOMING_CALL',
-          caller: currentNode.caller,
-          portrait: currentNode.portrait
-          ? images[currentNode.portrait].image.src
-          : null,
-          status: 'DISCONNECTED'
-        },
-        condition: condition
-      },
-      delay: currentNode.hangUpDelay,
-      description: currentNode.name
-    }
-    ret.push(hangUpAction)
-  }
-  if (currentNode.hasMarker) {
-    const markerAction = {
-      id: currentNode.id + '-marker',
-      receiver: "?u",
-      sender: "ghost",
-      content: {
-        task: {
-          type: 'MARKER',
-          icon: currentNode.markerIcon
-            ? images[currentNode.markerIcon].image.src
-            // ? `${cdnRoot}/${props.record.id}/images/${currentNode.markerIcon}/image`
-            : null,
-          location: currentNode.locationId ? locations[currentNode.locationId] : null,
-          title: currentNode.title,
-          id: currentNode.markerId,
-        },
-        condition: condition
-      },
-      delay: currentNode.markerDelay,
-      description: currentNode.name
-    }
-    ret.push(markerAction)
-  }
-  if (currentNode.hasMarkerRemoval) {
-    const markerRemovalAction = {
-      id: currentNode.id + '-marker-removal',
-      receiver: "?u",
-      sender: "ghost",
-      content: {
-        task: {
-          type: 'MARKER_REMOVAL',
-          id: currentNode.markerId + '-marker',
-        },
-        condition: condition
-      },
-      delay: currentNode.markerRemovalDelay,
-      description: currentNode.name
-    }
-    ret.push(markerRemovalAction)
-  }
-  if (currentNode.hasPopupDismissal) {
-    const popupDismissalAction = {
-      id: currentNode.id + '-popup-dismissal',
-      receiver: "?u",
-      sender: "ghost",
-      content: {
-        task: {
-          type: 'POPUP_DISMISSAL',
-          destinations: currentNode.dismissalDestinations,
-        },
-        condition: condition
-      },
-      delay: currentNode.dismissalDelay,
-      description: currentNode.name
-    }
-    ret.push(popupDismissalAction)
-  }
-  if (currentNode.hasMapStyle) {
-    const mapStyleAction = {
-      id: currentNode.id + '-map-style',
-      receiver: "?u",
-      sender: "ghost",
-      content: {
-        task: {
-          type: 'MAP_STYLE',
-          url: mapStyles[currentNode.mapStyle].mapStyle.src,
-        },
-        condition: condition
-      },
-      delay: currentNode.mapStyleDelay,
-      description: currentNode.name
-    }
-    ret.push(mapStyleAction)
-  }
-  return ret.map(a => ({
-    ...a,
-    session: {
-      scenario: "",
-      chapter: ""
-    }
-  }))
-}
-
 function PublishButton(props) {
   const disabled = useSelector(state => state.currentScenario.value !== props.record.id);
   const notify = useNotify()
@@ -382,7 +157,7 @@ function PublishButton(props) {
   const [loading, setLoading] = useState(false);
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
-  const data = getAllData(useGetList);
+  const data = getAllData();
   const {actions} = data;
   const [open, setOpen] = useState(false);
 
@@ -401,7 +176,8 @@ function PublishButton(props) {
     
     function getNode(tree) {
       const parents = tree.node.prevs ? tree.node.prevs.map(p => actions[p.prev]) : []
-      const serverActions = getActions(tree.node, data);
+      const condition = getCondition(tree.node, data)
+      const serverActions = getActions(tree.node, data, condition);
       // if (tree.node.parents) {
         // console.log('parent relation: debug parents = ', tree.node.parents);
       // }
@@ -479,7 +255,7 @@ function GpxButton(props) {
   const notify = useNotify()
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(false);
-  const data = getAllData(useGetList);
+  const data = getAllData();
   const {actions} = data;
   const [open, setOpen] = useState(false);
 
@@ -498,12 +274,13 @@ function GpxButton(props) {
 
     function getNode(tree) {
       const parents = tree.node.parents ? tree.node.parents.map(p => actions[p]) : []
+      const condition = getCondition(tree.node, data)
       return {
         name: tree.node.firstAction ? 'initial' : tree.node.id,
         children: tree.node.children || [],
         exclusiveWith: tree.node.exclusiveWith || [],
         triggers: getTriggers(tree.node, parents),
-        performances: getActions(tree.node, data).map(a => ({
+        performances: getActions(tree.node, data, condition).map(a => ({
           action: a,
           delay: (a.delay === 0 || a.delay) ? a.delay : (tree.node.delay || 0)
         }))
@@ -579,13 +356,13 @@ function Blocker(props) {
 
 function CloneButton(props) {
   const disabled = useSelector(state => state.currentScenario.value !== props.record.id);
-  const notify = useNotify()
-  const dispatch = useDispatch()
+  const notify = useNotify();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
-  const {actions, sounds, locations, beacons, images, mapStyles} = getAllData(useGetList)
+  const {actions, sounds, locations, beacons, images, mapStyles} = getAllData()
   const createData = JSON.parse(JSON.stringify(props.record))
   const cloneId = xid.next();
   createData.id = cloneId
