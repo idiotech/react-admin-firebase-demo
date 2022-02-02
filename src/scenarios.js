@@ -65,8 +65,12 @@ const ScenarioFilter = (props) => (
 const cdnRoot = 'http://daqiaotou-storage.floraland.tw/ghostspeak_editor'
 
 function isCurrentScenario(props) {
-  return useSelector(state => state.currentScenario.value  === props.record.id) ||
-    localStorage.getItem('scenario') === props.record.id
+  if (props && props.record) {
+    return useSelector(state => state.currentScenario.value  === props.record.id) ||
+      localStorage.getItem('scenario') === props.record.id
+  } else {
+    return false;
+  }
 }
 
 function UseButton(props) {

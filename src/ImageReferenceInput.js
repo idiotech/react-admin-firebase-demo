@@ -34,9 +34,9 @@ const ImageReferenceInput = props => {
         <br/>
         <FormDataConsumer>
           {({ formData, ...rest }) => 
-            <ReferenceField key={version} label="image" record={formData} basePath="images" source={props.source} reference="images">
+            <ReferenceField key={version} label="image" record={formData} basePath="../images" source={props.source} reference="images">
               <ImageField source="image.src" />
-              </ReferenceField>
+            </ReferenceField>
           }
         </FormDataConsumer>
         <br/>
