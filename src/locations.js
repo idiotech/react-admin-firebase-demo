@@ -27,7 +27,7 @@ const LocationFilter = (props) => (
 );
 
 const Title = ({ record }) => {
-    return <span>地點{record && record.name ? `："${record.name}"` : ''}</span>;
+    return <span>《{localStorage.getItem('scenarioName')}》地點{record && record.name ? `："${record.name}"` : ''}</span>;
 };
 
 export const LocationList = (props) => (

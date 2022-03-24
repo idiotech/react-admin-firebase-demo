@@ -24,7 +24,7 @@ const BeaconFilter = (props) => (
 );
 
 const Title = ({ record }) => {
-    return <span>Beacon{record && record.name ? `："${record.name}"` : ''}</span>;
+    return <span>《{localStorage.getItem('scenarioName')}》Beacon{record && record.name ? `："${record.name}"` : ''}</span>;
 };
 
 export const BeaconList = (props) => (

@@ -26,7 +26,7 @@ const ImageFilter = (props) => (
 );
 
 const Title = ({ record }) => {
-    return <span>圖片{record && record.name ? `："${record.name}"` : ''}</span>;
+    return <span>《{localStorage.getItem('scenarioName')}》圖片{record && record.name ? `："${record.name}"` : ''}</span>;
 };
 
 export const ImageList = (props) => (

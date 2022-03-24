@@ -73,7 +73,7 @@ import {
 } from './serverCommon'
 
 const Title = ({ record }) => {
-    return <span>廣播{record && record.name ? `："${record.name}"` : ''}</span>;
+    return <span>《{localStorage.getItem('scenarioName')}》廣播{record && record.name ? `："${record.name}"` : ''}</span>;
 };
 
 const BroadcastFilter = (props) => (

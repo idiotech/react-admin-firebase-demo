@@ -48,7 +48,7 @@ const ActionFilter = (props) => (
 );
 
 const Title = ({ record }) => {
-    return <span>動作{record && record.name ? `："${record.name}"` : ''}</span>;
+    return <span>《{localStorage.getItem('scenarioName')}》動作{record && record.name ? `："${record.name}"` : ''}</span>;
 };
 
 export const ActionList = (props) => {

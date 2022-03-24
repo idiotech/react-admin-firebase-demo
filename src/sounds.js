@@ -26,7 +26,7 @@ const SoundFilter = (props) => (
 );
 
 const Title = ({ record }) => {
-    return <span>聲音{record && record.name ? `："${record.name}"` : ''}</span>;
+    return <span>《{localStorage.getItem('scenarioName')}》聲音{record && record.name ? `："${record.name}"` : ''}</span>;
 };
 
 export const SoundList = (props) => (

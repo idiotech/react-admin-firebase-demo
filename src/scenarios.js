@@ -80,6 +80,7 @@ function UseButton(props) {
   function handleClick() {
     const scenario = props.record.id;
     localStorage.setItem('scenario', scenario)
+    localStorage.setItem('scenarioName', props.record.name)
     dispatch({ type: 'setScenario', scenario: scenario })
     refresh();
   }
@@ -210,6 +211,7 @@ function PublishButton(props) {
     }
     const payload = getNodes(actionTree)
     const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
+    // const urlString = `http://localhost:8080/v1/scenario/graphscript/${props.record.id}`
     const url = new URL(urlString)
     const params = {name: props.record.name, overwrite: true}
     url.search = new URLSearchParams(params).toString();
@@ -516,7 +518,7 @@ function CloneButton(props) {
   };
 
 const Title = ({ record }) => {
-    return <span>劇本：{record && record.name ? `："${record.name}"` : ''}</span>;
+    return <span>劇本{record && record.name ? `：${record.name}` : ''}</span>;
 };
 
 export const ScenarioList = (props) => (

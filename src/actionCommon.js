@@ -225,7 +225,7 @@ const hangUpInput = () =>
 
 const markerInput = () => 
             <>
-              <TextInput label="標題" source="title" /><br/>
+              <TextInput label="標題" source="title" validate={[required()]}/><br/>
               <ImageReferenceInput label="圖示檔案" source="markerIcon" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
               <LocationReferenceInput label="座標" source="locationId" reference="locations" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} >
                 <AutocompleteInput optionText="name" />
