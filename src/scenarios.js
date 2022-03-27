@@ -442,11 +442,16 @@ function CloneButton(props) {
       updateValue('soundId')
       updateValue('mapStyle')
       updateValue('soundCenterId')
-      updateValue('pictureId')
       updateValue('markerIcon')
       updateValue('portrait')
       updateValue('locationId')
       updateValue('markerId')
+      const pictures = newA.pictures
+      if (pictures) {
+        const newPics = pictures.map( p => idMap.get(p.pictureId));
+        newA.pictures = newPics;
+      }
+
       // for new formats
       if (newA.prevs) {
         newA.prevs.forEach(p => {
