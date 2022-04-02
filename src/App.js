@@ -86,7 +86,6 @@ const customReducers = { currentScenario: scenarioReducer }
 
 const history = createHashHistory();
 function Main(props) {
-    // const active = useSelector(state => state.currentScenario.valued);
     return (
       <Admin
         loginPage={CustomLoginPage} 
@@ -160,6 +159,7 @@ var prevScenario = null;
 function App() {
   const store = createAdminStore({authProvider, dataProvider, history, customReducers})
   const storedScenario = localStorage.getItem('scenario');
+  document.title="Urban Baker街區編輯器"
   console.log('initial scenario', storedScenario);
   if (storedScenario) {
     console.log('setting initial data provider', storedScenario);
