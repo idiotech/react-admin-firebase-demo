@@ -5,6 +5,7 @@ import {
   SimpleFormIterator,
   SelectInput,
   SelectArrayInput,
+  TextInput,
   ReferenceInput,
   AutocompleteInput,
   required,
@@ -169,7 +170,7 @@ const soundInput = (formData, enableDelay) =>
 const validateDestinations = (value) => {
   const dests = value.destinations
   const error = {}
-  if (dests.filter(d => d === 'APP' || d === 'ALERT' || d === 'INTRO').length >= 2) {
+  if (dests && dests.filter(d => d === 'APP' || d === 'ALERT' || d === 'INTRO').length >= 2) {
     error.destinations = '「前情提要」/「對話視窗」/「提示視窗」只能選其中一個'
   }
   return error
@@ -195,7 +196,7 @@ const popupInput = () =>
 
 const popupDismissalInput = () => 
             <>
-                <SelectArrayInput label="關閉" source="dismissalDestinations" choices={destinations} /> <br/>
+                <CheckboxGroupInput label="關閉" source="dismissalDestinations" choices={destinations} /> <br/>
                 <NumberInput label="延遲時間 (千分之一秒)" source="dismissalDelay" validate={[number()]} />
             </>
 

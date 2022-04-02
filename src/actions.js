@@ -75,7 +75,9 @@ const InputForm = (props) => {
   <SimpleForm {...props} validate={validateDestinations}>
       <FormDataConsumer>
       {({ formData, ...rest }) => {
-        const enableDelay = !formData.prevs.some(c => c.conditionType == 'GEOFENCE' || c.conditionType == 'BEACON')
+        const enableDelay = formData.prevs && !formData.prevs.some(c =>
+          c.conditionType == 'GEOFENCE' || c.conditionType == 'BEACON'
+        )
         return <>
           {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> } <br/>
           <TextInput label="名稱" source="name" validate={[required()]}/> <br/>

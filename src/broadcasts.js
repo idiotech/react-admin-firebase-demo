@@ -1,11 +1,8 @@
 import * as React from "react";
 import {
-  ArrayInput,
   Button,
   BooleanInput,
   Confirm,
-  NumberInput,
-  SimpleFormIterator,
   Datagrid,
   List,
   Create,
@@ -16,23 +13,10 @@ import {
   TextInput,
   EditButton,
   DeleteButton,
-  CreateButton,
   SelectInput,
-  SelectArrayInput,
-  ReferenceInput,
-  ReferenceArrayInput,
-  ReferenceArrayField,
-  SingleFieldList,
-  ChipField,
   FormDataConsumer,
-  AutocompleteInput,
   required,
-  number,
   FunctionField,
-  AutocompleteArrayInput,
-  useLoading,
-  ArrayField,
-  ReferenceField,
   fetchStart,
   fetchEnd,
   useNotify,
@@ -65,7 +49,7 @@ import {
   destinations, soundModes, soundTypes, beaconTypes, 
     callTypes, getContentIcon, locationCondition, beaconCondition,
     soundInput, popupInput, popupDismissalInput, incomingCallInput, hangUpInput, 
-    markerInput, markerRemovalInput, mapStyleInput
+    markerInput, markerRemovalInput, mapStyleInput, validateDestinations
 } from './actionCommon'
 
 import {
@@ -97,12 +81,13 @@ export const BroadcastList = (props) => {
 
 const InputForm = (props) => {
   return (
-  <SimpleForm {...props}>
+  <SimpleForm {...props} validate={validateDestinations}>
       <FormDataConsumer>
       {({ formData, ...rest }) => {
         return <>
-          <TextInput label="名稱" source="name" validate={[required()]}/> <br/>
           {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
+          <TextInput label="名稱" source="name" validate={[required()]}/> <br/>
+          <h3>觸發順序</h3><hr/>
               <SelectInput label="觸發條件" source="conditionType" choices={conditionTypes} />
               <FormDataConsumer>
                 {({
@@ -123,35 +108,42 @@ const InputForm = (props) => {
                 }}
               </FormDataConsumer>
               <br/>
-          <NumberInput label="延遲時間 (千分之一秒)" source="delay" validate={[required(), number()]} />
+          <h3>內容</h3><hr/>
           <BooleanInput label="聲音" source="hasSound" />
           {
             formData.hasSound && soundInput(formData)
           }
+          <hr/>
           <BooleanInput label="圖文訊息" source="hasPopup" />
           {
             formData.hasPopup && popupInput()
           }
+          <hr/>
           <BooleanInput label="關閉圖文框" source="hasPopupDismissal" />
           {
             formData.hasPopupDismissal && popupDismissalInput()
           }
+          <hr/>
           <BooleanInput label="來電" source="hasIncomingCall" />
           {
             formData.hasIncomingCall && incomingCallInput()
           }
+          <hr/>
           <BooleanInput label="掛電話" source="hasHangUp" />
           {
             formData.hasHangUp && hangUpInput()
           }
+          <hr/>
           <BooleanInput label="新圖釘" source="hasMarker" />
           {
             formData.hasMarker && markerInput()
           }
+          <hr/>
           <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
           {
             formData.hasMarkerRemoval && markerRemovalInput()
           }
+          <hr/>
           <BooleanInput label="地圖樣式" source="hasMapStyle" />
           {
             formData.hasMapStyle && mapStyleInput()
