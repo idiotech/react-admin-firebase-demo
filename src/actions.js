@@ -31,7 +31,7 @@ import {
     destinations, soundModes, soundTypes, conditionTypes, beaconTypes, 
     callTypes, getConditionIcon, getContentIcon, locationCondition, beaconCondition,
     soundInput, popupInput, popupDismissalInput, incomingCallInput, hangUpInput,
-    markerInput, markerRemovalInput, mapStyleInput
+    markerInput, markerRemovalInput, mapStyleInput, validateDestinations
 } from './actionCommon'
 
 
@@ -72,13 +72,15 @@ const InputForm = (props) => {
   const parentMap = new Map()
 
   return (
-  <SimpleForm {...props}>
+  <SimpleForm {...props} validate={validateDestinations}>
       <FormDataConsumer>
       {({ formData, ...rest }) => {
         const enableDelay = !formData.prevs.some(c => c.conditionType == 'GEOFENCE' || c.conditionType == 'BEACON')
         return <>
-          {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
-          <BooleanInput label="開頭" source="firstAction" />
+          {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> } <br/>
+          <TextInput label="名稱" source="name" validate={[required()]}/> <br/>
+          <h3>觸發順序</h3><hr/>
+          <BooleanInput label="開頭" source="firstAction" /> <br/>
           {formData.firstAction || <ArrayInput label="前一步" source="prevs">
             <SimpleFormIterator>
               <ReferenceInput label="接續" source="prev" reference="actions" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
@@ -123,38 +125,42 @@ const InputForm = (props) => {
               </ReferenceArrayInput>
             </>
           }
-          <TextInput label="名稱" source="name" validate={[required()]}/> <br/>
-          {
-            console.log('prevs', enableDelay, formData.prevs)
-          }
+          <h3>內容</h3><hr/>
           <BooleanInput label="聲音" source="hasSound" />
           {
             formData.hasSound && soundInput(formData, enableDelay)
           }
+          <hr/>
           <BooleanInput label="圖文訊息" source="hasPopup" />
           {
             formData.hasPopup && popupInput(enableDelay)
           }
+          <hr/>
           <BooleanInput label="關閉圖文框" source="hasPopupDismissal" />
           {
             formData.hasPopupDismissal && popupDismissalInput(enableDelay)
           }
+          <hr/>
           <BooleanInput label="來電" source="hasIncomingCall" />
           {
             formData.hasIncomingCall && incomingCallInput(enableDelay)
           }
+          <hr/>
           <BooleanInput label="掛電話" source="hasHangUp" />
           {
             formData.hasHangUp && hangUpInput(enableDelay)
           }
+          <hr/>
           <BooleanInput label="新圖釘" source="hasMarker" />
           {
             formData.hasMarker && markerInput(enableDelay)
           }
+          <hr/>
           <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
           {
             formData.hasMarkerRemoval && markerRemovalInput(enableDelay)
           }
+          <hr/>
           <BooleanInput label="地圖樣式" source="hasMapStyle" />
           {
             formData.hasMapStyle && mapStyleInput(enableDelay)

@@ -3,33 +3,13 @@ import {
   BooleanInput,
   NumberInput,
   SimpleFormIterator,
-  Datagrid,
-  List,
-  Create,
-  Edit,
-  Filter,
-  SimpleForm,
-  TextField,
-  TextInput,
-  EditButton,
-  DeleteButton,
-  CreateButton,
   SelectInput,
   SelectArrayInput,
   ReferenceInput,
-  ReferenceArrayInput,
-  ReferenceArrayField,
-  SingleFieldList,
-  ChipField,
-  FormDataConsumer,
   AutocompleteInput,
   required,
   number,
-  FunctionField,
-  AutocompleteArrayInput,
-  useLoading,
-  ArrayField,
-  ReferenceField
+  CheckboxGroupInput
 } from "react-admin";
 
 import BluetoothIcon from '@material-ui/icons/Bluetooth';
@@ -55,7 +35,6 @@ const destinations = [
           { id: 'APP', name: '對話視窗' },
           { id: 'ALERT', name: '提示視窗' },
           { id: 'INTRO', name: '前情提要' },
-          { id: 'WELCOME', name: '停用，請勿選擇' },
 ]
 const soundModes = [
           { id: 'STATIC_VOLUME', name: '固定' },
@@ -187,23 +166,32 @@ const soundInput = (formData, enableDelay) =>
                 }
             </>
 
+const validateDestinations = (value) => {
+  const dests = value.destinations
+  const error = {}
+  if (dests.filter(d => d === 'APP' || d === 'ALERT' || d === 'INTRO').length >= 2) {
+    error.destinations = '「前情提要」/「對話視窗」/「提示視窗」只能選其中一個'
+  }
+  return error
+};
+
 const popupInput = () => 
-            <>
-                <TextInput multiline label="文字" source="text" />
-                <ArrayInput label="圖片" source="pictures">
-                  <SimpleFormIterator>
-                    <ImageReferenceInput label="圖檔" source="pictureId" reference="images"  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
-                  </SimpleFormIterator>
-                </ArrayInput>
-                <ArrayInput label="回應按鈕" source="choices">
-                  <SimpleFormIterator>
-                    <TextInput source="choice" label="選擇" />
-                  </SimpleFormIterator>
-                </ArrayInput>
-                <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
-                <SelectArrayInput label="顯示於" source="destinations" choices={destinations} /> <br/>
-                <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[number()]} />
-            </>
+  <>
+      <TextInput multiline label="文字" source="text" />
+      <ArrayInput label="圖片" source="pictures">
+        <SimpleFormIterator>
+          <ImageReferenceInput label="圖檔" source="pictureId" reference="images"  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+        </SimpleFormIterator>
+      </ArrayInput>
+      <ArrayInput label="回應按鈕" source="choices">
+        <SimpleFormIterator>
+          <TextInput source="choice" label="選擇" />
+        </SimpleFormIterator>
+      </ArrayInput>
+      <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
+      <CheckboxGroupInput label="顯示於" source="destinations" choices={destinations} /> <br/>
+      <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[number()]} />
+  </>
 
 const popupDismissalInput = () => 
             <>
@@ -258,5 +246,5 @@ export {
     destinations, soundModes, soundTypes, conditionTypes, beaconTypes, 
     callTypes, getConditionIcon, getContentIcon, locationCondition, beaconCondition,
     soundInput, popupInput, popupDismissalInput, incomingCallInput, hangUpInput, 
-    markerInput, markerRemovalInput, mapStyleInput
+    markerInput, markerRemovalInput, mapStyleInput, validateDestinations
 }
