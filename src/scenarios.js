@@ -241,6 +241,16 @@ function PublishButton(props) {
       dispatch(fetchEnd());
     })
   }
+
+  function getScenarioName() {
+    if (props.record) {
+      return props.record.name;
+    } else {
+      window.location.reload();
+      return '';
+    }
+  }
+
   return (<>
     <Button
       label="發佈"
@@ -251,7 +261,7 @@ function PublishButton(props) {
     <Confirm
       isOpen={open}
       title="確認發佈"
-      content= {`你即將發佈${props.record.name}；使用者的進度將被中斷。確定嗎？`}
+      content= {`你即將發佈${getScenarioName()}；使用者的進度將被中斷。確定嗎？`}
       onConfirm={handleConfirm}
       onClose={handleDialogClose}
       confirm="確認發佈"

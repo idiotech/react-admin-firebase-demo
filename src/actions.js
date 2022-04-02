@@ -2,7 +2,6 @@ import * as React from "react";
 import {
   ArrayInput,
   BooleanInput,
-  NumberInput,
   SimpleFormIterator,
   Datagrid,
   List,
@@ -16,16 +15,11 @@ import {
   DeleteButton,
   CreateButton,
   SelectInput,
-  SelectArrayInput,
   ReferenceInput,
   ReferenceArrayInput,
-  ReferenceArrayField,
-  SingleFieldList,
   ChipField,
   FormDataConsumer,
-  AutocompleteInput,
   required,
-  number,
   FunctionField,
   AutocompleteArrayInput,
   useLoading,
@@ -81,6 +75,7 @@ const InputForm = (props) => {
   <SimpleForm {...props}>
       <FormDataConsumer>
       {({ formData, ...rest }) => {
+        const enableDelay = !formData.prevs.some(c => c.conditionType == 'GEOFENCE' || c.conditionType == 'BEACON')
         return <>
           {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> }
           <BooleanInput label="開頭" source="firstAction" />
@@ -129,38 +124,40 @@ const InputForm = (props) => {
             </>
           }
           <TextInput label="名稱" source="name" validate={[required()]}/> <br/>
-          <NumberInput label="延遲時間 (千分之一秒)" source="delay" validate={[required(), number()]} />
+          {
+            console.log('prevs', enableDelay, formData.prevs)
+          }
           <BooleanInput label="聲音" source="hasSound" />
           {
-            formData.hasSound && soundInput(formData)
+            formData.hasSound && soundInput(formData, enableDelay)
           }
           <BooleanInput label="圖文訊息" source="hasPopup" />
           {
-            formData.hasPopup && popupInput()
+            formData.hasPopup && popupInput(enableDelay)
           }
           <BooleanInput label="關閉圖文框" source="hasPopupDismissal" />
           {
-            formData.hasPopupDismissal && popupDismissalInput()
+            formData.hasPopupDismissal && popupDismissalInput(enableDelay)
           }
           <BooleanInput label="來電" source="hasIncomingCall" />
           {
-            formData.hasIncomingCall && incomingCallInput()
+            formData.hasIncomingCall && incomingCallInput(enableDelay)
           }
           <BooleanInput label="掛電話" source="hasHangUp" />
           {
-            formData.hasHangUp && hangUpInput()
+            formData.hasHangUp && hangUpInput(enableDelay)
           }
           <BooleanInput label="新圖釘" source="hasMarker" />
           {
-            formData.hasMarker && markerInput()
+            formData.hasMarker && markerInput(enableDelay)
           }
           <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
           {
-            formData.hasMarkerRemoval && markerRemovalInput()
+            formData.hasMarkerRemoval && markerRemovalInput(enableDelay)
           }
           <BooleanInput label="地圖樣式" source="hasMapStyle" />
           {
-            formData.hasMapStyle && mapStyleInput()
+            formData.hasMapStyle && mapStyleInput(enableDelay)
           }
         </>
       }}

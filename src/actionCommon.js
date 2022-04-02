@@ -158,7 +158,7 @@ const beaconCondition = (getSource) =>
                         />
                       </>
 
-const soundInput = (formData) => 
+const soundInput = (formData, enableDelay) =>
             <>
                 <SoundReferenceInput label="音檔" source="soundId" reference="sounds" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} validate={[required()]}>
                   <AutocompleteInput optionText="name" />
@@ -182,7 +182,9 @@ const soundInput = (formData) =>
                   <NumberInput label="範圍" source="range" initialValue={30} validate={[required(), number()]}/>公尺
                   </div>
                 }
-                <NumberInput label="延遲時間 (千分之一秒)" source="soundDelay" validate={[number()]} />
+                {
+                  enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="soundDelay" validate={[number()]} />
+                }
             </>
 
 const popupInput = () => 
