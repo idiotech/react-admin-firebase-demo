@@ -1,35 +1,4 @@
 import {
-    ArrayInput,
-    BooleanInput,
-    NumberInput,
-    SimpleFormIterator,
-    Datagrid,
-    List,
-    Create,
-    Edit,
-    Filter,
-    SimpleForm,
-    TextField,
-    TextInput,
-    EditButton,
-    DeleteButton,
-    CreateButton,
-    SelectInput,
-    SelectArrayInput,
-    ReferenceInput,
-    ReferenceArrayInput,
-    ReferenceArrayField,
-    SingleFieldList,
-    ChipField,
-    FormDataConsumer,
-    AutocompleteInput,
-    required,
-    number,
-    FunctionField,
-    AutocompleteArrayInput,
-    useLoading,
-    ArrayField,
-    ReferenceField,
     useGetList
   } from "react-admin";
 
@@ -252,6 +221,24 @@ export const getActions = (currentNode, data, condition) => {
       description: currentNode.name
     }
     ret.push(mapStyleAction)
+  }
+  if (currentNode.hasIntroImage) {
+    const introImageAction = {
+      id: currentNode.id + '-intro-image',
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: 'INTRO_IMAGE',
+          backgroundUrl: images[currentNode.introBackground].image.src,
+          logoUrl: images[currentNode.introLogo].image.src
+        },
+        condition: condition
+      },
+      delay: currentNode.introImageDelay,
+      description: currentNode.name
+    }
+    ret.push(introImageAction)
   }
   return ret.map(a => ({
     ...a,

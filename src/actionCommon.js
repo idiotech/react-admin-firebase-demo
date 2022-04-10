@@ -4,7 +4,6 @@ import {
   NumberInput,
   SimpleFormIterator,
   SelectInput,
-  SelectArrayInput,
   TextInput,
   ReferenceInput,
   AutocompleteInput,
@@ -26,6 +25,7 @@ import MapIcon from '@material-ui/icons/Map';
 import ReplyIcon from '@material-ui/icons/Reply';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import HourglassBottomIcon from '@material-ui/icons/HourglassEmpty';
+import ImageIcon from '@material-ui/icons/Image';
 
 import LocationReferenceInput from './LocationReferenceInput';
 import SoundReferenceInput from './SoundReferenceInput';
@@ -35,7 +35,7 @@ const destinations = [
           { id: 'NOTIFICATION', name: '通知列' },
           { id: 'APP', name: '對話視窗' },
           { id: 'ALERT', name: '提示視窗' },
-          { id: 'INTRO', name: '前情提要' },
+          { id: 'INTRO', name: '首頁' },
 ]
 const soundModes = [
           { id: 'STATIC_VOLUME', name: '固定' },
@@ -72,8 +72,9 @@ const getConditionIcon = (record) => {
     record.hasMarkerRemoval && record.markerRemovalDelay ||
     record.hasPopup && record.popupDelay ||
     record.hasPopupDismissal && record.popupDismissalDelay ||
-    record.hasMapStyle && record.mapStyleDelay
-  
+    record.hasMapStyle && record.mapStyleDelay ||
+    record.hasIntroImage && record.introImageDelay
+ 
     return <>
       { conds.has('TEXT') ? <ReplyIcon />: <></>}
       { conds.has('BEACON') ? <BluetoothIcon/>: <></>}
@@ -93,6 +94,7 @@ const getContentIcon = (record) => {
       { record.hasMarkerRemoval ? <LocationOffIcon/>: <></>}
       { record.hasHangUp ? <PhoneDisabledIcon/>: <></>}
       { record.hasMapStyle ? <MapIcon/>: <></>}
+      { record.hasIntroImage ? <ImageIcon/>: <></>}
     </>
   }
 
@@ -176,7 +178,7 @@ const validateDestinations = (value) => {
   return error
 };
 
-const popupInput = () => 
+const popupInput = (enableDelay) => 
   <>
       <TextInput multiline label="文字" source="text" />
       <ArrayInput label="圖片" source="pictures">
@@ -191,61 +193,84 @@ const popupInput = () =>
       </ArrayInput>
       <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
       <CheckboxGroupInput label="顯示於" source="destinations" choices={destinations} /> <br/>
-      <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[number()]} />
+      {
+        enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[number()]} />
+      }
   </>
 
-const popupDismissalInput = () => 
-            <>
-                <CheckboxGroupInput label="關閉" source="dismissalDestinations" choices={destinations} /> <br/>
-                <NumberInput label="延遲時間 (千分之一秒)" source="dismissalDelay" validate={[number()]} />
-            </>
+const popupDismissalInput = (enableDelay) => 
+    <>
+      <CheckboxGroupInput label="關閉" source="dismissalDestinations" choices={destinations} /> <br/>
+      {
+        enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="dismissalDelay" validate={[number()]} />
+      }
+    </>
 
-const incomingCallInput = () =>
-            <>
-                <TextInput label="來電人" source="caller" validate={[required()]}/>
-                <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
-                <SelectInput label="狀態" source="callStatus"  choices={callTypes} initialValue={'CONNECTING'} /> <br/>
-                <NumberInput label="延遲時間 (千分之一秒)" source="incomingCallDelay" validate={[number()]} />
-            </>
-const hangUpInput = () =>
-            <>
-                <TextInput label="來電人" source="caller" validate={[required()]}/>
-                <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
-                <NumberInput label="延遲時間 (千分之一秒)" source="hangUpDelay" validate={[number()]} />
-            </>
+const incomingCallInput = (enableDelay) =>
+  <>
+      <TextInput label="來電人" source="caller" validate={[required()]}/>
+      <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+      <SelectInput label="狀態" source="callStatus"  choices={callTypes} initialValue={'CONNECTING'} /> <br/>
+      {
+        enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="incomingCallDelay" validate={[number()]} />
+      }
+  </>
+const hangUpInput = (enableDelay) =>
+  <>
+      <TextInput label="來電人" source="caller" validate={[required()]}/>
+      <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+      {
+        enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="hangUpDelay" validate={[number()]} />
+      }
+  </>
 
-const markerInput = () => 
-            <>
-              <TextInput label="標題" source="title" validate={[required()]}/><br/>
-              <ImageReferenceInput label="圖示檔案" source="markerIcon" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
-              <LocationReferenceInput label="座標" source="locationId" reference="locations" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} >
-                <AutocompleteInput optionText="name" />
-              </LocationReferenceInput>
-              <br/>
-              <NumberInput label="延遲時間 (千分之一秒)" source="markerDelay" validate={[number()]} />
-            </>
+const markerInput = (enableDelay) => 
+  <>
+    <TextInput label="標題" source="title" validate={[required()]}/><br/>
+    <ImageReferenceInput label="圖示檔案" source="markerIcon" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+    <LocationReferenceInput label="座標" source="locationId" reference="locations" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} >
+      <AutocompleteInput optionText="name" />
+    </LocationReferenceInput>
+    <br/>
+    {
+       enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="markerDelay" validate={[number()]} />
+    }
+  </>
 
-const markerRemovalInput = () => 
-            <>
-               <ReferenceInput label="圖釘" source="markerId" reference="actions" validate={[required()]} filter={{ hasMarker: true }}  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
-                 <SelectInput optionText="title" />
-               </ReferenceInput>
-               <br/>
-               <NumberInput label="延遲時間 (千分之一秒)" source="markerRemovalDelay" validate={[number()]} />
-            </>
+const markerRemovalInput = (enableDelay) => 
+  <>
+    <ReferenceInput label="圖釘" source="markerId" reference="actions" validate={[required()]} filter={{ hasMarker: true }}  sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+      <SelectInput optionText="title" />
+    </ReferenceInput>
+    <br/>
+    {
+       enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="markerRemovalDelay" validate={[number()]} />
+    }
+  </>
 
-const mapStyleInput = () => 
-            <>
-               <ReferenceInput label="樣式" source="mapStyle" reference="mapStyles" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
-                 <SelectInput optionText="name" />
-               </ReferenceInput>
-               <br/>
-               <NumberInput label="延遲時間 (千分之一秒)" source="mapStyleDelay" validate={[number()]} />
-            </>
+const mapStyleInput = (enableDelay) => 
+  <>
+    <ReferenceInput label="樣式" source="mapStyle" reference="mapStyles" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+      <SelectInput optionText="name" />
+    </ReferenceInput>
+    <br/>
+    {
+       enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="mapStyleDelay" validate={[number()]} />
+    }
+  </>
+
+const introImageInput = (enableDelay) => 
+  <>
+    <ImageReferenceInput label="背景圖" source="introBackground" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+    <ImageReferenceInput label="Logo" source="introLogo" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+    {
+       enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="introImageDelay" validate={[number()]} />
+    }
+  </>
 
 export { 
     destinations, soundModes, soundTypes, conditionTypes, beaconTypes, 
     callTypes, getConditionIcon, getContentIcon, locationCondition, beaconCondition,
     soundInput, popupInput, popupDismissalInput, incomingCallInput, hangUpInput, 
-    markerInput, markerRemovalInput, mapStyleInput, validateDestinations
+    markerInput, markerRemovalInput, mapStyleInput, validateDestinations, introImageInput
 }

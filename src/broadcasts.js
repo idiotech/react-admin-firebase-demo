@@ -22,19 +22,12 @@ import {
   useNotify,
 } from "react-admin";
 
+import { getRecordField } from './utils'
 import { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 
 import BluetoothIcon from '@material-ui/icons/Bluetooth';
-import AudiotrackIcon from '@material-ui/icons/Audiotrack';
-import MessageIcon from '@material-ui/icons/Message';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
-import LocationOffIcon from '@material-ui/icons/LocationOff';
-import AddLocationIcon from '@material-ui/icons/AddLocation';
-import CancelIcon from '@material-ui/icons/Cancel';
-import PhoneCallbackIcon from '@material-ui/icons/PhoneCallback';
-import PhoneDisabledIcon from '@material-ui/icons/PhoneDisabled';
-import MapIcon from '@material-ui/icons/Map';
 import ReplyIcon from '@material-ui/icons/Reply';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import HourglassBottomIcon from '@material-ui/icons/HourglassEmpty';
@@ -249,7 +242,7 @@ function SendButton(props) {
         })
         .then((response) => {
           if (response.ok) {
-            notify(`成功傳送「${props.record.name}」`, 'success');
+            notify(`成功傳送「${getRecordField(props, 'name')}」`, 'success');
           } else {
             notify("傳送失敗；原因 =" + JSON.stringify(response.body) + " " + response.status, 'error');
           }
@@ -271,7 +264,7 @@ function SendButton(props) {
     <Confirm
       isOpen={open}
       title="傳送"
-      content= {`你即將傳送「${props.record.name}」給全部使用者。確定嗎？`}
+      content= {`你即將傳送「${getRecordField(props, 'name')}」給全部使用者。確定嗎？`}
       onConfirm={handleConfirm}
       onClose={handleDialogClose}
       confirm="確認傳送"

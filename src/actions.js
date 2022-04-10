@@ -28,12 +28,12 @@ import {
 } from "react-admin";
 
 import { 
-    destinations, soundModes, soundTypes, conditionTypes, beaconTypes, 
-    callTypes, getConditionIcon, getContentIcon, locationCondition, beaconCondition,
+    conditionTypes, getConditionIcon, getContentIcon, locationCondition, beaconCondition,
     soundInput, popupInput, popupDismissalInput, incomingCallInput, hangUpInput,
-    markerInput, markerRemovalInput, mapStyleInput, validateDestinations
+    markerInput, markerRemovalInput, mapStyleInput, validateDestinations, introImageInput
 } from './actionCommon'
 
+import { getRecordField } from './utils'
 
 const ActionFilter = (props) => (
   <Filter {...props}>
@@ -76,7 +76,7 @@ const InputForm = (props) => {
       <FormDataConsumer>
       {({ formData, ...rest }) => {
         const enableDelay = formData.prevs && !formData.prevs.some(c =>
-          c.conditionType == 'GEOFENCE' || c.conditionType == 'BEACON'
+          !c || c.conditionType == 'GEOFENCE' || c.conditionType == 'BEACON'
         )
         return <>
           {props.showid === "true" ? <TextInput source="id" options={{ disabled: true }}/> : <></> } <br/>
@@ -107,12 +107,24 @@ const InputForm = (props) => {
                     }
                     {
                       scopedFormData && scopedFormData.conditionType === 'TEXT' &&
-                        <TextInput 
-                          multiline
-                          label="文字"
-                          source={getSource("userReply")}
-                          validate={[required()]}
-                        />
+                      <>
+                        {
+                          !scopedFormData.fallback &&
+                          <TextInput 
+                            multiline
+                            label="文字"
+                            source={getSource("userReply")}
+                            validate={[required()]}
+                          />
+                        }
+                        {
+                          <BooleanInput 
+                            label="任意文字" 
+                            source={getSource("fallback")} 
+                            defaultValue={scopedFormData.userReply === 'fallback:'}
+                          />
+                        }
+                      </>
                     }
                   </>
                 }
@@ -167,6 +179,11 @@ const InputForm = (props) => {
           {
             formData.hasMapStyle && mapStyleInput(enableDelay)
           }
+          <hr/>
+          <BooleanInput label="前提提要背景" source="hasIntroImage" />
+          {
+            formData.hasIntroImage && introImageInput(enableDelay)
+          }
         </>
       }}
       </FormDataConsumer>
@@ -191,7 +208,7 @@ function NextButton(props) {
     <CreateButton label="下一步"
       to={{
         pathname: '/actions/create',
-        state: { record: { prevs: [{prev: props.record.id, conditionType: 'ALWAYS'}] }}
+        state: { record: { prevs: [{prev: getRecordField(props, 'id'), conditionType: 'ALWAYS'}] }}
       }}
     />
   )

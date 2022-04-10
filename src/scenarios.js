@@ -37,6 +37,8 @@ import {
 } from "react-admin-firebase";
 const xid = require('xid-js');
 
+import { getRecordField } from './utils'
+
 import {
   getAllData, getActions
 } from "./serverCommon"
@@ -78,9 +80,9 @@ function UseButton(props) {
   const dispatch = useDispatch();
   const refresh = useRefresh();
   function handleClick() {
-    const scenario = props.record.id;
+    const scenario = getRecordField(props, 'id');
     localStorage.setItem('scenario', scenario)
-    localStorage.setItem('scenarioName', props.record.name)
+    localStorage.setItem('scenarioName', getRecordField(props, 'name'))
     dispatch({ type: 'setScenario', scenario: scenario })
     refresh();
   }
@@ -107,6 +109,7 @@ function getTriggers(currentNode, parents) {
 }
 
 function getTrigger(currentNode, parentNode) {
+  console.log('current node condition', currentNode)
   const condition = currentNode.prevs.find(p => p.prev == parentNode.id);
   if (!condition) {
     console.log('bad parent', currentNode.name, parentNode.name, parentNode.id, currentNode.prevs.map(p => p.prev))
@@ -135,7 +138,7 @@ function getTrigger(currentNode, parentNode) {
       sender: "?u",
       payload: {
         type: condition.conditionType === "TEXT" ? "TEXT" : "END",
-        text: condition.userReply
+        text: condition.fallback ? 'fallback:' : condition.userReply
       },
       scenarioId: ""
   }
@@ -188,10 +191,6 @@ function PublishButton(props) {
       const parents = tree.node.prevs ? tree.node.prevs.map(p => actions[p.prev]) : []
       const condition = getCondition(tree.node, data)
       const serverActions = getActions(tree.node, data, condition);
-      // if (tree.node.parents) {
-        // console.log('parent relation: debug parents = ', tree.node.parents);
-      // }
-      // console.log('parent relation: parents = ', parents.map(p => p.name), 'child = ', tree.node.name);
       return {
         name: tree.node.firstAction ? 'initial' : tree.node.id,
         children: tree.node.children || [],
@@ -210,10 +209,10 @@ function PublishButton(props) {
       )
     }
     const payload = getNodes(actionTree)
-    const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
+    const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(props, 'id')}`
     // const urlString = `http://localhost:8080/v1/scenario/graphscript/${props.record.id}`
     const url = new URL(urlString)
-    const params = {name: props.record.name, overwrite: true}
+    const params = {name: getRecordField(props, 'name'), overwrite: true}
     url.search = new URLSearchParams(params).toString();
     console.log('payload', payload)
     // console.log('payload', payload.map(p => p.performances.map(p => p.action.content.condition)))
@@ -227,7 +226,7 @@ function PublishButton(props) {
     })
     .then((response) => {
       if (response.ok) {
-        notify("成功發佈" + props.record.name, 'success');
+        notify("成功發佈" + getRecordField(props, 'name'), 'success');
       } else {
         notify("發佈失敗；原因 =" + response.body + " " + response.status, 'error');
       }
@@ -242,15 +241,6 @@ function PublishButton(props) {
     })
   }
 
-  function getScenarioName() {
-    if (props.record) {
-      return props.record.name;
-    } else {
-      window.location.reload();
-      return '';
-    }
-  }
-
   return (<>
     <Button
       label="發佈"
@@ -261,7 +251,7 @@ function PublishButton(props) {
     <Confirm
       isOpen={open}
       title="確認發佈"
-      content= {`你即將發佈${getScenarioName()}；使用者的進度將被中斷。確定嗎？`}
+      content= {`你即將發佈${getRecordField(props, 'name')}；使用者的進度將被中斷。確定嗎？`}
       onConfirm={handleConfirm}
       onClose={handleDialogClose}
       confirm="確認發佈"
@@ -314,9 +304,9 @@ function GpxButton(props) {
       )
     }
     const payload = getNodes(actionTree)
-    const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${props.record.id}`
+    const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(props, 'id')}`
     const url = new URL(urlString)
-    const params = {name: props.record.name, overwrite: true}
+    const params = {name: getRecordField(props, 'name'), overwrite: true}
     url.search = new URLSearchParams(params).toString();
 
     const points = payload.map(n => 
@@ -341,7 +331,7 @@ function GpxButton(props) {
     const blob = new Blob([cleanGpx], {type: 'application/gpx+xml'}); 
     const gpxUrl = window.URL.createObjectURL(blob);
     link.href = gpxUrl;
-    link.download = props.record.name  + '.gpx';
+    link.download = getRecordField(props, 'name')  + '.gpx';
     setLoading(false);
     setOpen(false);
     dispatch(fetchEnd());
@@ -387,7 +377,7 @@ function CloneButton(props) {
   const createData = JSON.parse(JSON.stringify(props.record))
   const cloneId = xid.next();
   createData.id = cloneId
-  createData.name = props.record.name + '-' + cloneId
+  createData.name = getRecordField(props, 'name') + '-' + cloneId
   const [create, { creating }] = useMutation({
     type: 'create',
     resource: 'scenarios',
@@ -498,6 +488,11 @@ function CloneButton(props) {
             delete(newA[`triggers_${oldId}_userReply`]);
             rec.userReply = reply;
           }
+          const fallback = newA[`triggers_${oldId}_fallback`];
+          if (fallback) {
+            delete(newA[`triggers_${oldId}_fallback`]);
+            rec.fallback = fallback;
+          }
           return rec;
         })
         newA.prevs = prevs;
@@ -522,7 +517,7 @@ function CloneButton(props) {
     <Confirm
       isOpen={open}
       title="確認複製"
-      content= {`你即將複製一份《${props.record.name}》；確定嗎？`}
+      content= {`你即將複製一份《${getRecordField(props, 'name')}》；確定嗎？`}
       onConfirm={handleConfirm}
       onClose={handleDialogClose}
       confirm="確認複製"
@@ -537,7 +532,7 @@ const Title = ({ record }) => {
 };
 
 export const ScenarioList = (props) => (
-  <List title={<Title/>} {...props}  filters={<ScenarioFilter />}>
+  <List title={<Title/>} {...props} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={100} filters={<ScenarioFilter />}>
     <Datagrid>
       <TextField label="名稱" source="name" />
       <TextField label="說明" source="description" />
