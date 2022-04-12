@@ -2,7 +2,7 @@
 import React from "react";
 import { Login, LoginForm } from "react-admin";
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
-import firebase from 'firebase';
+import firebase from "firebase/compat/app";
 
 // Configure FirebaseUI.
 const uiConfig = {
@@ -14,10 +14,24 @@ const uiConfig = {
   signInOptions: [
     firebase.auth.GoogleAuthProvider.PROVIDER_ID,
     firebase.auth.FacebookAuthProvider.PROVIDER_ID
-  ]
+  ],
+  // Optional callbacks in order to get Access Token from Google,Facebook,... etc
+  callbacks: {
+    signInSuccessWithAuthResult: (result) => {
+      const credential = result.credential;
+      // The signed-in user info.
+      const user = result.user;
+      // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+      const accessToken = credential.accessToken;
+      console.log({result, user, accessToken});
+    }
+  }
 };
 
-const SignInScreen = () => <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()}/>;
+const SignInScreen = () => <StyledFirebaseAuth 
+  firebaseAuth={firebase.auth()}
+  uiConfig={uiConfig}
+/>;
 
 const CustomLoginForm = props => (
   <div>
