@@ -130,7 +130,11 @@ function getTrigger(currentNode, parentNode) {
                 ? parentNode.id + '-marker-removal'
                 : parentNode.hasMapStyle
                   ? parentNode.id + '-map-style'
-                  : parentNode.id + '-popup-dismissal'
+                  : parentNode.hasPopupDismissal
+                    ? parentNode.id + '-popup-dismissal'
+                    : parentNode.hasIntroImage
+                      ? parentNode.id + '-intro-image'
+                      : parentNode.id + '-button-style'
   return {
       id: "",
       actionId: actionId,
@@ -191,6 +195,7 @@ function PublishButton(props) {
       const parents = tree.node.prevs ? tree.node.prevs.map(p => actions[p.prev]) : []
       const condition = getCondition(tree.node, data)
       const serverActions = getActions(tree.node, data, condition);
+      console.log('server actions', serverActions);
       return {
         name: tree.node.firstAction ? 'initial' : tree.node.id,
         children: tree.node.children || [],
@@ -210,12 +215,11 @@ function PublishButton(props) {
     }
     const payload = getNodes(actionTree)
     const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(props, 'id')}`
-    // const urlString = `http://localhost:8080/v1/scenario/graphscript/${props.record.id}`
     const url = new URL(urlString)
     const params = {name: getRecordField(props, 'name'), overwrite: true}
     url.search = new URLSearchParams(params).toString();
-    console.log('payload', payload)
-    // console.log('payload', payload.map(p => p.performances.map(p => p.action.content.condition)))
+    // console.log('payload', payload.map(p => p.performances.map(p => p.action.content)))
+    console.log('payload', payload);
 
     fetch(url, {
       method: 'PUT',
@@ -532,7 +536,7 @@ const Title = ({ record }) => {
 };
 
 export const ScenarioList = (props) => (
-  <List title={<Title/>} {...props} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={100} filters={<ScenarioFilter />}>
+  <List title={<Title/>} {...props} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={20} filters={<ScenarioFilter />}>
     <Datagrid>
       <TextField label="名稱" source="name" />
       <TextField label="說明" source="description" />

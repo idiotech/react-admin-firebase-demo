@@ -12,6 +12,8 @@ import {
   CheckboxGroupInput
 } from "react-admin";
 
+import { ColorField, ColorInput } from 'react-admin-color-input';
+
 import BluetoothIcon from '@material-ui/icons/Bluetooth';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import MessageIcon from '@material-ui/icons/Message';
@@ -26,6 +28,7 @@ import ReplyIcon from '@material-ui/icons/Reply';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import HourglassBottomIcon from '@material-ui/icons/HourglassEmpty';
 import ImageIcon from '@material-ui/icons/Image';
+import ButtonIcon from '@material-ui/icons/NavigateNext';
 
 import LocationReferenceInput from './LocationReferenceInput';
 import SoundReferenceInput from './SoundReferenceInput';
@@ -73,7 +76,8 @@ const getConditionIcon = (record) => {
     record.hasPopup && record.popupDelay ||
     record.hasPopupDismissal && record.popupDismissalDelay ||
     record.hasMapStyle && record.mapStyleDelay ||
-    record.hasIntroImage && record.introImageDelay
+    record.hasIntroImage && record.introImageDelay ||
+    record.hasButtonStyle && record.buttonStyleDelay
  
     return <>
       { conds.has('TEXT') ? <ReplyIcon />: <></>}
@@ -95,6 +99,7 @@ const getContentIcon = (record) => {
       { record.hasHangUp ? <PhoneDisabledIcon/>: <></>}
       { record.hasMapStyle ? <MapIcon/>: <></>}
       { record.hasIntroImage ? <ImageIcon/>: <></>}
+      { record.hasButtonStyle ? <ButtonIcon/>: <></>}
     </>
   }
 
@@ -263,8 +268,20 @@ const introImageInput = (enableDelay) =>
   <>
     <ImageReferenceInput label="背景圖" source="introBackground" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
     <ImageReferenceInput label="Logo" source="introLogo" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
+    <NumberInput label="Logo距頂" source="introLogoMarginTop" validate={[number()]} />
+    <NumberInput label="Logo高度" source="introLogoHeight" validate={[number()]} />
+    <NumberInput label="Logo寬度" source="introLogoWidth" validate={[number()]} />
     {
        enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="introImageDelay" validate={[number()]} />
+    }
+  </>
+
+const buttonStyleInput = (enableDelay) =>
+  <>
+    <ColorInput label="背景顏色" source="backgroundColor" />
+    <ColorInput label="文字顏色" source="textColor" />
+    {
+       enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="buttonStyleDelay" validate={[number()]} />
     }
   </>
 
@@ -272,5 +289,6 @@ export {
     destinations, soundModes, soundTypes, conditionTypes, beaconTypes, 
     callTypes, getConditionIcon, getContentIcon, locationCondition, beaconCondition,
     soundInput, popupInput, popupDismissalInput, incomingCallInput, hangUpInput, 
-    markerInput, markerRemovalInput, mapStyleInput, validateDestinations, introImageInput
+    markerInput, markerRemovalInput, mapStyleInput, validateDestinations, introImageInput,
+    buttonStyleInput
 }

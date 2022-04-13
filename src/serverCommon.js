@@ -231,7 +231,10 @@ export const getActions = (currentNode, data, condition) => {
         task: {
           type: 'INTRO_IMAGE',
           backgroundUrl: images[currentNode.introBackground].image.src,
-          logoUrl: images[currentNode.introLogo].image.src
+          logoUrl: images[currentNode.introLogo].image.src,
+          logoMarginTop: currentNode.introLogoMarginTop,
+          logoWidth: currentNode.introLogoWidth,
+          logoHeight: currentNode.introLogoHeight
         },
         condition: condition
       },
@@ -239,6 +242,25 @@ export const getActions = (currentNode, data, condition) => {
       description: currentNode.name
     }
     ret.push(introImageAction)
+  }
+  if (currentNode.hasButtonStyle) {
+    console.log('BUTTON_STYLE', currentNode.backgroundColor)
+    const buttonStyleAction = {
+      id: currentNode.id + '-button-style',
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: 'BUTTON_STYLE',
+          textColor: currentNode.textColor,
+          backgroundColor: currentNode.backgroundColor
+        },
+        condition: condition
+      },
+      delay: currentNode.backgroundDelay,
+      description: currentNode.name
+    }
+    ret.push(buttonStyleAction)
   }
   return ret.map(a => ({
     ...a,
