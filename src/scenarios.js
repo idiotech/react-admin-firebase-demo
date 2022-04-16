@@ -216,7 +216,7 @@ function PublishButton(props) {
     const payload = getNodes(actionTree)
     const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(props, 'id')}`
     const url = new URL(urlString)
-    const params = {name: getRecordField(props, 'name'), overwrite: true}
+    const params = {name: getRecordField(props, 'name'), displayName: getRecordField(props, 'displayName'), overwrite: true}
     url.search = new URLSearchParams(params).toString();
     // console.log('payload', payload.map(p => p.performances.map(p => p.action.content)))
     console.log('payload', payload);
@@ -540,7 +540,7 @@ export const ScenarioList = (props) => (
     <Datagrid>
       <TextField label="名稱" source="name" />
       <TextField label="說明" source="description" />
-      <UseButton source="id" />
+      <UseButton />
       <PublishButton />
       <CloneButton />
       <GpxButton />
@@ -554,6 +554,7 @@ export const ScenarioCreate = (props) => (
   <Create title={<Title />} {...props} >
     <SimpleForm>
       <TextInput label="名稱" source="name" />
+      <TextInput label="顯示名稱" source="displayName" />
       <TextInput label="說明" source="description" />
     </SimpleForm>
   </Create>
@@ -566,6 +567,7 @@ export const ScenarioEdit = (props) => (
       <DateTimeInput label="建立時間" disabled source="createdate" />
       <DateTimeInput label="修改時間" disabled source="lastupdate" />
       <TextInput label="名稱"  source="name" />
+      <TextInput label="顯示名稱" source="displayName" />
       <TextInput label="說明" source="description" />
     </SimpleForm>
   </Edit>
