@@ -45,7 +45,13 @@ export const getAllData = () => {
     { field: 'published_at', order: 'DESC' }
   );
   const mapStyles = mapStyleResult.data
-  return {actions, locations, beacons, images, sounds, mapStyles};
+  const broadcastResult = useGetList(
+    'broadcasts',
+    { page: 1, perPage: 500 },
+    { field: 'published_at', order: 'DESC' }
+  );
+  const broadcasts = broadcastResult.data
+  return {actions, locations, beacons, images, sounds, mapStyles, broadcasts};
 }
 
 export const getActions = (currentNode, data, condition) => {

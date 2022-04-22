@@ -377,7 +377,7 @@ function CloneButton(props) {
   const [open, setOpen] = useState(false);
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
-  const {actions, sounds, locations, beacons, images, mapStyles} = getAllData()
+  const {actions, sounds, locations, beacons, images, mapStyles, broadcasts} = getAllData()
   const createData = JSON.parse(JSON.stringify(props.record))
   const cloneId = xid.next();
   createData.id = cloneId
@@ -400,6 +400,7 @@ function CloneButton(props) {
   Object.keys(images).forEach(a => idMap.set(a, xid.next()))
   Object.keys(sounds).forEach(a => idMap.set(a, xid.next()))
   Object.keys(mapStyles).forEach(a => idMap.set(a, xid.next()))
+  Object.keys(broadcasts).forEach(a => idMap.set(a, xid.next()))
   async function handleConfirm() {
     setOpen(false);
     setLoading(true);
@@ -423,39 +424,50 @@ function CloneButton(props) {
       ...createFields(mapStyles, 'mapStyles'),
       ...createFields(locations, 'locations'),
     ])
-    const actionValues = Object.values(actions)
-    await Promise.all(actionValues.map(a => {
-
+    function updateValueFor(obj, field) {
+      const value = obj[field];
+      if (value) {
+        const newValue = idMap.get(value)
+        obj[field] = newValue ? newValue : null
+      }
+    }
+    function updateValuesFor(a) {
+      updateValueFor(a, 'geofenceCenter')
+      updateValueFor(a, 'beacon')
+      updateValueFor(a, 'soundId')
+      updateValueFor(a, 'mapStyle')
+      updateValueFor(a, 'soundCenterId')
+      updateValueFor(a, 'markerIcon')
+      updateValueFor(a, 'portrait')
+      updateValueFor(a, 'locationId')
+      updateValueFor(a, 'markerId')
+      updateValueFor(a, 'introBackground')
+      updateValueFor(a, 'introLogo')
+      console.log('pictures before', a.pictures)
+      if (a.pictures) {
+        a.pictures.forEach( p => {
+          console.log('picture', p.pictureId, a.pictures)
+          const newId = idMap.get(p.pictureId);
+          console.log('pictures id from', p.pictureId, 'to', newId)
+          p.pictureId = newId;
+          console.log('pictures during', a.pictures, p.pictureId)
+        });
+        console.log('pictures after', a.pictures)
+      }
+    } 
+    await Promise.all(Object.values(broadcasts).map(a => {
+      const newA = JSON.parse(JSON.stringify(a))
+      newA.id = idMap.get(a.id)
+      updateValuesFor(newA);
+      return baseProvider.create('broadcasts', {data: newA})
+    })) 
+    await Promise.all(Object.values(actions).map(a => {
       const newA = JSON.parse(JSON.stringify(a))
       newA.id = idMap.get(a.id)
       if (newA.exclusiveWith) {
         newA.exclusiveWith = newA.exclusiveWith.map(id => idMap.get(id)).filter(e => e);
       }
-      function updateValueFor(obj, field) {
-        const value = obj[field];
-        if (value) {
-          const newValue = idMap.get(value)
-          obj[field] = newValue ? newValue : null
-        }
-      }
-      function updateValue(field) {
-        updateValueFor(newA, field);
-      }
-      updateValue('geofenceCenter')
-      updateValue('beacon')
-      updateValue('soundId')
-      updateValue('mapStyle')
-      updateValue('soundCenterId')
-      updateValue('markerIcon')
-      updateValue('portrait')
-      updateValue('locationId')
-      updateValue('markerId')
-      const pictures = newA.pictures
-      if (pictures) {
-        const newPics = pictures.map( p => idMap.get(p.pictureId));
-        newA.pictures = newPics;
-      }
-
+      updateValuesFor(newA);
       // for new formats
       if (newA.prevs) {
         newA.prevs.forEach(p => {
