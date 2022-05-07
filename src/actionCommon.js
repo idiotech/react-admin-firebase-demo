@@ -253,11 +253,15 @@ const markerRemovalInput = (enableDelay) =>
     }
   </>
 
-const mapStyleInput = (enableDelay) => 
+const mapStyleInput = (enableDelay, formData) => 
   <>
-    <ReferenceInput label="樣式" source="mapStyle" reference="mapStyles" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
-      <SelectInput optionText="name" />
-    </ReferenceInput>
+    {
+      !formData.satellite && 
+        <ReferenceInput label="樣式" source="mapStyle" reference="mapStyles" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000}>
+          <SelectInput optionText="name" />
+        </ReferenceInput>
+    }
+    <BooleanInput label="衛星地圖" source="satellite" initialValue={false} />
     <br/>
     {
        enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="mapStyleDelay" validate={[number()]} />

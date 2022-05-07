@@ -216,10 +216,12 @@ function PublishButton(props) {
     const payload = getNodes(actionTree)
     const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(props, 'id')}`
     const url = new URL(urlString)
-    const params = {name: getRecordField(props, 'name'), displayName: getRecordField(props, 'displayName'), overwrite: true}
+    const displayName = getRecordField(props, 'displayName') || null
+    const params = {name: getRecordField(props, 'name'), displayName: displayName, overwrite: true}
+    console.log('displayName', params)
     url.search = new URLSearchParams(params).toString();
     // console.log('payload', payload.map(p => p.performances.map(p => p.action.content)))
-    console.log('payload', payload);
+    // console.log('payload', payload);
 
     fetch(url, {
       method: 'PUT',

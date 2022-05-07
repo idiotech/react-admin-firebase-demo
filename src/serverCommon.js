@@ -219,7 +219,8 @@ export const getActions = (currentNode, data, condition) => {
       content: {
         task: {
           type: 'MAP_STYLE',
-          url: mapStyles[currentNode.mapStyle].mapStyle.src,
+          url: currentNode.satellite ? null : currentNode.mapStyle ? mapStyles[currentNode.mapStyle].mapStyle.src : null,
+          satellite: currentNode.satellite
         },
         condition: condition
       },

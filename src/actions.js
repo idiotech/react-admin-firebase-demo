@@ -177,7 +177,7 @@ const InputForm = (props) => {
           <hr/>
           <BooleanInput label="地圖樣式" source="hasMapStyle" />
           {
-            formData.hasMapStyle && mapStyleInput(enableDelay)
+            formData.hasMapStyle && mapStyleInput(enableDelay, formData)
           }
           <hr/>
           <BooleanInput label="前提提要背景" source="hasIntroImage" />
