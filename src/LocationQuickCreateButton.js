@@ -16,7 +16,7 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
-import { CoordinateInput, CoordinateField } from "./coordinates";
+import { CoordinateInput } from "./coordinates";
 
 function LocationQuickCreateButton({ onChange, source }) {
   const [showDialog, setShowDialog] = useState(false);

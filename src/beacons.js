@@ -4,11 +4,9 @@ import * as React from "react";
 import {
   Datagrid,
   List,
-  Show,
   Create,
   Edit,
   Filter,
-  SimpleShowLayout,
   SimpleForm,
   TextField,
   TextInput,

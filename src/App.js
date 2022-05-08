@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ActionList, ActionCreate, ActionShow, ActionEdit } from "./actions";
+import { ActionList, ActionCreate, ActionEdit } from "./actions";
 import {
   ScenarioList,
   ScenarioCreate,
@@ -18,10 +18,8 @@ import {
   FirebaseDataProvider,
   FirebaseAuthProvider,
 } from "react-admin-firebase";
-import { useSelector, Provider } from "react-redux";
-import { createStore } from "redux";
+import { Provider } from "react-redux";
 
-import CommentIcon from "@material-ui/icons/Comment";
 import CustomLoginPage from "./CustomLoginPage";
 import CompositeDataProvider from "./compositeDataProvider";
 import { createHashHistory } from "history";
@@ -106,7 +104,7 @@ const dataProvider = new CompositeDataProvider([
 const customReducers = { currentScenario: scenarioReducer };
 
 const history = createHashHistory();
-function Main(props) {
+function Main() {
   return (
     <Admin
       loginPage={CustomLoginPage}

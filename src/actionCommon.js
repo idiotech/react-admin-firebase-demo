@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   ArrayInput,
   BooleanInput,
@@ -15,7 +16,7 @@ import {
 
 import "./modalImage.css";
 
-import { ColorField, ColorInput } from "react-admin-color-input";
+import { ColorInput } from "react-admin-color-input";
 
 import BluetoothIcon from "@material-ui/icons/Bluetooth";
 import AudiotrackIcon from "@material-ui/icons/Audiotrack";

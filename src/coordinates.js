@@ -5,7 +5,7 @@ import { NumberInput, required, number } from "react-admin";
 
 const validateCoordinate = [required(), number()];
 
-export const CoordinateInput = (props) => {
+export const CoordinateInput = () => {
   return (
     <span>
       <NumberInput source="lat" label="緯度" validate={validateCoordinate} />
@@ -15,7 +15,7 @@ export const CoordinateInput = (props) => {
   );
 };
 
-export const CoordinateField = ({ source, record = {} }) => (
+export const CoordinateField = ({ record = {} }) => (
   <span>
     {record["lat"]},{record["lon"]}
   </span>

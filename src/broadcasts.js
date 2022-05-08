@@ -24,7 +24,7 @@ import {
 
 import { getRecordField } from "./utils";
 import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import BluetoothIcon from "@material-ui/icons/Bluetooth";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
@@ -39,11 +39,6 @@ const conditionTypes = [
 ];
 
 import {
-  destinations,
-  soundModes,
-  soundTypes,
-  beaconTypes,
-  callTypes,
   getContentIcon,
   locationCondition,
   beaconCondition,
@@ -99,7 +94,7 @@ const InputForm = (props) => {
   return (
     <SimpleForm {...props} validate={validateDestinations}>
       <FormDataConsumer>
-        {({ formData, ...rest }) => {
+        {({ formData }) => {
           return (
             <>
               {props.showid === "true" ? (
@@ -119,7 +114,6 @@ const InputForm = (props) => {
               <FormDataConsumer>
                 {({
                   formData, // The whole form data
-                  ...rest
                 }) => {
                   const getSource = (field) => field;
                   return (

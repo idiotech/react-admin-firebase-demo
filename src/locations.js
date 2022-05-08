@@ -12,7 +12,6 @@ import {
   SimpleForm,
   TextField,
   TextInput,
-  ShowButton,
   EditButton,
   DeleteButton,
   DateTimeInput,
@@ -45,7 +44,7 @@ export const LocationList = (props) => (
   >
     <Datagrid>
       <TextField label="名稱" source="name" />
-      <CoordinateField label="座標" source="coordinates" label="座標" />
+      <CoordinateField label="座標" source="coordinates" />
       <TextField label="說明" source="description" />
       <EditButton label="" />
       <DeleteButton label="" redirect={false} />

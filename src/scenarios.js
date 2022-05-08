@@ -26,16 +26,14 @@ import {
 import { createStore } from "redux";
 import { useState } from "react";
 import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { useSelector, useDispatch } from "react-redux";
 import {
   FirebaseDataProvider,
-  FirebaseAuthProvider,
 } from "react-admin-firebase";
-const xid = require("xid-js");
+import * as xid from "xid-js";
 
 import { getRecordField } from "./utils";
 
@@ -50,7 +48,7 @@ export function scenarioReducer(state = { value: "" }, action) {
   }
 }
 
-const { buildGPX, BaseBuilder } = require("gpx-builder");
+import { buildGPX, BaseBuilder } from "gpx-builder";
 const { Point, Track, Segment } = BaseBuilder.MODELS;
 
 const store = createStore(scenarioReducer);
@@ -62,7 +60,7 @@ const ScenarioFilter = (props) => (
     <TextInput label="Search" source="name" alwaysOn />
   </Filter>
 );
-const cdnRoot = "http://daqiaotou-storage.floraland.tw/ghostspeak_editor";
+// const cdnRoot = "http://daqiaotou-storage.floraland.tw/ghostspeak_editor";
 
 function isCurrentScenario(props) {
   if (props && props.record) {
@@ -305,7 +303,7 @@ function GpxButton(props) {
   const [loading, setLoading] = useState(false);
   const data = getAllData();
   const { actions } = data;
-  const [open, setOpen] = useState(false);
+  const [setOpen] = useState(false);
 
   function handleConfirm() {
     setOpen(false);
@@ -428,7 +426,7 @@ function CloneButton(props) {
   const cloneId = xid.next();
   createData.id = cloneId;
   createData.name = getRecordField(props, "name") + "-" + cloneId;
-  const [create, { creating }] = useMutation({
+  const [create] = useMutation({
     type: "create",
     resource: "scenarios",
     payload: { data: createData },

@@ -8,9 +8,6 @@ class CompositeDataProvider {
     const { dataProvider } = this.dataProviders.find((dp) =>
       dp.resources.includes(resource)
     );
-    const instance = this.dataProviders.find((dp) =>
-      dp.resources.includes(resource)
-    );
     return dataProvider[name](resource, params);
   }
 

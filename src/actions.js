@@ -22,7 +22,6 @@ import {
   required,
   FunctionField,
   AutocompleteArrayInput,
-  useLoading,
   ArrayField,
   ReferenceField,
 } from "react-admin";
@@ -88,14 +87,11 @@ export const ActionList = (props) => {
 
 const InputForm = (props) => {
   console.log(`rewrite with ${JSON.stringify(props)}`);
-  const [locked, setLocked] = React.useState(true);
-  const loading = useLoading();
-  const parentMap = new Map();
 
   return (
     <SimpleForm {...props} validate={validateDestinations}>
       <FormDataConsumer>
-        {({ formData, ...rest }) => {
+        {({ formData }) => {
           const enableDelay =
             formData.prevs &&
             !formData.prevs.some(
@@ -140,10 +136,8 @@ const InputForm = (props) => {
                     />
                     <FormDataConsumer>
                       {({
-                        formData, // The whole form data
                         scopedFormData, // The data for this item of the ArrayInput
                         getSource, // A function to get the valid source inside an ArrayInput
-                        ...rest
                       }) => (
                         <>
                           {scopedFormData &&
