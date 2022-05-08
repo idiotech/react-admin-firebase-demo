@@ -14,7 +14,7 @@ import {
   TextInput,
   EditButton,
   DeleteButton,
-  DateTimeInput
+  DateTimeInput,
 } from "react-admin";
 
 const BeaconFilter = (props) => (
@@ -24,23 +24,28 @@ const BeaconFilter = (props) => (
 );
 
 const Title = ({ record }) => {
-    return <span>《{localStorage.getItem('scenarioName')}》Beacon{record && record.name ? `："${record.name}"` : ''}</span>;
+  return (
+    <span>
+      《{localStorage.getItem("scenarioName")}》Beacon
+      {record && record.name ? `："${record.name}"` : ""}
+    </span>
+  );
 };
 
 export const BeaconList = (props) => (
-  <List title={<Title/>} {...props}  filters={<BeaconFilter />}>
+  <List title={<Title />} {...props} filters={<BeaconFilter />}>
     <Datagrid>
       <TextField label="名稱" source="name" />
       <TextField label="Beacon ID" source="beaconId" />
       <TextField label="說明" source="description" />
       <EditButton label="" />
-      <DeleteButton label="" redirect={false}/>
+      <DeleteButton label="" redirect={false} />
     </Datagrid>
   </List>
 );
 
 export const BeaconCreate = (props) => (
-  <Create title={<Title />} {...props} >
+  <Create title={<Title />} {...props}>
     <SimpleForm>
       <TextInput label="名稱" source="name" />
       <TextInput label="Beacon ID" source="beaconId" />
@@ -50,7 +55,7 @@ export const BeaconCreate = (props) => (
 );
 
 export const BeaconEdit = (props) => (
-  <Edit title={<Title />}  {...props}>
+  <Edit title={<Title />} {...props}>
     <SimpleForm>
       <TextInput disabled source="id" />
       <DateTimeInput label="建立時間" disabled source="createdate" />

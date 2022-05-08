@@ -15,10 +15,10 @@ import {
   ShowButton,
   EditButton,
   DeleteButton,
-  DateTimeInput
+  DateTimeInput,
 } from "react-admin";
 
-import {CoordinateInput, CoordinateField} from "./coordinates"
+import { CoordinateInput, CoordinateField } from "./coordinates";
 
 const LocationFilter = (props) => (
   <Filter {...props}>
@@ -27,17 +27,28 @@ const LocationFilter = (props) => (
 );
 
 const Title = ({ record }) => {
-    return <span>《{localStorage.getItem('scenarioName')}》地點{record && record.name ? `："${record.name}"` : ''}</span>;
+  return (
+    <span>
+      《{localStorage.getItem("scenarioName")}》地點
+      {record && record.name ? `："${record.name}"` : ""}
+    </span>
+  );
 };
 
 export const LocationList = (props) => (
-  <List title={<Title/>} {...props} sort={{ field: 'name', order: 'ASC' }} perPage="100" filters={<LocationFilter />}>
+  <List
+    title={<Title />}
+    {...props}
+    sort={{ field: "name", order: "ASC" }}
+    perPage="100"
+    filters={<LocationFilter />}
+  >
     <Datagrid>
       <TextField label="名稱" source="name" />
-      <CoordinateField label="座標" source="coordinates" label="座標"  />
+      <CoordinateField label="座標" source="coordinates" label="座標" />
       <TextField label="說明" source="description" />
       <EditButton label="" />
-      <DeleteButton label="" redirect={false}/>
+      <DeleteButton label="" redirect={false} />
     </Datagrid>
   </List>
 );
@@ -55,9 +66,8 @@ export const LocationShow = (props) => (
   </Show>
 );
 
-
 export const LocationCreate = (props) => (
-  <Create title={<Title />} {...props} >
+  <Create title={<Title />} {...props}>
     <SimpleForm>
       <TextInput label="名稱" source="name" />
       <CoordinateInput />
@@ -67,12 +77,12 @@ export const LocationCreate = (props) => (
 );
 
 export const LocationEdit = (props) => (
-  <Edit title={<Title />}  {...props}>
+  <Edit title={<Title />} {...props}>
     <SimpleForm>
       <TextInput disabled source="id" />
       <DateTimeInput label="建立時間" disabled source="createdate" />
       <DateTimeInput label="修改時間" disabled source="lastupdate" />
-      <TextInput label="名稱"  source="name" />
+      <TextInput label="名稱" source="name" />
       <CoordinateInput />
       <TextInput label="說明" source="description" />
     </SimpleForm>

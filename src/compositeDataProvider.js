@@ -1,6 +1,6 @@
 class CompositeDataProvider {
   constructor(dataProviders) {
-    this.time = Date.now()
+    this.time = Date.now();
     this.dataProviders = dataProviders;
   }
 
@@ -10,7 +10,7 @@ class CompositeDataProvider {
     );
     const instance = this.dataProviders.find((dp) =>
       dp.resources.includes(resource)
-    )
+    );
     return dataProvider[name](resource, params);
   }
 

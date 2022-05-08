@@ -28,12 +28,12 @@ import {
   FormDataConsumer,
   BooleanInput,
   TopToolbar,
-  Button
+  Button,
 } from "react-admin";
 import RichTextInput from "ra-input-rich-text";
 
 const Title = ({ record }) => {
-    return <span>小節{record && record.name ? `："${record.name}"` : ''}</span>;
+  return <span>小節{record && record.name ? `："${record.name}"` : ""}</span>;
 };
 
 const NodeFilter = (props) => (
@@ -43,13 +43,13 @@ const NodeFilter = (props) => (
 );
 
 const triggerTypes = [
-          { id: 'START', name: '開始' },
-          { id: 'END', name: '結束' },
-          { id: 'TEXT', name: '文字回應' }
-]
+  { id: "START", name: "開始" },
+  { id: "END", name: "結束" },
+  { id: "TEXT", name: "文字回應" },
+];
 
 export const NodeList = (props) => (
-  <List title={<Title/>} {...props} filters={<NodeFilter />}>
+  <List title={<Title />} {...props} filters={<NodeFilter />}>
     <Datagrid>
       <TextField source="name" label="名稱" />
       <ReferenceArrayField label="接下來" source="children" reference="nodes">
@@ -63,7 +63,7 @@ export const NodeList = (props) => (
         </SingleFieldList>
       </ReferenceArrayField>
       <EditButton label="" />
-      <DeleteButton label="" redirect={false}/>
+      <DeleteButton label="" redirect={false} />
     </Datagrid>
   </List>
 );
@@ -73,7 +73,11 @@ export const NodeShow = (props) => (
     <SimpleShowLayout>
       <TextField source="id" />
       <TextField source="name" />
-      <ReferenceArrayField label="Actions" source="actionIds" reference="actions">
+      <ReferenceArrayField
+        label="Actions"
+        source="actionIds"
+        reference="actions"
+      >
         <SingleFieldList>
           <TextField source="name" />
         </SingleFieldList>
@@ -84,43 +88,59 @@ export const NodeShow = (props) => (
 
 const NodeEditActions = ({ basePath, data, resource }) => {
   function handleClick() {
-    console.log('fuck click', data, resource)
+    console.log("fuck click", data, resource);
   }
   return (
-     <TopToolbar>
-       <ShowButton basePath={basePath} record={data} />
-       <Button color="primary" onClick={handleClick} label="儲存" />
-     </TopToolbar>
-  )
+    <TopToolbar>
+      <ShowButton basePath={basePath} record={data} />
+      <Button color="primary" onClick={handleClick} label="儲存" />
+    </TopToolbar>
+  );
 };
 
 export const NodeCreate = (props) => (
-  <Create actions={<NodeEditActions />} title={<Title/>} {...props} >
+  <Create actions={<NodeEditActions />} title={<Title />} {...props}>
     <SimpleForm>
       <TextInput source="name" label="名稱" />
       <BooleanInput label="第一小節" source="initial" initialValue={false} />
       <FormDataConsumer>
-        {({ formData, ...rest }) => formData.initial !== true &&
+        {({ formData, ...rest }) =>
+          formData.initial !== true && (
             <ArrayInput label="觸發條件" source="triggers">
               <SimpleFormIterator>
-                <ReferenceInput label="動作" source="replyTo" reference="actions">
+                <ReferenceInput
+                  label="動作"
+                  source="replyTo"
+                  reference="actions"
+                >
                   <AutocompleteInput optionText="name" />
                 </ReferenceInput>
-                <SelectInput label="狀態" source="category" choices={triggerTypes} />
+                <SelectInput
+                  label="狀態"
+                  source="category"
+                  choices={triggerTypes}
+                />
                 <FormDataConsumer>
-                  {({ getSource, scopedFormData }) => 
-                    scopedFormData && scopedFormData.category === 'TEXT' && 
-                    <TextInput label="內文" source={getSource('text')} />
+                  {({ getSource, scopedFormData }) =>
+                    scopedFormData &&
+                    scopedFormData.category === "TEXT" && (
+                      <TextInput label="內文" source={getSource("text")} />
+                    )
                   }
                 </FormDataConsumer>
               </SimpleFormIterator>
             </ArrayInput>
+          )
         }
       </FormDataConsumer>
       <ReferenceArrayInput label="動作" source="actionIds" reference="actions">
         <AutocompleteArrayInput optionText="name" />
       </ReferenceArrayInput>
-      <ReferenceArrayInput label="互斥於" source="exclusiveWith" reference="nodes">
+      <ReferenceArrayInput
+        label="互斥於"
+        source="exclusiveWith"
+        reference="nodes"
+      >
         <AutocompleteArrayInput optionText="name" />
       </ReferenceArrayInput>
       <ReferenceArrayInput label="下一步" source="children" reference="nodes">
@@ -131,33 +151,49 @@ export const NodeCreate = (props) => (
 );
 
 export const NodeEdit = (props) => (
-  <Edit actions={<NodeEditActions />} title={<Title/>} {...props}>
+  <Edit actions={<NodeEditActions />} title={<Title />} {...props}>
     <SimpleForm>
-      <TextInput source="id" options={{ disabled: true }}/>
+      <TextInput source="id" options={{ disabled: true }} />
       <TextInput source="name" label="名稱" />
       <BooleanInput label="第一小節" source="initial" initialValue={false} />
       <FormDataConsumer>
-        {({ formData, ...rest }) => formData.initial !== true &&
+        {({ formData, ...rest }) =>
+          formData.initial !== true && (
             <ArrayInput label="觸發條件" source="triggers">
               <SimpleFormIterator>
-                <ReferenceInput label="動作" source="replyTo" reference="actions">
+                <ReferenceInput
+                  label="動作"
+                  source="replyTo"
+                  reference="actions"
+                >
                   <AutocompleteInput optionText="name" />
                 </ReferenceInput>
-                <SelectInput label="狀態" source="category" choices={triggerTypes} />
+                <SelectInput
+                  label="狀態"
+                  source="category"
+                  choices={triggerTypes}
+                />
                 <FormDataConsumer>
-                  {({ getSource, scopedFormData }) => 
-                    scopedFormData && scopedFormData.category === 'TEXT' && 
-                    <TextInput label="內文" source={getSource('text')} />
+                  {({ getSource, scopedFormData }) =>
+                    scopedFormData &&
+                    scopedFormData.category === "TEXT" && (
+                      <TextInput label="內文" source={getSource("text")} />
+                    )
                   }
                 </FormDataConsumer>
               </SimpleFormIterator>
             </ArrayInput>
+          )
         }
       </FormDataConsumer>
       <ReferenceArrayInput label="動作" source="actionIds" reference="actions">
         <AutocompleteArrayInput optionText="name" />
       </ReferenceArrayInput>
-      <ReferenceArrayInput label="互斥於" source="exclusiveWith" reference="nodes">
+      <ReferenceArrayInput
+        label="互斥於"
+        source="exclusiveWith"
+        reference="nodes"
+      >
         <AutocompleteArrayInput optionText="name" />
       </ReferenceArrayInput>
       <ReferenceArrayInput label="下一步" source="children" reference="nodes">

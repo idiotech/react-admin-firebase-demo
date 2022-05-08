@@ -1,30 +1,30 @@
 import * as React from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
-import { 
-    NumberInput,
-    required,
-    number
-} from 'react-admin';
+import { NumberInput, required, number } from "react-admin";
 
 const validateCoordinate = [required(), number()];
 
-export const CoordinateInput = props => {
+export const CoordinateInput = (props) => {
   return (
     <span>
-        <NumberInput source="lat" label="緯度" validate={validateCoordinate}/>
-        &nbsp;
-        <NumberInput source="lon" label="經度" validate={validateCoordinate}/>
+      <NumberInput source="lat" label="緯度" validate={validateCoordinate} />
+      &nbsp;
+      <NumberInput source="lon" label="經度" validate={validateCoordinate} />
     </span>
-  )
+  );
 };
 
-export const CoordinateField = ({ source, record = {} }) => <span>{record['lat']},{record['lon']}</span>;
+export const CoordinateField = ({ source, record = {} }) => (
+  <span>
+    {record["lat"]},{record["lon"]}
+  </span>
+);
 
 CoordinateField.propTypes = {
-    label: PropTypes.string,
-    record: PropTypes.object,
-    source: PropTypes.string.isRequired,
+  label: PropTypes.string,
+  record: PropTypes.object,
+  source: PropTypes.string.isRequired,
 };
 
-CoordinateField.defaultProps = { label: 'Coordinates', addLabel: true };
+CoordinateField.defaultProps = { label: "Coordinates", addLabel: true };
