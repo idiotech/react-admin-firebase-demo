@@ -9,8 +9,11 @@ import {
   AutocompleteInput,
   required,
   number,
-  CheckboxGroupInput
+  CheckboxGroupInput,
+  Button
 } from "react-admin";
+
+import './modalImage.css'
 
 import { ColorField, ColorInput } from 'react-admin-color-input';
 
@@ -41,8 +44,8 @@ const destinations = [
           { id: 'INTRO', name: '首頁' },
 ]
 const soundModes = [
-          { id: 'STATIC_VOLUME', name: '固定' },
-          { id: 'DYNAMIC_VOLUME', name: '遠近調整' },
+          { id: 'STATIC_VOLUME', name: '固定音量' },
+          { id: 'DYNAMIC_VOLUME', name: '越遠越小聲' },
 ]
 const soundTypes = [
           { id: 'MAIN', name: '主劇情' },
@@ -145,12 +148,44 @@ const beaconCondition = (getSource) =>
                         />
                       </>
 
+export const modalImage = 
+<>
+  <div id="modalContainer" class="modal">
+      <span id="closeModal" class="close">&times;</span>
+      <img id="modalImage" class="modal-content"/>
+      <div id="modalCaption" class="caption"></div>
+  </div>
+</>
+
+function setModal(img, caption) {
+  const modal = document.getElementById('modalContainer');
+  modal.style.display = 'block';
+  const imgElem = document.getElementById('modalImage');
+  imgElem.src = img;
+  imgElem.alt = caption;
+  const captionElem = document.getElementById('modalCaption');
+  captionElem.innerHTML = caption;
+  const closeElem = document.getElementById('closeModal');
+  closeElem.onclick = () => { modal.style.display = 'none' }
+}
+
+function modalButton(img, caption) {
+  function handleClick() {
+    setModal(img, caption);
+  }
+  return <Button
+    label={caption}
+    onClick={handleClick}
+    primary="true"
+  />
+}
 const soundInput = (formData, enableDelay) =>
             <>
                 <SoundReferenceInput label="音檔" source="soundId" reference="sounds" sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} validate={[required()]}>
                   <AutocompleteInput optionText="name" />
                 </SoundReferenceInput>
                 <SelectInput label="聲音類型" source="soundType" choices={soundTypes} />
+                <br/>
                 <SelectInput label="音量模式" source="mode" choices={soundModes} />
                 {
                   formData.mode === 'STATIC_VOLUME' &&
@@ -161,12 +196,18 @@ const soundInput = (formData, enableDelay) =>
                 }
                 {
                   formData.mode === 'DYNAMIC_VOLUME' &&
+                  <span>
+                    中心點音量為1，圓周的音量為「最小音量」
+                  </span>
+                }
+                {
+                  formData.mode === 'DYNAMIC_VOLUME' &&
                   <div>
                   <LocationReferenceInput label="中心點" source="soundCenterId" reference="locations" validate={[required()]} perPage={1000}>
                     <AutocompleteInput optionText="name" />
                   </LocationReferenceInput>
                   <NumberInput label="最小音量" source="minVolume" initialValue={0} validate={[required(), number()]} /> 0-1之間<br/>
-                  <NumberInput label="範圍" source="range" initialValue={30} validate={[required(), number()]}/>公尺
+                  <NumberInput label="半徑" source="range" initialValue={30} validate={[required(), number()]}/>公尺
                   </div>
                 }
                 {
@@ -197,7 +238,15 @@ const popupInput = (enableDelay) =>
         </SimpleFormIterator>
       </ArrayInput>
       <BooleanInput label="允許文字回應" source="allowTextReply" initialValue={false} />
-      <CheckboxGroupInput label="顯示於" source="destinations" choices={destinations} /> <br/>
+      <CheckboxGroupInput label="顯示於" source="destinations" choices={destinations} />
+      <span>
+        示意圖：
+        {modalButton('https://storage.googleapis.com/daqiaotou/editor/image/notification.jpg', '通知列(iOS不支援按鈕)')}
+        {modalButton('https://storage.googleapis.com/daqiaotou/editor/image/dialog.jpg', '對話視窗')}
+        {modalButton('https://storage.googleapis.com/daqiaotou/editor/image/alert.jpg', '提示視窗')}
+        {modalButton('https://storage.googleapis.com/daqiaotou/editor/image/intro.jpg', '首頁(不支援圖片)')}
+      </span>
+      <br/>
       {
         enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="popupDelay" validate={[number()]} />
       }
@@ -216,6 +265,8 @@ const incomingCallInput = (enableDelay) =>
       <TextInput label="來電人" source="caller" validate={[required()]}/>
       <ImageReferenceInput label="圖示檔案" source="portrait" reference="images" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} />
       <SelectInput label="狀態" source="callStatus"  choices={callTypes} initialValue={'CONNECTING'} /> <br/>
+      {modalButton('https://storage.googleapis.com/daqiaotou/editor/image/phone.jpg', '示意圖')}
+      <br/>
       {
         enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="incomingCallDelay" validate={[number()]} />
       }
@@ -236,6 +287,8 @@ const markerInput = (enableDelay) =>
     <LocationReferenceInput label="座標" source="locationId" reference="locations" validate={[required()]} sort={{ field: 'lastupdate', order: 'DESC' }} perPage={1000} >
       <AutocompleteInput optionText="name" />
     </LocationReferenceInput>
+    <br/>
+    {modalButton('https://storage.googleapis.com/daqiaotou/editor/image/marker.jpg', '示意圖')}
     <br/>
     {
        enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="markerDelay" validate={[number()]} />
@@ -263,10 +316,18 @@ const mapStyleInput = (enableDelay, formData) =>
     }
     <BooleanInput label="衛星地圖" source="satellite" initialValue={false} />
     <br/>
+    <span>
+      示意圖
+      {modalButton('https://storage.googleapis.com/daqiaotou/editor/image/sattelite.jpg', '衛星地圖')}
+      {modalButton('https://storage.googleapis.com/daqiaotou/editor/image/marker.jpg','一般地圖')}
+    </span>
+    <br/>
     {
        enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="mapStyleDelay" validate={[number()]} />
     }
   </>
+
+
 
 const introImageInput = (enableDelay) => 
   <>
@@ -275,15 +336,21 @@ const introImageInput = (enableDelay) =>
     <NumberInput label="Logo距頂" source="introLogoMarginTop" validate={[number()]} />
     <NumberInput label="Logo高度" source="introLogoHeight" validate={[number()]} />
     <NumberInput label="Logo寬度" source="introLogoWidth" validate={[number()]} />
+    <br/>
+    {modalButton('https://storage.googleapis.com/daqiaotou/editor/image/intro-style.jpg', '示意圖')}
+    <br/>
     {
        enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="introImageDelay" validate={[number()]} />
     }
   </>
+  
 
 const buttonStyleInput = (enableDelay) =>
   <>
     <ColorInput label="背景顏色" source="backgroundColor" />
     <ColorInput label="文字顏色" source="textColor" />
+    {modalButton('https://storage.googleapis.com/daqiaotou/editor/image/button.jpg', '示意圖')}
+    <br/>
     {
        enableDelay && <NumberInput label="延遲時間 (千分之一秒)" source="buttonStyleDelay" validate={[number()]} />
     }

@@ -30,7 +30,8 @@ import {
 import { 
     conditionTypes, getConditionIcon, getContentIcon, locationCondition, beaconCondition,
     soundInput, popupInput, popupDismissalInput, incomingCallInput, hangUpInput,
-    markerInput, markerRemovalInput, mapStyleInput, validateDestinations, introImageInput, buttonStyleInput
+    markerInput, markerRemovalInput, mapStyleInput, validateDestinations, introImageInput, 
+    buttonStyleInput, modalImage
 } from './actionCommon'
 
 import { getRecordField } from './utils'
@@ -139,7 +140,9 @@ const InputForm = (props) => {
               </ReferenceArrayInput>
             </>
           }
+
           <h3>內容</h3><hr/>
+          {modalImage}
           <BooleanInput label="聲音" source="hasSound" />
           {
             formData.hasSound && soundInput(formData, enableDelay)
@@ -180,7 +183,7 @@ const InputForm = (props) => {
             formData.hasMapStyle && mapStyleInput(enableDelay, formData)
           }
           <hr/>
-          <BooleanInput label="前提提要背景" source="hasIntroImage" />
+          <BooleanInput label="首頁背景" source="hasIntroImage" />
           {
             formData.hasIntroImage && introImageInput(enableDelay)
           }
