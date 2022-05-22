@@ -207,20 +207,22 @@ const soundInput = (formData, enableDelay) => (
     {formData.mode === "STATIC_VOLUME" && (
       <div>
         <NumberInput
-          label="淡出秒數"
-          source="fadeOutSeconds"
-          validate={[number()]}
-        />
-        <br />
-        <NumberInput
           label="正文秒數"
           source="speechLength"
           validate={[number()]}
         />
+        播放到超過正文秒數之後，如果與下一個音檔重疊，則開始淡出。
+        <br />
+        <NumberInput
+          label="淡出秒數"
+          source="fadeOutSeconds"
+          validate={[number()]}
+        />
+        在幾秒內淡出到消失。
       </div>
     )}
     {formData.mode === "DYNAMIC_VOLUME" && (
-      <span>中心點音量為1，圓周的音量為「最小音量」</span>
+      <span>中心點音量值為1(檔案原始音量)，到圓周的音量為「最小音量」</span>
     )}
     {formData.mode === "DYNAMIC_VOLUME" && (
       <div>
@@ -297,6 +299,10 @@ const popupInput = (enableDelay) => (
       source="allowTextReply"
       initialValue={false}
     />
+    {modalButton(
+      "https://storage.googleapis.com/daqiaotou/editor/image/text-input.jpg",
+      "文字回應示意圖"
+    )}
     <CheckboxGroupInput
       label="顯示於"
       source="destinations"
@@ -481,7 +487,7 @@ const mapStyleInput = (enableDelay, formData) => (
     <BooleanInput label="衛星地圖" source="satellite" initialValue={false} />
     <br />
     <span>
-      示意圖
+      示意圖：
       {modalButton(
         "https://storage.googleapis.com/daqiaotou/editor/image/sattelite.jpg",
         "衛星地圖"

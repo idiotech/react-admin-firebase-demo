@@ -34,10 +34,34 @@ const adminOptions = {
 
 const authProvider = FirebaseAuthProvider(config, adminOptions);
 
-const adminProvider = {
-  dataProvider: FirebaseDataProvider(config, adminOptions),
-  resources: ["scenarios"],
-};
+function createAdminDataProvider() {
+  return FirebaseDataProvider(config, adminOptions);
+}
+
+function getProvider(scenarioId) {
+  const scenarioOtions = {
+    logging: false,
+    rootRef: "ghostspeak_editor/" + scenarioId,
+  };
+  return FirebaseDataProvider(config, scenarioOtions);
+}
+
+function createAdminProvider() {
+  const adminDataProvider = createAdminDataProvider();
+  return {
+    dataProvider: {
+      ...adminDataProvider,
+      getList: (resource, params) => {
+        const baseProvider = getProvider("dummy");
+        const authUid = baseProvider.app.auth().currentUser?.uid ;
+        const localUid  = localStorage.getItem("uid");
+        params.filter.uid = authUid || localUid;
+        return adminDataProvider.getList(resource, params);
+      },
+    },
+    resources: ["scenarios"],
+  };
+}
 
 function createDataProvider(scenario) {
   const scenarioOtions = {
@@ -97,7 +121,7 @@ function createDataProvider(scenario) {
 }
 
 const dataProvider = new CompositeDataProvider([
-  adminProvider,
+  createAdminDataProvider(),
   createDataProvider("test"),
 ]);
 
@@ -176,6 +200,7 @@ function Main() {
 var prevScenario = null;
 
 function App() {
+  const adminProvider = createAdminProvider();
   const store = createAdminStore({
     authProvider,
     dataProvider,

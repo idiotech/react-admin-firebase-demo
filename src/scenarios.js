@@ -30,9 +30,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  FirebaseDataProvider,
-} from "react-admin-firebase";
+import { FirebaseDataProvider } from "react-admin-firebase";
 import * as xid from "xid-js";
 
 import { getRecordField } from "./utils";
@@ -412,6 +410,16 @@ function Blocker(props) {
   );
 }
 
+function getProvider(scenarioId) {
+  const scenarioOtions = {
+    logging: false,
+    rootRef: "ghostspeak_editor/" + scenarioId,
+  };
+  return FirebaseDataProvider(config, scenarioOtions);
+}
+
+// NPke29IzKoLgFMZRm2Hc
+
 function CloneButton(props) {
   const disabled = !isCurrentScenario(props);
   const notify = useNotify();
@@ -431,11 +439,9 @@ function CloneButton(props) {
     resource: "scenarios",
     payload: { data: createData },
   });
-  const scenarioOtions = {
-    logging: true,
-    rootRef: "ghostspeak_editor/" + createData.id,
-  };
-  const baseProvider = FirebaseDataProvider(config, scenarioOtions);
+  const baseProvider = getProvider(createData.id);
+
+  // TODO copy UID
   const refresh = useRefresh();
   const idMap = new Map();
   Object.keys(actions).forEach((a) => idMap.set(a, xid.next()));
@@ -620,28 +626,46 @@ export const ScenarioList = (props) => (
   </List>
 );
 
-export const ScenarioCreate = (props) => (
-  <Create title={<Title />} {...props}>
-    <SimpleForm>
-      <TextInput label="名稱" source="name" />
-      <TextInput label="顯示名稱" source="displayName" />
-      <TextInput label="說明" source="description" />
-    </SimpleForm>
-  </Create>
-);
+export const ScenarioCreate = (props) => {
+  const baseProvider = getProvider("dummy");
+  const anotherUid = baseProvider.app.auth().currentUser?.uid || "dead";
+  return (
+    <Create
+      title={<Title />}
+      {...props}
+    >
+      <SimpleForm>
+        <TextInput label="名稱" source="name" />
+        <TextInput label="顯示名稱" source="displayName" />
+        <TextInput label="說明" source="description" />
+        <TextInput
+          label="User ID"
+          source="uid"
+          disabled
+          initialValue={anotherUid}
+        />
+      </SimpleForm>
+    </Create>
+  );
+};
 
-export const ScenarioEdit = (props) => (
-  <Edit title={<Title />} {...props}>
-    <SimpleForm>
-      <TextInput disabled source="id" />
-      <DateTimeInput label="建立時間" disabled source="createdate" />
-      <DateTimeInput label="修改時間" disabled source="lastupdate" />
-      <TextInput label="名稱" source="name" />
-      <TextInput label="顯示名稱" source="displayName" />
-      <TextInput label="說明" source="description" />
-    </SimpleForm>
-  </Edit>
-);
+export const ScenarioEdit = (props) => {
+  const baseProvider = getProvider("dummy");
+  const uid = baseProvider.app.auth().currentUser?.uid || "dead";
+  return (
+    <Edit title={<Title />} {...props}>
+      <SimpleForm>
+        <TextInput disabled source="id" />
+        <TextInput label="名稱" source="name" />
+        <TextInput label="顯示名稱" source="displayName" />
+        <TextInput label="說明" source="description" />
+        <DateTimeInput label="建立時間" disabled source="createdate" />
+        <DateTimeInput label="修改時間" disabled source="lastupdate" />
+        <TextInput label="user id" source="uid" initialValue={uid} />
+      </SimpleForm>
+    </Edit>
+  );
+};
 
 export function getActionTree(actions) {
   const initial = actions.find((a) => a.firstAction);
@@ -658,15 +682,12 @@ export function getActionTree(actions) {
     }
   }, new Map());
 
-  console.log("parent map:", parentMap);
   function createTree(root) {
     const children = parentMap.get(root.id) || [];
     const childNodes = children.map((c) => {
       if (nodesSet.has(c.id)) {
-        console.log("already added child!", c.name);
         return null;
       } else {
-        console.log("adding child", c.name, "to", root.name);
         nodesSet.add(c.id);
         return c;
       }
@@ -674,10 +695,6 @@ export function getActionTree(actions) {
     root.children = children.map((c) => c.id);
     const treeChildren = childNodes.filter((c) => c).map((c) => createTree(c));
     treeChildren.sort((a, b) => a.children.length > b.children.length);
-    console.log(
-      "sort debug:",
-      treeChildren.map((c) => c.node.name)
-    );
     return {
       node: root,
       children: treeChildren,
