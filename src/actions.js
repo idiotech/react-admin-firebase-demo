@@ -174,7 +174,8 @@ const InputForm = (props) => {
                   </SimpleFormIterator>
                 </ArrayInput>
               )}
-              {!formData.firstAction && (
+              <BooleanInput label="進階流程控制" source="advancedFlow" />
+              {!formData.firstAction && formData.advancedFlow && (
                 <>
                   <ReferenceArrayInput
                     label="互斥於"
@@ -199,17 +200,17 @@ const InputForm = (props) => {
               <BooleanInput label="關閉圖文框" source="hasPopupDismissal" />
               {formData.hasPopupDismissal && popupDismissalInput(enableDelay)}
               <hr />
-              <BooleanInput label="來電" source="hasIncomingCall" />
-              {formData.hasIncomingCall && incomingCallInput(enableDelay)}
-              <hr />
-              <BooleanInput label="掛電話" source="hasHangUp" />
-              {formData.hasHangUp && hangUpInput(enableDelay)}
-              <hr />
               <BooleanInput label="新圖釘" source="hasMarker" />
               {formData.hasMarker && markerInput(enableDelay)}
               <hr />
               <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
               {formData.hasMarkerRemoval && markerRemovalInput(enableDelay)}
+              <hr />
+              <BooleanInput label="來電" source="hasIncomingCall" />
+              {formData.hasIncomingCall && incomingCallInput(enableDelay)}
+              <hr />
+              <BooleanInput label="掛電話" source="hasHangUp" />
+              {formData.hasHangUp && hangUpInput(enableDelay)}
               <hr />
               <BooleanInput label="地圖樣式" source="hasMapStyle" />
               {formData.hasMapStyle && mapStyleInput(enableDelay, formData)}

@@ -204,7 +204,8 @@ const soundInput = (formData, enableDelay) => (
     <SelectInput label="聲音類型" source="soundType" choices={soundTypes} />
     <br />
     <SelectInput label="音量模式" source="mode" choices={soundModes} />
-    {formData.mode === "STATIC_VOLUME" && (
+    <BooleanInput label="進階音量控制" source="advancedSound" initialValue={false} />
+    {formData.mode === "STATIC_VOLUME" && formData.advancedSound && (
       <div>
         <NumberInput
           label="正文秒數"
@@ -373,10 +374,14 @@ const incomingCallInput = (enableDelay) => (
       choices={callTypes}
       initialValue={"CONNECTING"}
     />{" "}
-    <br />
+    <br />示意圖：
     {modalButton(
-      "https://storage.googleapis.com/daqiaotou/editor/image/phone.jpg",
-      "示意圖"
+      "https://storage.googleapis.com/daqiaotou/editor/image/phone-calling.png",
+      "未接通"
+    )}
+    {modalButton(
+      "https://storage.googleapis.com/daqiaotou/editor/image/phone-connected.png",
+      "接通"
     )}
     <br />
     {enableDelay && (
