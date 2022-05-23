@@ -121,7 +121,7 @@ function createDataProvider(scenario) {
 }
 
 const dataProvider = new CompositeDataProvider([
-  createAdminDataProvider(),
+  createAdminProvider(),
   createDataProvider("test"),
 ]);
 
