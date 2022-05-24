@@ -15,27 +15,28 @@ const defaultPosition = {
 
 export const CoordinateInput = (formData) => {
   const form = useForm();
-
+  const [position, setPosition] = React.useState(defaultPosition);
+  const [initial, setInitial] = React.useState(true);
   function handleLocationChange({ position }) {
     form.change("lat", position.lat);
     form.change("lon", position.lng);
   }
 
-  function getDefaultPosition() {
-    if (formData.record && formData.record.lat) {
-      return { lat: formData.record.lat, lng: formData.record.lon };
-    } else {
-      return defaultPosition;
-    }
-  }
-
-  // navigator && navigator.geolocation.getCurrentPosition(position => {
-  //   const { latitude, longitude } = position.coords;
-  //   if (!formData.record || !formData.record.lat) {
-  //     form.change("lat", latitude)
-  //     form.change("lon", longitude)
-  //   }
-  // });
+  React.useEffect(() => {
+    navigator && navigator.geolocation.getCurrentPosition(position => {
+      const { latitude, longitude } = position.coords;
+      if (!formData.lat) {
+        form.change("lat", latitude)
+        form.change("lon", longitude)
+        setPosition({lat: latitude, lng: longitude})
+      } else {
+        if (initial) {
+          setPosition({lat: formData.lat, lng: formData.lon})
+          setInitial(false)
+        }
+      }
+    });
+  })
 
   return (
     <>
@@ -47,7 +48,7 @@ export const CoordinateInput = (formData) => {
       <LocationPicker
         containerElement={<div style={{ height: "60%" }} />}
         mapElement={<div style={{ height: "500px" }} />}
-        defaultPosition={getDefaultPosition()}
+        defaultPosition={position}
         radius={-1}
         zoom={17}
         onChange={handleLocationChange}

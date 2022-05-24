@@ -22,7 +22,8 @@ const uiConfig = {
       const user = result.user;
       // This gives you a Facebook Access Token. You can use it to access the Facebook API.
       const accessToken = credential.accessToken;
-      console.log({ result, user, accessToken });
+      console.log('login data', { result, user, accessToken });
+      localStorage.setItem('uid', user.uid);
       return true;
     },
   },

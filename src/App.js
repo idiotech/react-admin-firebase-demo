@@ -55,7 +55,8 @@ function createAdminProvider() {
         const baseProvider = getProvider("dummy");
         const authUid = baseProvider.app.auth().currentUser?.uid ;
         const localUid  = localStorage.getItem("uid");
-        params.filter.uid = authUid || localUid;
+        console.log('uid', authUid, localUid)
+        params.filter.uid = authUid || localUid || 'dead';
         return adminDataProvider.getList(resource, params);
       },
     },
