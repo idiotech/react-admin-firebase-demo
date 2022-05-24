@@ -1,4 +1,3 @@
-// in src/posts.js
 import * as React from "react";
 // tslint:disable-next-line:no-var-requires
 import {
@@ -15,6 +14,7 @@ import {
   EditButton,
   DeleteButton,
   DateTimeInput,
+  FormDataConsumer,
 } from "react-admin";
 
 import { CoordinateInput, CoordinateField } from "./coordinates";
@@ -69,7 +69,9 @@ export const LocationCreate = (props) => (
   <Create title={<Title />} {...props}>
     <SimpleForm>
       <TextInput label="名稱" source="name" />
-      <CoordinateInput />
+      <FormDataConsumer>
+        {({ formData }) => CoordinateInput(formData)}
+      </FormDataConsumer>
       <TextInput label="說明" source="description" />
     </SimpleForm>
   </Create>
@@ -82,7 +84,9 @@ export const LocationEdit = (props) => (
       <DateTimeInput label="建立時間" disabled source="createdate" />
       <DateTimeInput label="修改時間" disabled source="lastupdate" />
       <TextInput label="名稱" source="name" />
-      <CoordinateInput />
+      <FormDataConsumer>
+        {({ formData }) => CoordinateInput(formData)}
+      </FormDataConsumer>
       <TextInput label="說明" source="description" />
     </SimpleForm>
   </Edit>

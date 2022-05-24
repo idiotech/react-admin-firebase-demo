@@ -3,7 +3,6 @@ import { ReferenceInput, AutocompleteInput } from "react-admin";
 import { makeStyles } from "@material-ui/core/styles";
 
 import LocationQuickCreateButton from "./LocationQuickCreateButton";
-// import PostQuickPreviewButton from './PostQuickPreviewButton';
 
 const useStyles = makeStyles({
   root: {
@@ -19,7 +18,6 @@ const LocationReferenceInput = (props) => {
   const classes = useStyles();
   const [version, setVersion] = useState(0);
   const handleChange = useCallback(() => setVersion(version + 1), [version]);
-  console.log("props test", props);
   return (
     <div>
       <div className={classes.root}>
