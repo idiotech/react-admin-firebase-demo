@@ -33,17 +33,23 @@ const SignInScreen = () => (
   <StyledFirebaseAuth firebaseAuth={firebase.auth()} uiConfig={uiConfig} />
 );
 
-const CustomLoginForm = (props) => (
-  <div>
+const CustomLoginForm = (props) => {
+  return <div>
     <LoginForm {...props} />
     <SignInScreen />
   </div>
-);
+};
 
-const CustomLoginPage = (props) => (
-  <Login {...props}>
+const CustomLoginPage = (props) => {
+  React.useEffect( () => {
+    localStorage.removeItem('uid');
+    localStorage.removeItem('scenario');
+    localStorage.removeItem('scenarioName');
+    console.log('effect happened');
+  })
+  return <Login {...props}>
     <CustomLoginForm {...props} />
   </Login>
-);
+};
 
 export default CustomLoginPage;

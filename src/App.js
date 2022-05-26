@@ -27,6 +27,9 @@ import createAdminStore from "./createAdminStore";
 
 import { firebaseConfig as config } from "./FIREBASE_CONFIG";
 
+import polyglotI18nProvider from "ra-i18n-polyglot"; // install the package
+import englishMessages from "ra-language-english"; // install the package
+
 const adminOptions = {
   logging: true,
   rootRef: "ghostspeak_editor/admin",
@@ -53,10 +56,18 @@ function createAdminProvider() {
       ...adminDataProvider,
       getList: (resource, params) => {
         const baseProvider = getProvider("dummy");
-        const authUid = baseProvider.app.auth().currentUser?.uid ;
-        const localUid  = localStorage.getItem("uid");
-        console.log('uid', authUid, localUid)
-        params.filter.uid = authUid || localUid || 'dead';
+        const authUid = baseProvider.app.auth().currentUser?.uid;
+        const authUid2 = baseProvider.app.auth()?._delegate?.currentUser?.uid;
+        const localUid = localStorage.getItem("uid");
+        console.log(
+          "uid",
+          authUid,
+          authUid2,
+          localUid,
+          baseProvider.app.auth(),
+          baseProvider.app.auth()._delegate.currentUser
+        );
+        params.filter.uid = authUid || authUid2 || localUid || "dead";
         return adminDataProvider.getList(resource, params);
       },
     },
@@ -130,11 +141,16 @@ const customReducers = { currentScenario: scenarioReducer };
 
 const history = createHashHistory();
 function Main() {
+  const i18nProvider = polyglotI18nProvider(() => englishMessages, "en", {
+    allowMissing: true,
+    onMissingKey: (key) => key,
+  });
   return (
     <Admin
       loginPage={CustomLoginPage}
       dataProvider={dataProvider}
       authProvider={authProvider}
+      i18nProvider={i18nProvider}
       history={history}
       customReducers={customReducers}
     >

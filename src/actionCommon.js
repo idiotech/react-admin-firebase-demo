@@ -44,6 +44,7 @@ const destinations = [
   { id: "ALERT", name: "提示視窗" },
   { id: "INTRO", name: "首頁" },
 ];
+const dismissalDestinations = [{ id: "APP", name: "對話視窗" }];
 const soundModes = [
   { id: "STATIC_VOLUME", name: "固定音量" },
   { id: "DYNAMIC_VOLUME", name: "越遠越小聲" },
@@ -201,10 +202,30 @@ const soundInput = (formData, enableDelay) => (
     >
       <AutocompleteInput optionText="name" />
     </SoundReferenceInput>
-    <SelectInput label="聲音類型" source="soundType" choices={soundTypes} />
+
+    <BooleanInput
+      label="進階聲音控制"
+      source="advancedSound"
+      initialValue={false}
+    />
+
+    {formData.advancedSound && (
+      <>
+        <SelectInput
+          label="聲音類型"
+          source="soundType"
+          choices={soundTypes}
+          initialValue="MAIN"
+        />
+        <SelectInput
+          label="音量模式"
+          source="mode"
+          choices={soundModes}
+          initialValue="STATIC_VOLUME"
+        />
+      </>
+    )}
     <br />
-    <SelectInput label="音量模式" source="mode" choices={soundModes} />
-    <BooleanInput label="進階音量控制" source="advancedSound" initialValue={false} />
     {formData.mode === "STATIC_VOLUME" && formData.advancedSound && (
       <div>
         <NumberInput
@@ -212,46 +233,46 @@ const soundInput = (formData, enableDelay) => (
           source="speechLength"
           validate={[number()]}
         />
-        播放到超過正文秒數之後，如果與下一個音檔重疊，則開始淡出。
+        播放到超過正文秒數之後，如果與下一個音檔重疊，則開始淡出。不淡出則不必設。
         <br />
         <NumberInput
           label="淡出秒數"
           source="fadeOutSeconds"
           validate={[number()]}
         />
-        在幾秒內淡出到消失。
+        在幾秒內淡出到消失。設為0代表立即停止。
       </div>
     )}
-    {formData.mode === "DYNAMIC_VOLUME" && (
-      <span>中心點音量值為1(檔案原始音量)，到圓周的音量為「最小音量」</span>
-    )}
-    {formData.mode === "DYNAMIC_VOLUME" && (
-      <div>
-        <LocationReferenceInput
-          label="中心點"
-          source="soundCenterId"
-          reference="locations"
-          validate={[required()]}
-          perPage={1000}
-        >
-          <AutocompleteInput optionText="name" />
-        </LocationReferenceInput>
-        <NumberInput
-          label="最小音量"
-          source="minVolume"
-          initialValue={0}
-          validate={[required(), number()]}
-        />{" "}
-        0-1之間
-        <br />
-        <NumberInput
-          label="半徑"
-          source="range"
-          initialValue={30}
-          validate={[required(), number()]}
-        />
-        公尺
-      </div>
+    {formData.mode === "DYNAMIC_VOLUME" && formData.advancedSound && (
+      <>
+        <span>中心點音量值為1(檔案原始音量)，到圓周的音量為「最小音量」</span>
+        <div>
+          <LocationReferenceInput
+            label="中心點"
+            source="soundCenterId"
+            reference="locations"
+            validate={[required()]}
+            perPage={1000}
+          >
+            <AutocompleteInput optionText="name" />
+          </LocationReferenceInput>
+          <NumberInput
+            label="最小音量"
+            source="minVolume"
+            initialValue={0}
+            validate={[required(), number()]}
+          />{" "}
+          0-1之間
+          <br />
+          <NumberInput
+            label="半徑"
+            source="range"
+            initialValue={30}
+            validate={[required(), number()]}
+          />
+          公尺
+        </div>
+      </>
     )}
     {enableDelay && (
       <NumberInput
@@ -272,90 +293,99 @@ const validateDestinations = (value) => {
       2
   ) {
     error.destinations = "「前情提要」/「對話視窗」/「提示視窗」只能選其中一個";
+  } else if (dests && dests.length === 0) {
+    error.destinations = "至少要選其中一個";
   }
+
   return error;
 };
 
-const popupInput = (enableDelay) => (
-  <>
-    <TextInput multiline label="文字" source="text" />
-    <ArrayInput label="圖片" source="pictures">
-      <SimpleFormIterator>
-        <ImageReferenceInput
-          label="圖檔"
-          source="pictureId"
-          reference="images"
-          sort={{ field: "lastupdate", order: "DESC" }}
-          perPage={1000}
+const popupInput = (enableDelay) => {
+  const initialDestination = React.useMemo(() => ["ALERT"], []);
+  return (
+    <>
+      <TextInput multiline label="文字" source="text" />
+      <ArrayInput label="圖片" source="pictures">
+        <SimpleFormIterator>
+          <ImageReferenceInput
+            label="圖檔"
+            source="pictureId"
+            reference="images"
+            sort={{ field: "lastupdate", order: "DESC" }}
+            perPage={1000}
+          />
+        </SimpleFormIterator>
+      </ArrayInput>
+      <ArrayInput label="回應按鈕" source="choices">
+        <SimpleFormIterator>
+          <TextInput source="choice" label="選擇" />
+        </SimpleFormIterator>
+      </ArrayInput>
+      <BooleanInput
+        label="允許文字回應"
+        source="allowTextReply"
+        initialValue={false}
+      />
+      {modalButton(
+        "https://storage.googleapis.com/daqiaotou/editor/image/text-input.jpg",
+        "文字回應示意圖"
+      )}
+      <CheckboxGroupInput
+        label="顯示於"
+        source="destinations"
+        choices={destinations}
+        initialValue={initialDestination}
+      />
+      <span>
+        示意圖：
+        {modalButton(
+          "https://storage.googleapis.com/daqiaotou/editor/image/notification.jpg",
+          "通知列(iOS不支援按鈕)"
+        )}
+        {modalButton(
+          "https://storage.googleapis.com/daqiaotou/editor/image/dialog.jpg",
+          "對話視窗"
+        )}
+        {modalButton(
+          "https://storage.googleapis.com/daqiaotou/editor/image/alert.jpg",
+          "提示視窗"
+        )}
+        {modalButton(
+          "https://storage.googleapis.com/daqiaotou/editor/image/intro.jpg",
+          "首頁(不支援圖片)"
+        )}
+      </span>
+      <br />
+      {enableDelay && (
+        <NumberInput
+          label="延遲時間 (千分之一秒)"
+          source="popupDelay"
+          validate={[number()]}
         />
-      </SimpleFormIterator>
-    </ArrayInput>
-    <ArrayInput label="回應按鈕" source="choices">
-      <SimpleFormIterator>
-        <TextInput source="choice" label="選擇" />
-      </SimpleFormIterator>
-    </ArrayInput>
-    <BooleanInput
-      label="允許文字回應"
-      source="allowTextReply"
-      initialValue={false}
-    />
-    {modalButton(
-      "https://storage.googleapis.com/daqiaotou/editor/image/text-input.jpg",
-      "文字回應示意圖"
-    )}
-    <CheckboxGroupInput
-      label="顯示於"
-      source="destinations"
-      choices={destinations}
-    />
-    <span>
-      示意圖：
-      {modalButton(
-        "https://storage.googleapis.com/daqiaotou/editor/image/notification.jpg",
-        "通知列(iOS不支援按鈕)"
       )}
-      {modalButton(
-        "https://storage.googleapis.com/daqiaotou/editor/image/dialog.jpg",
-        "對話視窗"
-      )}
-      {modalButton(
-        "https://storage.googleapis.com/daqiaotou/editor/image/alert.jpg",
-        "提示視窗"
-      )}
-      {modalButton(
-        "https://storage.googleapis.com/daqiaotou/editor/image/intro.jpg",
-        "首頁(不支援圖片)"
-      )}
-    </span>
-    <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="popupDelay"
-        validate={[number()]}
-      />
-    )}
-  </>
-);
+    </>
+  );
+};
 
-const popupDismissalInput = (enableDelay) => (
-  <>
-    <CheckboxGroupInput
-      label="關閉"
-      source="dismissalDestinations"
-      choices={destinations}
-    />{" "}
-    <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="dismissalDelay"
-        validate={[number()]}
-      />
-    )}
-  </>
-);
+const popupDismissalInput = (enableDelay) => {
+  return (
+    <>
+      <CheckboxGroupInput
+        label="關閉"
+        source="dismissalDestinations"
+        choices={dismissalDestinations}
+      />{" "}
+      <br />
+      {enableDelay && (
+        <NumberInput
+          label="延遲時間 (千分之一秒)"
+          source="dismissalDelay"
+          validate={[number()]}
+        />
+      )}
+    </>
+  );
+};
 
 const incomingCallInput = (enableDelay) => (
   <>
@@ -374,7 +404,8 @@ const incomingCallInput = (enableDelay) => (
       choices={callTypes}
       initialValue={"CONNECTING"}
     />{" "}
-    <br />示意圖：
+    <br />
+    示意圖：
     {modalButton(
       "https://storage.googleapis.com/daqiaotou/editor/image/phone-calling.png",
       "未接通"

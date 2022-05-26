@@ -174,7 +174,7 @@ const InputForm = (props) => {
                   </SimpleFormIterator>
                 </ArrayInput>
               )}
-              <BooleanInput label="進階流程控制" source="advancedFlow" />
+              {!formData.firstAction && <BooleanInput label="進階流程控制" source="advancedFlow" />}
               {!formData.firstAction && formData.advancedFlow && (
                 <>
                   <ReferenceArrayInput
@@ -188,7 +188,7 @@ const InputForm = (props) => {
                   </ReferenceArrayInput>
                 </>
               )}
-              <h3>內容</h3>
+              <h3>常用內容</h3>
               <hr />
               {modalImage}
               <BooleanInput label="聲音" source="hasSound" />
@@ -206,20 +206,27 @@ const InputForm = (props) => {
               <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
               {formData.hasMarkerRemoval && markerRemovalInput(enableDelay)}
               <hr />
-              <BooleanInput label="來電" source="hasIncomingCall" />
-              {formData.hasIncomingCall && incomingCallInput(enableDelay)}
+              <h3>進階內容</h3>
+              <BooleanInput label="開啟進階內容" source="advancedActionType" />
               <hr />
-              <BooleanInput label="掛電話" source="hasHangUp" />
-              {formData.hasHangUp && hangUpInput(enableDelay)}
-              <hr />
-              <BooleanInput label="地圖樣式" source="hasMapStyle" />
-              {formData.hasMapStyle && mapStyleInput(enableDelay, formData)}
-              <hr />
-              <BooleanInput label="首頁背景" source="hasIntroImage" />
-              {formData.hasIntroImage && introImageInput(enableDelay)}
-              <hr />
-              <BooleanInput label="按鈕顏色" source="hasButtonStyle" />
-              {formData.hasButtonStyle && buttonStyleInput(enableDelay)}
+              {formData.advancedActionType && 
+                <>
+                  <BooleanInput label="來電" source="hasIncomingCall" />
+                  {formData.hasIncomingCall && incomingCallInput(enableDelay)}
+                  <hr />
+                  <BooleanInput label="掛電話" source="hasHangUp" />
+                  {formData.hasHangUp && hangUpInput(enableDelay)}
+                  <hr />
+                  <BooleanInput label="地圖樣式" source="hasMapStyle" />
+                  {formData.hasMapStyle && mapStyleInput(enableDelay, formData)}
+                  <hr />
+                  <BooleanInput label="首頁背景" source="hasIntroImage" />
+                  {formData.hasIntroImage && introImageInput(enableDelay)}
+                  <hr />
+                  <BooleanInput label="按鈕顏色" source="hasButtonStyle" />
+                  {formData.hasButtonStyle && buttonStyleInput(enableDelay)}
+                </>
+              }
             </>
           );
         }}
