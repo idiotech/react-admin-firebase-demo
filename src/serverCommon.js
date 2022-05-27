@@ -68,7 +68,7 @@ export const getActions = (currentNode, data, condition) => {
               "http://daqiaotou-storage.floraland.tw/sounds/entrance.mp3"
             : "http://daqiaotou-storage.floraland.tw/sounds/entrance.mp3",
           volumeSetting: {
-            type: currentNode.mode,
+            type: currentNode.mode || 'STATIC_VOLUME',
             center: currentNode.soundCenterId
               ? locations[currentNode.soundCenterId]
               : null,

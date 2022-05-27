@@ -12,7 +12,6 @@ import {
   TextField,
   TextInput,
   EditButton,
-  DeleteButton,
   CreateButton,
   SelectInput,
   ReferenceInput,
@@ -83,24 +82,28 @@ export const ActionList = (props) => {
           </Datagrid>
         </ArrayField>
         <NextButton source="id" label="下一步" />
-        <DeleteButton label="" redirect={false} />
+        <DeleteButton />
       </Datagrid>
     </List>
   );
 };
 
-const EditToolbar = props => {
+const DeleteButton = props => {
     const record = useRecordContext();
-    return <Toolbar {...props}>
-        <SaveButton label="儲存"/>
-        <DeleteWithConfirmButton
+    return <DeleteWithConfirmButton {...props}
             label="刪除"
             confirmContent="將刪除此動作，確定嗎？"
             confirmTitle={`確認刪除《${record.name}》`}
             translateOptions={{ name: record.name }}
         />
+}
+
+const EditToolbar = props => {
+    return <Toolbar {...props}>
+        <SaveButton label="儲存"/>
+        <DeleteButton />
     </Toolbar>
-  };
+};
   
 const InputForm = (props) => {
   console.log(`rewrite with ${JSON.stringify(props)}`);
