@@ -225,7 +225,7 @@ function SendButton(props) {
   const [open, setOpen] = useState(false);
   const handleClick = () => setOpen(true);
   const [loading, setLoading] = useState(false);
-  const data = getAllData();
+  const data = useAllData();
   const handleDialogClose = () => setOpen(false);
   const dispatch = useDispatch();
   const notify = useNotify();

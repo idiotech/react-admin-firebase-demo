@@ -24,6 +24,10 @@ import {
   AutocompleteArrayInput,
   ArrayField,
   ReferenceField,
+  Toolbar,
+  SaveButton,
+  useRecordContext,
+  DeleteWithConfirmButton
 } from "react-admin";
 
 import {
@@ -85,11 +89,24 @@ export const ActionList = (props) => {
   );
 };
 
+const EditToolbar = props => {
+    const record = useRecordContext();
+    return <Toolbar {...props}>
+        <SaveButton label="儲存"/>
+        <DeleteWithConfirmButton
+            label="刪除"
+            confirmContent="將刪除此動作，確定嗎？"
+            confirmTitle={`確認刪除《${record.name}》`}
+            translateOptions={{ name: record.name }}
+        />
+    </Toolbar>
+  };
+  
 const InputForm = (props) => {
   console.log(`rewrite with ${JSON.stringify(props)}`);
 
   return (
-    <SimpleForm {...props} validate={validateDestinations}>
+    <SimpleForm {...props} validate={validateDestinations} toolbar={<EditToolbar />} >
       <FormDataConsumer>
         {({ formData }) => {
           const enableDelay =
@@ -243,9 +260,10 @@ export const ActionCreate = (props) => {
   );
 };
 
+
 export const ActionEdit = (props) => {
   return (
-    <Edit title={<Title />} {...props}>
+    <Edit title={<Title />} {...props} >
       <InputForm {...props} showid="true" />
     </Edit>
   );

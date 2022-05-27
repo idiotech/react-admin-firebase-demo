@@ -35,7 +35,7 @@ import * as xid from "xid-js";
 
 import { getRecordField } from "./utils";
 
-import { getAllData, getActions } from "./serverCommon";
+import { useAllData, getActions } from "./serverCommon";
 
 export function scenarioReducer(state = { value: "" }, action) {
   switch (action.type) {
@@ -184,7 +184,7 @@ function PublishButton(props) {
   const [loading, setLoading] = useState(false);
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
-  const data = getAllData();
+  const data = useAllData();
   const { actions } = data;
   const [open, setOpen] = useState(false);
 
@@ -299,7 +299,7 @@ function GpxButton(props) {
   const notify = useNotify();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const data = getAllData();
+  const data = useAllData();
   const { actions } = data;
   const [setOpen] = useState(false);
 
@@ -429,7 +429,7 @@ function CloneButton(props) {
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
   const { actions, sounds, locations, beacons, images, mapStyles, broadcasts } =
-    getAllData();
+    useAllData();
   const createData = JSON.parse(JSON.stringify(props.record));
   const cloneId = xid.next();
   createData.id = cloneId;

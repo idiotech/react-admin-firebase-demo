@@ -1,6 +1,6 @@
 import { useGetList } from "react-admin";
 
-export const getAllData = () => {
+export const useAllData = () => {
   const actionResult = useGetList(
     "actions",
     { page: 1, perPage: 500 },
