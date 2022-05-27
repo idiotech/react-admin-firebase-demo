@@ -53,7 +53,7 @@ import {
   validateDestinations,
 } from "./actionCommon";
 
-import { getAllData, getActions } from "./serverCommon";
+import { useAllData, getActions } from "./serverCommon";
 
 const Title = ({ record }) => {
   return (
