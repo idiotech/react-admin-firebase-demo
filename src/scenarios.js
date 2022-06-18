@@ -1,4 +1,3 @@
-// in src/posts.js
 import * as React from "react";
 import { firebaseConfig as config } from "./FIREBASE_CONFIG";
 
@@ -294,6 +293,71 @@ function PublishButton(props) {
   );
 }
 
+function UnpublishButton(props) {
+
+  const disabled = !isCurrentScenario(props);
+  const notify = useNotify();
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const handleClick = () => setOpen(true);
+  const handleDialogClose = () => setOpen(false);
+  const [open, setOpen] = useState(false);
+  function handleConfirm() {
+    setOpen(false);
+    setLoading(true);
+    dispatch(fetchStart());
+    const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(
+      props,
+      "id"
+    )}`;
+    const url = new URL(urlString);
+    fetch(url, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        if (response.ok) {
+          notify("成功解除發佈" + getRecordField(props, "name"), "success");
+        } else {
+          notify(
+            "解除發佈失敗；原因 =" + response.body + " " + response.status,
+            "error"
+          );
+        }
+      })
+      .catch((e) => {
+        notify("解除發佈失敗；原因 =" + e, "error");
+      })
+      .finally(() => {
+        setLoading(false);
+        setOpen(false);
+        dispatch(fetchEnd());
+      });
+  }
+
+  return (
+    <>
+      <Button
+        label="解除發佈"
+        onClick={handleClick}
+        disabled={disabled || loading}
+        primary="true"
+      />
+      <Confirm
+        isOpen={open}
+        title="確認解除發佈"
+        content={`你即將解除發佈${getRecordField(
+          props,
+          "name"
+        )}；用戶將無法使用。確定嗎？`}
+        onConfirm={handleConfirm}
+        onClose={handleDialogClose}
+        confirm="確認解除發佈"
+        cancel="取消"
+      />
+    </>
+  );
+}
+
 function GpxButton(props) {
   const disabled = !isCurrentScenario(props);
   const notify = useNotify();
@@ -493,6 +557,7 @@ function CloneButton(props) {
       updateValueFor(a, "markerId");
       updateValueFor(a, "introBackground");
       updateValueFor(a, "introLogo");
+      updateValueFor(a, "markerLogo");
       console.log("pictures before", a.pictures);
       if (a.pictures) {
         a.pictures.forEach((p) => {
@@ -618,6 +683,7 @@ export const ScenarioList = (props) => (
       <TextField label="說明" source="description" />
       <UseButton />
       <PublishButton />
+      <UnpublishButton />
       <CloneButton />
       <GpxButton />
       <EditButton label="" />

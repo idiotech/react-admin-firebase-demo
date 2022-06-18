@@ -284,7 +284,7 @@ const soundInput = (formData, enableDelay) => (
   </>
 );
 
-const validateDestinations = (value) => {
+const validateBeforeSubmit = (value) => {
   const dests = value.destinations;
   const error = {};
   if (
@@ -296,7 +296,9 @@ const validateDestinations = (value) => {
   } else if (dests && dests.length === 0) {
     error.destinations = "至少要選其中一個";
   }
-
+  if (value.hasIntroImage && !value.introBackground && !value.introLogo && !value.mapLogo) {
+    error.hasIntroImage = "背景和logo至少要有一個"
+  }
   return error;
 };
 
@@ -544,39 +546,55 @@ const mapStyleInput = (enableDelay, formData) => (
   </>
 );
 
-const introImageInput = (enableDelay) => (
+const introImageInput = (formData, enableDelay) => (
   <>
     <ImageReferenceInput
       label="背景圖"
       source="introBackground"
       reference="images"
-      validate={[required()]}
       sort={{ field: "lastupdate", order: "DESC" }}
       perPage={1000}
     />
+    首頁logo建議比例: 寬300 / 高280
     <ImageReferenceInput
-      label="Logo"
+      label="首頁logo"
       source="introLogo"
       reference="images"
-      validate={[required()]}
       sort={{ field: "lastupdate", order: "DESC" }}
       perPage={1000}
     />
-    <NumberInput
-      label="Logo距頂"
-      source="introLogoMarginTop"
-      validate={[number()]}
+    地圖logo建議比例: 寬62 / 高100
+    <ImageReferenceInput
+      label="地圖頁logo"
+      source="mapLogo"
+      reference="images"
+      sort={{ field: "lastupdate", order: "DESC" }}
+      perPage={1000}
     />
-    <NumberInput
-      label="Logo高度"
-      source="introLogoHeight"
-      validate={[number()]}
+    <BooleanInput
+      label="向下相容模式"
+      source="advancedLogo"
+      initialValue={false}
     />
-    <NumberInput
-      label="Logo寬度"
-      source="introLogoWidth"
-      validate={[number()]}
-    />
+    {formData.advancedLogo && (
+      <>
+        <NumberInput
+          label="Logo距頂"
+          source="introLogoMarginTop"
+          validate={[number()]}
+        />
+        <NumberInput
+          label="Logo高度"
+          source="introLogoHeight"
+          validate={[number()]}
+        />
+        <NumberInput
+          label="Logo寬度"
+          source="introLogoWidth"
+          validate={[number()]}
+        />
+      </>
+    )}
     <br />
     {modalButton(
       "https://storage.googleapis.com/daqiaotou/editor/image/intro-style.jpg",
@@ -631,7 +649,7 @@ export {
   markerInput,
   markerRemovalInput,
   mapStyleInput,
-  validateDestinations,
+  validateBeforeSubmit,
   introImageInput,
   buttonStyleInput,
 };

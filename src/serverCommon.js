@@ -214,6 +214,9 @@ export const getActions = (currentNode, data, condition) => {
     ret.push(popupDismissalAction);
   }
   if (currentNode.hasMapStyle) {
+    console.log('map style debug 1', mapStyles);
+    console.log('map style debug 2', currentNode.mapStyle);
+    console.log('map style debug 3', mapStyles[currentNode.mapStyle] );
     const mapStyleAction = {
       id: currentNode.id + "-map-style",
       receiver: "?u",
@@ -224,7 +227,7 @@ export const getActions = (currentNode, data, condition) => {
           url: currentNode.satellite
             ? null
             : currentNode.mapStyle
-            ? mapStyles[currentNode.mapStyle].mapStyle.src
+            ? mapStyles[currentNode.mapStyle]?.mapStyle.src
             : null,
           satellite: currentNode.satellite,
         },
@@ -243,8 +246,9 @@ export const getActions = (currentNode, data, condition) => {
       content: {
         task: {
           type: "INTRO_IMAGE",
-          backgroundUrl: images[currentNode.introBackground].image.src,
-          logoUrl: images[currentNode.introLogo].image.src,
+          backgroundUrl: currentNode.introBackground ? images[currentNode.introBackground]?.image.src : null,
+          logoUrl: currentNode.introLogo ? images[currentNode.introLogo]?.image.src : null,
+          mapLogoUrl: currentNode.mapLogo ? images[currentNode.mapLogo]?.image.src : null,
           logoMarginTop: currentNode.introLogoMarginTop,
           logoWidth: currentNode.introLogoWidth,
           logoHeight: currentNode.introLogoHeight,

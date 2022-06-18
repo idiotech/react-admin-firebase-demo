@@ -28,7 +28,7 @@ const ImageReferenceInput = (props) => {
   return (
     <div>
       <div className={classes.root}>
-        <ReferenceInput key={version} {...props}>
+        <ReferenceInput key={version} {...props} allowEmpty={true}>
           <AutocompleteInput optionText="name" />
         </ReferenceInput>
         <ImageQuickCreateButton onChange={handleChange} source={props.source} />

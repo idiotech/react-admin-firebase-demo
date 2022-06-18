@@ -26,7 +26,7 @@ import {
   Toolbar,
   SaveButton,
   useRecordContext,
-  DeleteWithConfirmButton
+  DeleteWithConfirmButton,
 } from "react-admin";
 
 import {
@@ -43,10 +43,10 @@ import {
   markerInput,
   markerRemovalInput,
   mapStyleInput,
-  validateDestinations,
   introImageInput,
   buttonStyleInput,
   modalImage,
+  validateBeforeSubmit,
 } from "./actionCommon";
 
 import { getRecordField } from "./utils";
@@ -98,18 +98,28 @@ const DeleteButton = props => {
         />
 }
 
+const ActionSaveButton = props => {
+  console.log('props', props)
+  if (props.record && props.record.id) {
+    const redirect = `/actions/create/?source={"prevs": [{"prev" : "${props.record.id}", "conditionType": "ALWAYS" }]}`
+    return <SaveButton {...props} redirect={redirect} />;
+  } else {
+    return <SaveButton {...props} />;
+  }
+}
+
 const EditToolbar = props => {
     return <Toolbar {...props}>
-        <SaveButton label="儲存"/>
-        <DeleteButton />
+      <span>
+        <SaveButton label="儲存" {...props} /> &nbsp;
+        { props.record && props.record.id && <ActionSaveButton label="儲存並建下一步" {...props} /> }
+      </span>
     </Toolbar>
 };
   
 const InputForm = (props) => {
-  console.log(`rewrite with ${JSON.stringify(props)}`);
-
   return (
-    <SimpleForm {...props} validate={validateDestinations} toolbar={<EditToolbar />} >
+    <SimpleForm {...props} validate={validateBeforeSubmit} toolbar={<EditToolbar />} >
       <FormDataConsumer>
         {({ formData }) => {
           const enableDelay =
@@ -241,7 +251,7 @@ const InputForm = (props) => {
                   {formData.hasMapStyle && mapStyleInput(enableDelay, formData)}
                   <hr />
                   <BooleanInput label="首頁背景" source="hasIntroImage" />
-                  {formData.hasIntroImage && introImageInput(enableDelay)}
+                  {formData.hasIntroImage && introImageInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput label="按鈕顏色" source="hasButtonStyle" />
                   {formData.hasButtonStyle && buttonStyleInput(enableDelay)}
@@ -257,7 +267,7 @@ const InputForm = (props) => {
 
 export const ActionCreate = (props) => {
   return (
-    <Create title={<Title />} {...props}>
+    <Create title={<Title />} mutationMode="pessimistic" {...props}>
       <InputForm {...props} showid="false" />
     </Create>
   );

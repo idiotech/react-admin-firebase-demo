@@ -50,7 +50,7 @@ import {
   markerInput,
   markerRemovalInput,
   mapStyleInput,
-  validateDestinations,
+  validateBeforeSubmit,
 } from "./actionCommon";
 
 import { useAllData, getActions } from "./serverCommon";
@@ -92,7 +92,7 @@ export const BroadcastList = (props) => {
 
 const InputForm = (props) => {
   return (
-    <SimpleForm {...props} validate={validateDestinations}>
+    <SimpleForm {...props} validate={validateBeforeSubmit}>
       <FormDataConsumer>
         {({ formData }) => {
           return (
