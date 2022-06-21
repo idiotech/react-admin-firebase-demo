@@ -365,7 +365,8 @@ function GpxButton(props) {
   const [loading, setLoading] = useState(false);
   const data = useAllData();
   const { actions } = data;
-  const [setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  console.log(open)
 
   function handleConfirm() {
     setOpen(false);

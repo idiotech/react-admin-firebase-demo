@@ -52,7 +52,7 @@ const soundModes = [
 const soundTypes = [
   { id: "MAIN", name: "主劇情" },
   { id: "BACKGROUND", name: "背景單次" },
-  { id: "LOOP", name: "背景循環" },
+  // { id: "LOOP", name: "背景循環" },
 ];
 const conditionTypes = [
   { id: "ALWAYS", name: "上個動作結束" },
@@ -226,7 +226,7 @@ const soundInput = (formData, enableDelay) => (
       </>
     )}
     <br />
-    {formData.mode === "STATIC_VOLUME" && formData.advancedSound && (
+    {formData.mode === "STATIC_VOLUME" && formData.soundType === "MAIN" && formData.advancedSound && (
       <div>
         <NumberInput
           label="正文秒數"

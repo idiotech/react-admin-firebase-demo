@@ -56,6 +56,8 @@ function ImageQuickCreateButton({ onChange, source }) {
       <Button onClick={handleClick} label="ra.action.create">
         <IconContentAdd />
       </Button>
+
+      <p>(圖釘建議大小： 150 x 156)</p>
       <Dialog
         fullWidth
         open={showDialog}

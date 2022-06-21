@@ -50,6 +50,7 @@ export const ImageCreate = (props) => (
       <ImageInput label="圖片" source="image">
         <ImageField source="src" title="name" />
       </ImageInput>
+      <>(圖釘建議大小： 150 x 150)</>
     </SimpleForm>
   </Create>
 );
@@ -62,6 +63,7 @@ export const ImageEdit = (props) => (
       <ImageInput label="圖片" source="image">
         <ImageField source="src" title="name" />
       </ImageInput>
+      <>(圖釘建議大小： 150 x 150)</>
       <DateTimeInput label="建立時間" disabled source="createdate" />
       <DateTimeInput label="修改時間" disabled source="lastupdate" />
     </SimpleForm>
