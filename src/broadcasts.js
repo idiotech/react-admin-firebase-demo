@@ -80,6 +80,7 @@ export const BroadcastList = (props) => {
       filters={<BroadcastFilter />}
     >
       <Datagrid>
+        <TextField label="編號" source="rowIndex" />
         <TextField label="名稱" source="name" />
         <FunctionField label="條件" render={getConditionIcon} />
         <FunctionField label="內容" render={getContentIcon} />

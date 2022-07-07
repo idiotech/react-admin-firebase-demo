@@ -45,6 +45,7 @@ export const LocationList = (props) => {
       filters={<LocationFilter />}
     >
       <Datagrid>
+        <TextField label="編號" source="rowIndex" />
         <TextField label="名稱" source="name" />
         <CoordinateField label="座標" source="coordinates" />
         <TextField label="說明" source="description" />

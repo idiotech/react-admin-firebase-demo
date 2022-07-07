@@ -35,6 +35,7 @@ export const BeaconList = (props) => {
   if (localStorage.getItem('scenario'))
     return <List title={<Title />} {...props} filters={<BeaconFilter />}>
       <Datagrid>
+        <TextField label="編號" source="rowIndex" />
         <TextField label="名稱" source="name" />
         <TextField label="Beacon ID" source="beaconId" />
         <TextField label="說明" source="description" />

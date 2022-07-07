@@ -41,6 +41,7 @@ export const MapStyleList = (props) => {
       filters={<MapStyleFilter />}
     >
       <Datagrid>
+        <TextField label="編號" source="rowIndex" />
         <TextField label="名稱" source="name" />
         <FileField label="地圖樣式" source="mapStyle.src" title={"連結"} />
         <EditButton label="" />

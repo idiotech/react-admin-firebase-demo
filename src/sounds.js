@@ -43,6 +43,7 @@ export const SoundList = (props) => {
       filters={<SoundFilter />}
     >
       <Datagrid>
+        <TextField label="編號" source="rowIndex" />
         <TextField label="名稱" source="name" />
         <FileField label="音檔" source="sound.src" title={"連結"} />
         <EditButton label="" />

@@ -24,11 +24,12 @@ export const CoordinateInput = (formData) => {
 
   React.useEffect(() => {
     navigator && navigator.geolocation.getCurrentPosition(position => {
-      const { latitude, longitude } = position.coords;
+      // const { latitude, longitude } = position.coords;
       if (!formData.lat) {
-        form.change("lat", latitude)
-        form.change("lon", longitude)
-        setPosition({lat: latitude, lng: longitude})
+        console.log('current position', position);
+        // form.change("lat", latitude)
+        // form.change("lon", longitude)
+        // setPosition({lat: latitude, lng: longitude})
       } else {
         if (initial) {
           setPosition({lat: formData.lat, lng: formData.lon})
