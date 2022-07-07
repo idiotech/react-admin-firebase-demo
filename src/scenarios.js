@@ -21,6 +21,8 @@ import {
   fetchEnd,
   Confirm,
   useMutation,
+  BooleanField,
+  BooleanInput
 } from "react-admin";
 import { createStore } from "redux";
 import { useState } from "react";
@@ -176,6 +178,8 @@ function getCondition(currentNode, data) {
   }
 }
 
+const isSuperUser = localStorage.getItem("uid") === process.env.REACT_APP_SUPER_USER;
+
 function PublishButton(props) {
   const disabled = !isCurrentScenario(props);
   const notify = useNotify();
@@ -236,6 +240,7 @@ function PublishButton(props) {
       name: getRecordField(props, "name"),
       displayName: displayName,
       overwrite: true,
+      public: getRecordField(props, "public")
     };
     console.log("displayName", params);
     url.search = new URLSearchParams(params).toString();
@@ -671,8 +676,8 @@ const Title = ({ record }) => {
   return <span>劇本{record && record.name ? `：${record.name}` : ""}</span>;
 };
 
-export const ScenarioList = (props) => (
-  <List
+export const ScenarioList = (props) => {
+  return <List
     title={<Title />}
     {...props}
     sort={{ field: "lastupdate", order: "DESC" }}
@@ -682,6 +687,7 @@ export const ScenarioList = (props) => (
     <Datagrid>
       <TextField label="名稱" source="name" />
       <TextField label="說明" source="description" />
+      <BooleanField label="正式上架" source="public" />
       <UseButton />
       <PublishButton />
       <UnpublishButton />
@@ -691,7 +697,7 @@ export const ScenarioList = (props) => (
       <DeleteButton label="" redirect={false} />
     </Datagrid>
   </List>
-);
+};
 
 export const ScenarioCreate = (props) => {
   const baseProvider = getProvider("dummy");
@@ -711,6 +717,7 @@ export const ScenarioCreate = (props) => {
           disabled
           initialValue={anotherUid}
         />
+        <BooleanInput label="正式上架" source="public" disabled={!isSuperUser} />
       </SimpleForm>
     </Create>
   );
@@ -726,9 +733,10 @@ export const ScenarioEdit = (props) => {
         <TextInput label="名稱" source="name" />
         <TextInput label="顯示名稱" source="displayName" />
         <TextInput label="說明" source="description" />
+        <BooleanInput label="正式上架" source="public" disabled={!isSuperUser} />
         <DateTimeInput label="建立時間" disabled source="createdate" />
         <DateTimeInput label="修改時間" disabled source="lastupdate" />
-        <TextInput label="user id" source="uid" initialValue={uid} />
+        <TextInput label="user id" source="uid" disabled initialValue={uid} />
       </SimpleForm>
     </Edit>
   );

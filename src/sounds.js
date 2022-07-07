@@ -17,6 +17,7 @@ import {
   FileInput,
 } from "react-admin";
 
+import { DummyList } from "./dummy"
 const SoundFilter = (props) => (
   <Filter {...props}>
     <TextInput label="Search" source="name" alwaysOn />
@@ -32,22 +33,24 @@ const Title = ({ record }) => {
   );
 };
 
-export const SoundList = (props) => (
-  <List
-    title={<Title />}
-    {...props}
-    perPage="100"
-    sort={{ field: "name", order: "ASC" }}
-    filters={<SoundFilter />}
-  >
-    <Datagrid>
-      <TextField label="名稱" source="name" />
-      <FileField label="音檔" source="sound.src" title={"連結"} />
-      <EditButton label="" />
-      <DeleteButton label="" redirect={false} />
-    </Datagrid>
-  </List>
-);
+export const SoundList = (props) => {
+  if (localStorage.getItem('scenario')) {
+    return <List
+      title={<Title />}
+      {...props}
+      perPage="100"
+      sort={{ field: "name", order: "ASC" }}
+      filters={<SoundFilter />}
+    >
+      <Datagrid>
+        <TextField label="名稱" source="name" />
+        <FileField label="音檔" source="sound.src" title={"連結"} />
+        <EditButton label="" />
+        <DeleteButton label="" redirect={false} />
+      </Datagrid>
+    </List>
+  } else return DummyList(props);
+};
 
 export const SoundCreate = (props) => (
   <Create title={<Title />} {...props}>

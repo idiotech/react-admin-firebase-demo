@@ -18,6 +18,7 @@ import {
 } from "react-admin";
 
 import { CoordinateInput, CoordinateField } from "./coordinates";
+import { DummyList } from "./dummy"
 
 const LocationFilter = (props) => (
   <Filter {...props}>
@@ -34,23 +35,25 @@ const Title = ({ record }) => {
   );
 };
 
-export const LocationList = (props) => (
-  <List
-    title={<Title />}
-    {...props}
-    sort={{ field: "name", order: "ASC" }}
-    perPage="100"
-    filters={<LocationFilter />}
-  >
-    <Datagrid>
-      <TextField label="名稱" source="name" />
-      <CoordinateField label="座標" source="coordinates" />
-      <TextField label="說明" source="description" />
-      <EditButton label="" />
-      <DeleteButton label="" redirect={false} />
-    </Datagrid>
-  </List>
-);
+export const LocationList = (props) => {
+  if (localStorage.getItem('scenario')) { 
+    return <List
+      title={<Title />}
+      {...props}
+      sort={{ field: "name", order: "ASC" }}
+      perPage="100"
+      filters={<LocationFilter />}
+    >
+      <Datagrid>
+        <TextField label="名稱" source="name" />
+        <CoordinateField label="座標" source="coordinates" />
+        <TextField label="說明" source="description" />
+        <EditButton label="" />
+        <DeleteButton label="" redirect={false} />
+      </Datagrid>
+    </List>
+  } else return DummyList(props);
+};
 
 export const LocationShow = (props) => (
   <Show {...props}>

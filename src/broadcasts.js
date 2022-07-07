@@ -31,6 +31,7 @@ import MyLocationIcon from "@material-ui/icons/MyLocation";
 import ReplyIcon from "@material-ui/icons/Reply";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import HourglassBottomIcon from "@material-ui/icons/HourglassEmpty";
+import { DummyList } from "./dummy"
 
 const conditionTypes = [
   { id: "ALWAYS", name: "立刻" },
@@ -71,8 +72,8 @@ const BroadcastFilter = (props) => (
 );
 
 export const BroadcastList = (props) => {
-  return (
-    <List
+  if (localStorage.getItem('scenario')) { 
+    return <List
       title={<Title />}
       {...props}
       perPage={100}
@@ -87,7 +88,7 @@ export const BroadcastList = (props) => {
         <DeleteButton label="" redirect={false} />
       </Datagrid>
     </List>
-  );
+  } else return DummyList(props)
 };
 
 const InputForm = (props) => {

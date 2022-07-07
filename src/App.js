@@ -49,6 +49,8 @@ function getProvider(scenarioId) {
   return FirebaseDataProvider(config, scenarioOtions);
 }
 
+const superUser = process.env.REACT_APP_SUPER_USER
+
 function createAdminProvider() {
   const adminDataProvider = createAdminDataProvider();
   return {
@@ -67,7 +69,11 @@ function createAdminProvider() {
           baseProvider.app.auth(),
           baseProvider.app.auth()._delegate.currentUser
         );
-        params.filter.uid = authUid || authUid2 || localUid || "dead";
+        const filterUid = authUid || authUid2 || localUid || "dead";
+        console.log('superuser', filterUid, superUser)
+        if (filterUid != superUser) {
+          params.filter.uid = filterUid;
+        }
         return adminDataProvider.getList(resource, params);
       },
     },
@@ -85,9 +91,7 @@ function createDataProvider(scenario) {
     dataProvider: {
       ...baseProvider,
       getList: (resource, params) => {
-        if (resource !== "actions")
-          return baseProvider.getList(resource, params);
-        else {
+        function getActionList() {
           const newParams = JSON.parse(JSON.stringify(params));
           newParams.pagination.page = 1;
           newParams.pagination.perPage = 10000;
@@ -106,16 +110,24 @@ function createDataProvider(scenario) {
               const memberIds = new Set(members.map((m) => m.id));
               const page = params.pagination.page - 1;
               const perPage = params.pagination.perPage;
+              const data = [
+                ...members,
+                ...list.data.filter((n) => !memberIds.has(n.id)),
+              ];
+              data.forEach((e, index) => {e.rowIndex = index + 1});
               return {
-                data: [
-                  ...members,
-                  ...list.data.filter((n) => !memberIds.has(n.id)),
-                ].slice(page * perPage, (page + 1) * perPage),
+                data: data.slice(page * perPage, (page + 1) * perPage),
                 total: list.data.length,
               };
             } else return list;
           });
         }
+        return resource !== "actions" 
+          ? baseProvider.getList(resource, params).then((r) => {
+            r.data.forEach((e, index) => {e.rowIndex = index + 1});
+            return r;
+          })
+          : getActionList()
       },
     },
     resources: [
@@ -145,6 +157,7 @@ function Main() {
     allowMissing: true,
     onMissingKey: (key) => key,
   });
+  // localStorage.removeItem('scenario')
   return (
     <Admin
       loginPage={CustomLoginPage}

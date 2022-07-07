@@ -50,6 +50,7 @@ import {
 } from "./actionCommon";
 
 import { getRecordField } from "./utils";
+import { DummyList } from "./dummy"
 
 const ActionFilter = (props) => (
   <Filter {...props}>
@@ -65,11 +66,21 @@ const Title = ({ record }) => {
     </span>
   );
 };
+const getRowIndex = (record) => {
+  const key = `a-${record.id}`;
+  if (record.rowIndex) {
+    localStorage.setItem(key, record.rowIndex);
+    return <div>{record.rowIndex}</div>
+  } else {
+    return <div>{localStorage.getItem(key)}</div>
+  }
+}
 
 export const ActionList = (props) => {
-  return (
-    <List title={<Title />} {...props} perPage={100} filters={<ActionFilter />}>
+  if (localStorage.getItem('scenario'))
+    return <List title={<Title />} {...props} perPage={100} filters={<ActionFilter />}>
       <Datagrid>
+        <FunctionField label="編號" render={getRowIndex} />
         <TextField label="名稱" source="name" />
         <FunctionField label="條件" render={getConditionIcon} />
         <FunctionField label="內容" render={getContentIcon} />
@@ -85,7 +96,7 @@ export const ActionList = (props) => {
         <DeleteButton />
       </Datagrid>
     </List>
-  );
+   else return DummyList(props);
 };
 
 const DeleteButton = props => {
@@ -99,7 +110,6 @@ const DeleteButton = props => {
 }
 
 const ActionSaveButton = props => {
-  console.log('props', props)
   if (props.record && props.record.id) {
     const redirect = `/actions/create/?source={"prevs": [{"prev" : "${props.record.id}", "conditionType": "ALWAYS" }]}`
     return <SaveButton {...props} redirect={redirect} />;
