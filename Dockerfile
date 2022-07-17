@@ -16,4 +16,6 @@ COPY public /app/public
 
 RUN yarn build
 
+COPY .env /app/
+
 CMD [ "yarn", "start" ]

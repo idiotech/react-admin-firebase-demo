@@ -68,6 +68,17 @@ const callTypes = [
   { id: "CONNECTING", name: "未接通" },
   { id: "CONNECTED", name: "接通" },
 ];
+const comparisonTypes = [
+  { id: "<=", name: "<=" },
+  { id: "=", name: "==" },
+  { id: ">=", name: ">=" },
+];
+const operationTypes = [
+  { id: "+", name: "+" },
+  { id: "-", name: "-" },
+  { id: "=", name: "=" },
+];
+
 const getConditionIcon = (record) => {
   const conds = record.prevs
     ? new Set(record.prevs.flatMap((p) => p.conditionType))
@@ -630,6 +641,28 @@ const buttonStyleInput = (enableDelay) => (
   </>
 );
 
+const variableUpdateInput = () => (
+  <ArrayInput label="更新變數" source="variableUpdates">
+    <SimpleFormIterator>
+      <ReferenceInput
+        label="變數"
+        source="variable"
+        reference="variables"
+        validate={[required()]}
+      >
+        <AutocompleteInput optionText="name" />
+      </ReferenceInput>
+      <SelectInput
+        label="運算"
+        source="operation"
+        choices={operationTypes}
+        validate={[required()]}
+      />
+      <NumberInput label="值" source="value" validate={[required()]}/>
+    </SimpleFormIterator>
+  </ArrayInput>
+);
+
 export {
   destinations,
   soundModes,
@@ -637,6 +670,8 @@ export {
   conditionTypes,
   beaconTypes,
   callTypes,
+  operationTypes,
+  comparisonTypes,
   getConditionIcon,
   getContentIcon,
   locationCondition,
@@ -652,4 +687,5 @@ export {
   validateBeforeSubmit,
   introImageInput,
   buttonStyleInput,
+  variableUpdateInput
 };

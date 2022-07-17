@@ -13,6 +13,7 @@ import { ImageList, ImageCreate, ImageEdit } from "./images";
 import { SoundList, SoundCreate, SoundEdit } from "./sounds";
 import { MapStyleList, MapStyleCreate, MapStyleEdit } from "./mapStyles";
 import { BroadcastList, BroadcastCreate, BroadcastEdit } from "./broadcasts";
+import { VariableList, VariableCreate, VariableEdit } from "./variables";
 import { Admin, Resource } from "react-admin";
 import {
   FirebaseDataProvider,
@@ -139,6 +140,7 @@ function createDataProvider(scenario) {
       "sounds",
       "mapStyles",
       "broadcasts",
+      "variables"
     ],
     name: scenario,
   };
@@ -208,6 +210,13 @@ function Main() {
         list={MapStyleList}
         create={MapStyleCreate}
         edit={MapStyleEdit}
+      />
+      <Resource
+        name="variables"
+        options={{ label: "變數" }}
+        list={VariableList}
+        create={VariableCreate}
+        edit={VariableEdit}
       />
       <Resource
         name="actions"

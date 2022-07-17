@@ -48,11 +48,17 @@ export const useAllData = () => {
     { field: "published_at", order: "DESC" }
   );
   const broadcasts = broadcastResult.data;
-  return { actions, locations, beacons, images, sounds, mapStyles, broadcasts };
+  const variableResult = useGetList(
+    "variables",
+    { page: 1, perPage: 500 },
+    { field: "published_at", order: "DESC" }
+  );
+  const variables = variableResult.data;
+  return { actions, locations, beacons, images, sounds, mapStyles, broadcasts, variables };
 };
 
 export const getActions = (currentNode, data, condition) => {
-  const { sounds, locations, images, mapStyles } = data;
+  const { sounds, locations, images, mapStyles, variables } = data;
   const ret = [];
   if (currentNode.hasSound) {
     const soundAction = {
@@ -214,9 +220,6 @@ export const getActions = (currentNode, data, condition) => {
     ret.push(popupDismissalAction);
   }
   if (currentNode.hasMapStyle) {
-    console.log('map style debug 1', mapStyles);
-    console.log('map style debug 2', currentNode.mapStyle);
-    console.log('map style debug 3', mapStyles[currentNode.mapStyle] );
     const mapStyleAction = {
       id: currentNode.id + "-map-style",
       receiver: "?u",
@@ -261,7 +264,6 @@ export const getActions = (currentNode, data, condition) => {
     ret.push(introImageAction);
   }
   if (currentNode.hasButtonStyle) {
-    console.log("BUTTON_STYLE", currentNode.backgroundColor);
     const buttonStyleAction = {
       id: currentNode.id + "-button-style",
       receiver: "?u",
@@ -278,6 +280,53 @@ export const getActions = (currentNode, data, condition) => {
       description: currentNode.name,
     };
     ret.push(buttonStyleAction);
+  }
+  if (currentNode.hasVariableUpdate) {
+    const variableUpdates = currentNode.variableUpdates.map( vu => ({
+      name: vu.variable? variables[vu.variable]?.name : null,
+      operation: vu.operation,
+      value: vu.value,
+    }));
+ 
+    const variableAction = {
+      id: currentNode.id + "-variable-update" + "",
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: "VARIABLE_UPDATES",
+          updates: variableUpdates
+        },
+        condition: condition,
+      },
+      description: currentNode.name,
+    }
+    ret.push(variableAction);
+  }
+  if (currentNode.firstAction) {
+    const updates = [];
+    for (const key in variables) {
+      const v = variables[key]
+      updates.push({
+        name: v.name,
+        operation: '=',
+        value: v.value
+      })
+    }
+    const variableAction = {
+      id: currentNode.id + "-variable-default" + "",
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: "VARIABLE_UPDATES",
+          updates: updates
+        },
+        condition: condition,
+      },
+      description: currentNode.name,
+    }
+    ret.push(variableAction);
   }
   return ret.map((a) => ({
     ...a,

@@ -27,6 +27,7 @@ import {
   SaveButton,
   useRecordContext,
   DeleteWithConfirmButton,
+  NumberInput
 } from "react-admin";
 
 import {
@@ -45,8 +46,10 @@ import {
   mapStyleInput,
   introImageInput,
   buttonStyleInput,
+  variableUpdateInput,
   modalImage,
   validateBeforeSubmit,
+  comparisonTypes
 } from "./actionCommon";
 
 import { getRecordField } from "./utils";
@@ -226,6 +229,25 @@ const InputForm = (props) => {
                   >
                     <AutocompleteArrayInput optionText="name" />
                   </ReferenceArrayInput>
+                  <ArrayInput label="附加條件" source="preconditions">
+                     <SimpleFormIterator>
+                       <ReferenceInput
+                         label="變數"
+                         source="variable"
+                         reference="variables"
+                         sort={{ field: "lastupdate", order: "DESC" }}
+                         perPage={1000}
+                       >
+                        <SelectInput optionText="name" />
+                      </ReferenceInput>
+                      <SelectInput
+                        label="比較"
+                        source="comparison"
+                        choices={comparisonTypes}
+                      />
+                      <NumberInput label="數值" source="value"/>
+                    </SimpleFormIterator>
+                  </ArrayInput>
                 </>
               )}
               <h3>常用內容</h3>
@@ -265,6 +287,9 @@ const InputForm = (props) => {
                   <hr />
                   <BooleanInput label="按鈕顏色" source="hasButtonStyle" />
                   {formData.hasButtonStyle && buttonStyleInput(enableDelay)}
+                  <hr />
+                  <BooleanInput label="更新變數" source="hasVariableUpdate" />
+                  {formData.hasVariableUpdate && variableUpdateInput()}
                 </>
               }
             </>

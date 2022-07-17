@@ -188,7 +188,7 @@ function PublishButton(props) {
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
   const data = useAllData();
-  const { actions } = data;
+  const { actions, variables } = data;
   const [open, setOpen] = useState(false);
 
   function handleConfirm() {
@@ -210,9 +210,9 @@ function PublishButton(props) {
         : [];
       const condition = getCondition(tree.node, data);
       const serverActions = getActions(tree.node, data, condition);
-      console.log("server actions", serverActions);
+      const isFirst = tree.node.firstAction
       return {
-        name: tree.node.firstAction ? "initial" : tree.node.id,
+        name: isFirst ? "initial" : tree.node.id,
         children: tree.node.children || [],
         exclusiveWith: (tree.node.exclusiveWith || []).filter((e) => e),
         triggers: getTriggers(tree.node, parents),
@@ -220,6 +220,11 @@ function PublishButton(props) {
           action: a,
           delay: a.delay === 0 || a.delay ? a.delay : tree.node.delay || 0,
         })),
+        preconditions: tree.node.preconditions?.map(p => ({
+          name: variables[p.variable]?.name,
+          comparison: p.comparison,
+          value: p.value
+        }))
       };
     }
 
@@ -245,7 +250,7 @@ function PublishButton(props) {
     console.log("displayName", params);
     url.search = new URLSearchParams(params).toString();
     // console.log('payload', payload.map(p => p.performances.map(p => p.action.content)))
-    // console.log('payload', payload);
+    console.log('payload', payload);
 
     fetch(url, {
       method: "PUT",
@@ -371,8 +376,7 @@ function GpxButton(props) {
   const data = useAllData();
   const { actions } = data;
   const [open, setOpen] = useState(false);
-  console.log(open)
-
+  open
   function handleConfirm() {
     setOpen(false);
     setLoading(true);
