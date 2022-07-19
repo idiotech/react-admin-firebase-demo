@@ -22,7 +22,7 @@ import {
   Confirm,
   useMutation,
   BooleanField,
-  BooleanInput
+  BooleanInput,
 } from "react-admin";
 import { createStore } from "redux";
 import { useState } from "react";
@@ -178,7 +178,8 @@ function getCondition(currentNode, data) {
   }
 }
 
-const isSuperUser = localStorage.getItem("uid") === process.env.REACT_APP_SUPER_USER;
+const isSuperUser =
+  localStorage.getItem("uid") === process.env.REACT_APP_SUPER_USER;
 
 function PublishButton(props) {
   const disabled = !isCurrentScenario(props);
@@ -210,7 +211,7 @@ function PublishButton(props) {
         : [];
       const condition = getCondition(tree.node, data);
       const serverActions = getActions(tree.node, data, condition);
-      const isFirst = tree.node.firstAction
+      const isFirst = tree.node.firstAction;
       return {
         name: isFirst ? "initial" : tree.node.id,
         children: tree.node.children || [],
@@ -220,11 +221,11 @@ function PublishButton(props) {
           action: a,
           delay: a.delay === 0 || a.delay ? a.delay : tree.node.delay || 0,
         })),
-        preconditions: tree.node.preconditions?.map(p => ({
+        preconditions: tree.node.preconditions?.map((p) => ({
           name: variables[p.variable]?.name,
           comparison: p.comparison,
-          value: p.value
-        }))
+          value: p.value,
+        })),
       };
     }
 
@@ -245,12 +246,12 @@ function PublishButton(props) {
       name: getRecordField(props, "name"),
       displayName: displayName,
       overwrite: true,
-      public: getRecordField(props, "public")
+      public: getRecordField(props, "public"),
     };
     console.log("displayName", params);
     url.search = new URLSearchParams(params).toString();
     // console.log('payload', payload.map(p => p.performances.map(p => p.action.content)))
-    console.log('payload', payload);
+    console.log("payload", payload);
 
     fetch(url, {
       method: "PUT",
@@ -304,7 +305,6 @@ function PublishButton(props) {
 }
 
 function UnpublishButton(props) {
-
   const disabled = !isCurrentScenario(props);
   const notify = useNotify();
   const dispatch = useDispatch();
@@ -376,7 +376,7 @@ function GpxButton(props) {
   const data = useAllData();
   const { actions } = data;
   const [open, setOpen] = useState(false);
-  open
+  open;
   function handleConfirm() {
     setOpen(false);
     setLoading(true);
@@ -568,16 +568,11 @@ function CloneButton(props) {
       updateValueFor(a, "introBackground");
       updateValueFor(a, "introLogo");
       updateValueFor(a, "markerLogo");
-      console.log("pictures before", a.pictures);
       if (a.pictures) {
         a.pictures.forEach((p) => {
-          console.log("picture", p.pictureId, a.pictures);
           const newId = idMap.get(p.pictureId);
-          console.log("pictures id from", p.pictureId, "to", newId);
           p.pictureId = newId;
-          console.log("pictures during", a.pictures, p.pictureId);
         });
-        console.log("pictures after", a.pictures);
       }
     }
     await Promise.all(
@@ -681,36 +676,35 @@ const Title = ({ record }) => {
 };
 
 export const ScenarioList = (props) => {
-  return <List
-    title={<Title />}
-    {...props}
-    sort={{ field: "lastupdate", order: "DESC" }}
-    perPage={20}
-    filters={<ScenarioFilter />}
-  >
-    <Datagrid>
-      <TextField label="名稱" source="name" />
-      <TextField label="說明" source="description" />
-      <BooleanField label="正式上架" source="public" />
-      <UseButton />
-      <PublishButton />
-      <UnpublishButton />
-      <CloneButton />
-      <GpxButton />
-      <EditButton label="" />
-      <DeleteButton label="" redirect={false} />
-    </Datagrid>
-  </List>
+  return (
+    <List
+      title={<Title />}
+      {...props}
+      sort={{ field: "lastupdate", order: "DESC" }}
+      perPage={20}
+      filters={<ScenarioFilter />}
+    >
+      <Datagrid>
+        <TextField label="名稱" source="name" />
+        <TextField label="說明" source="description" />
+        <BooleanField label="正式上架" source="public" />
+        <UseButton />
+        <PublishButton />
+        <UnpublishButton />
+        <CloneButton />
+        <GpxButton />
+        <EditButton label="" />
+        <DeleteButton label="" redirect={false} />
+      </Datagrid>
+    </List>
+  );
 };
 
 export const ScenarioCreate = (props) => {
   const baseProvider = getProvider("dummy");
   const anotherUid = baseProvider.app.auth().currentUser?.uid || "dead";
   return (
-    <Create
-      title={<Title />}
-      {...props}
-    >
+    <Create title={<Title />} {...props}>
       <SimpleForm>
         <TextInput label="名稱" source="name" />
         <TextInput label="顯示名稱" source="displayName" />
@@ -721,7 +715,11 @@ export const ScenarioCreate = (props) => {
           disabled
           initialValue={anotherUid}
         />
-        <BooleanInput label="正式上架" source="public" disabled={!isSuperUser} />
+        <BooleanInput
+          label="正式上架"
+          source="public"
+          disabled={!isSuperUser}
+        />
       </SimpleForm>
     </Create>
   );
@@ -737,7 +735,11 @@ export const ScenarioEdit = (props) => {
         <TextInput label="名稱" source="name" />
         <TextInput label="顯示名稱" source="displayName" />
         <TextInput label="說明" source="description" />
-        <BooleanInput label="正式上架" source="public" disabled={!isSuperUser} />
+        <BooleanInput
+          label="正式上架"
+          source="public"
+          disabled={!isSuperUser}
+        />
         <DateTimeInput label="建立時間" disabled source="createdate" />
         <DateTimeInput label="修改時間" disabled source="lastupdate" />
         <TextInput label="user id" source="uid" disabled initialValue={uid} />

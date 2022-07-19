@@ -17,7 +17,7 @@ import {
   ImageInput,
 } from "react-admin";
 
-import { DummyList } from "./dummy"
+import { DummyList } from "./dummy";
 
 const ImageFilter = (props) => (
   <Filter {...props}>
@@ -35,17 +35,19 @@ const Title = ({ record }) => {
 };
 
 export const ImageList = (props) => {
-  if (localStorage.getItem('scenario')) { 
-    return <List title={<Title />} {...props} filters={<ImageFilter />}>
-      <Datagrid>
-        <TextField label="編號" source="rowIndex" />
-        <TextField label="名稱" source="name" />
-        <ImageField label="圖片" source="image.src" />
-        <EditButton label="" />
-        <DeleteButton label="" redirect={false} />
-      </Datagrid>
-    </List>
-  } else return DummyList(props)
+  if (localStorage.getItem("scenario")) {
+    return (
+      <List title={<Title />} {...props} filters={<ImageFilter />}>
+        <Datagrid>
+          <TextField label="編號" source="rowIndex" />
+          <TextField label="名稱" source="name" />
+          <ImageField label="圖片" source="image.src" />
+          <EditButton label="" />
+          <DeleteButton label="" redirect={false} />
+        </Datagrid>
+      </List>
+    );
+  } else return DummyList(props);
 };
 
 export const ImageCreate = (props) => (

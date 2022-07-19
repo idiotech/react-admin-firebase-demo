@@ -50,7 +50,7 @@ function getProvider(scenarioId) {
   return FirebaseDataProvider(config, scenarioOtions);
 }
 
-const superUser = process.env.REACT_APP_SUPER_USER
+const superUser = process.env.REACT_APP_SUPER_USER;
 
 function createAdminProvider() {
   const adminDataProvider = createAdminDataProvider();
@@ -62,16 +62,20 @@ function createAdminProvider() {
         const authUid = baseProvider.app.auth().currentUser?.uid;
         const authUid2 = baseProvider.app.auth()?._delegate?.currentUser?.uid;
         const localUid = localStorage.getItem("uid");
-        console.log(
-          "uid",
-          authUid,
-          authUid2,
-          localUid,
-          baseProvider.app.auth(),
-          baseProvider.app.auth()._delegate.currentUser
-        );
-        const filterUid = authUid || authUid2 || localUid || "dead";
-        console.log('superuser', filterUid, superUser)
+        // console.log(
+        //   "uid",
+        //   authUid,
+        //   authUid2,
+        //   localUid,
+        //   baseProvider.app.auth(),
+        //   baseProvider.app.auth()._delegate.currentUser
+        // );
+        const authId = authUid || authUid2;
+        if (authId && !localUid) {
+          localStorage.setItem("uid", authId);
+        }
+        const filterUid = authId || localUid || "dead";
+        // console.log('superuser', filterUid, superUser)
         if (filterUid != superUser) {
           params.filter.uid = filterUid;
         }
@@ -115,7 +119,9 @@ function createDataProvider(scenario) {
                 ...members,
                 ...list.data.filter((n) => !memberIds.has(n.id)),
               ];
-              data.forEach((e, index) => {e.rowIndex = index + 1});
+              data.forEach((e, index) => {
+                e.rowIndex = index + 1;
+              });
               return {
                 data: data.slice(page * perPage, (page + 1) * perPage),
                 total: list.data.length,
@@ -123,12 +129,14 @@ function createDataProvider(scenario) {
             } else return list;
           });
         }
-        return resource !== "actions" 
+        return resource !== "actions"
           ? baseProvider.getList(resource, params).then((r) => {
-            r.data.forEach((e, index) => {e.rowIndex = index + 1});
-            return r;
-          })
-          : getActionList()
+              r.data.forEach((e, index) => {
+                e.rowIndex = index + 1;
+              });
+              return r;
+            })
+          : getActionList();
       },
     },
     resources: [
@@ -140,7 +148,7 @@ function createDataProvider(scenario) {
       "sounds",
       "mapStyles",
       "broadcasts",
-      "variables"
+      "variables",
     ],
     name: scenario,
   };
@@ -258,7 +266,6 @@ function App() {
     prevScenario = storedScenario;
   }
   store.subscribe(() => {
-    console.log("listener", store.getState());
     const scenario = store.getState().currentScenario.value;
     if (scenario && scenario !== prevScenario) {
       console.log("setting data provider", store.getState());

@@ -31,7 +31,7 @@ import MyLocationIcon from "@material-ui/icons/MyLocation";
 import ReplyIcon from "@material-ui/icons/Reply";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import HourglassBottomIcon from "@material-ui/icons/HourglassEmpty";
-import { DummyList } from "./dummy"
+import { DummyList } from "./dummy";
 
 const conditionTypes = [
   { id: "ALWAYS", name: "立刻" },
@@ -72,24 +72,26 @@ const BroadcastFilter = (props) => (
 );
 
 export const BroadcastList = (props) => {
-  if (localStorage.getItem('scenario')) { 
-    return <List
-      title={<Title />}
-      {...props}
-      perPage={100}
-      filters={<BroadcastFilter />}
-    >
-      <Datagrid>
-        <TextField label="編號" source="rowIndex" />
-        <TextField label="名稱" source="name" />
-        <FunctionField label="條件" render={getConditionIcon} />
-        <FunctionField label="內容" render={getContentIcon} />
-        <EditButton label="編輯" />
-        <SendButton label="傳送" />
-        <DeleteButton label="" redirect={false} />
-      </Datagrid>
-    </List>
-  } else return DummyList(props)
+  if (localStorage.getItem("scenario")) {
+    return (
+      <List
+        title={<Title />}
+        {...props}
+        perPage={100}
+        filters={<BroadcastFilter />}
+      >
+        <Datagrid>
+          <TextField label="編號" source="rowIndex" />
+          <TextField label="名稱" source="name" />
+          <FunctionField label="條件" render={getConditionIcon} />
+          <FunctionField label="內容" render={getContentIcon} />
+          <EditButton label="編輯" />
+          <SendButton label="傳送" />
+          <DeleteButton label="" redirect={false} />
+        </Datagrid>
+      </List>
+    );
+  } else return DummyList(props);
 };
 
 const InputForm = (props) => {

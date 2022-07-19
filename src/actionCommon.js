@@ -237,23 +237,25 @@ const soundInput = (formData, enableDelay) => (
       </>
     )}
     <br />
-    {formData.mode === "STATIC_VOLUME" && formData.soundType === "MAIN" && formData.advancedSound && (
-      <div>
-        <NumberInput
-          label="正文秒數"
-          source="speechLength"
-          validate={[number()]}
-        />
-        播放到超過正文秒數之後，如果與下一個音檔重疊，則開始淡出。不淡出則不必設。
-        <br />
-        <NumberInput
-          label="淡出秒數"
-          source="fadeOutSeconds"
-          validate={[number()]}
-        />
-        在幾秒內淡出到消失。設為0代表立即停止。
-      </div>
-    )}
+    {formData.mode === "STATIC_VOLUME" &&
+      formData.soundType === "MAIN" &&
+      formData.advancedSound && (
+        <div>
+          <NumberInput
+            label="正文秒數"
+            source="speechLength"
+            validate={[number()]}
+          />
+          播放到超過正文秒數之後，如果與下一個音檔重疊，則開始淡出。不淡出則不必設。
+          <br />
+          <NumberInput
+            label="淡出秒數"
+            source="fadeOutSeconds"
+            validate={[number()]}
+          />
+          在幾秒內淡出到消失。設為0代表立即停止。
+        </div>
+      )}
     {formData.mode === "DYNAMIC_VOLUME" && formData.advancedSound && (
       <>
         <span>中心點音量值為1(檔案原始音量)，到圓周的音量為「最小音量」</span>
@@ -307,8 +309,13 @@ const validateBeforeSubmit = (value) => {
   } else if (dests && dests.length === 0) {
     error.destinations = "至少要選其中一個";
   }
-  if (value.hasIntroImage && !value.introBackground && !value.introLogo && !value.mapLogo) {
-    error.hasIntroImage = "背景和logo至少要有一個"
+  if (
+    value.hasIntroImage &&
+    !value.introBackground &&
+    !value.introLogo &&
+    !value.mapLogo
+  ) {
+    error.hasIntroImage = "背景和logo至少要有一個";
   }
   return error;
 };
@@ -658,7 +665,7 @@ const variableUpdateInput = () => (
         choices={operationTypes}
         validate={[required()]}
       />
-      <NumberInput label="值" source="value" validate={[required()]}/>
+      <NumberInput label="值" source="value" validate={[required()]} />
     </SimpleFormIterator>
   </ArrayInput>
 );
@@ -687,5 +694,5 @@ export {
   validateBeforeSubmit,
   introImageInput,
   buttonStyleInput,
-  variableUpdateInput
+  variableUpdateInput,
 };

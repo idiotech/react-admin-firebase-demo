@@ -14,7 +14,7 @@ import {
   DeleteButton,
   DateTimeInput,
 } from "react-admin";
-import { DummyList } from "./dummy"
+import { DummyList } from "./dummy";
 
 const BeaconFilter = (props) => (
   <Filter {...props}>
@@ -32,18 +32,20 @@ const Title = ({ record }) => {
 };
 
 export const BeaconList = (props) => {
-  if (localStorage.getItem('scenario'))
-    return <List title={<Title />} {...props} filters={<BeaconFilter />}>
-      <Datagrid>
-        <TextField label="編號" source="rowIndex" />
-        <TextField label="名稱" source="name" />
-        <TextField label="Beacon ID" source="beaconId" />
-        <TextField label="說明" source="description" />
-        <EditButton label="" />
-        <DeleteButton label="" redirect={false} />
-      </Datagrid>
-    </List>
-  else return DummyList(props)
+  if (localStorage.getItem("scenario"))
+    return (
+      <List title={<Title />} {...props} filters={<BeaconFilter />}>
+        <Datagrid>
+          <TextField label="編號" source="rowIndex" />
+          <TextField label="名稱" source="name" />
+          <TextField label="Beacon ID" source="beaconId" />
+          <TextField label="說明" source="description" />
+          <EditButton label="" />
+          <DeleteButton label="" redirect={false} />
+        </Datagrid>
+      </List>
+    );
+  else return DummyList(props);
 };
 
 export const BeaconCreate = (props) => (

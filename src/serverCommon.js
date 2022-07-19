@@ -54,7 +54,16 @@ export const useAllData = () => {
     { field: "published_at", order: "DESC" }
   );
   const variables = variableResult.data;
-  return { actions, locations, beacons, images, sounds, mapStyles, broadcasts, variables };
+  return {
+    actions,
+    locations,
+    beacons,
+    images,
+    sounds,
+    mapStyles,
+    broadcasts,
+    variables,
+  };
 };
 
 export const getActions = (currentNode, data, condition) => {
@@ -74,7 +83,7 @@ export const getActions = (currentNode, data, condition) => {
               "http://daqiaotou-storage.floraland.tw/sounds/entrance.mp3"
             : "http://daqiaotou-storage.floraland.tw/sounds/entrance.mp3",
           volumeSetting: {
-            type: currentNode.mode || 'STATIC_VOLUME',
+            type: currentNode.mode || "STATIC_VOLUME",
             center: currentNode.soundCenterId
               ? locations[currentNode.soundCenterId]
               : null,
@@ -249,9 +258,15 @@ export const getActions = (currentNode, data, condition) => {
       content: {
         task: {
           type: "INTRO_IMAGE",
-          backgroundUrl: currentNode.introBackground ? images[currentNode.introBackground]?.image.src : null,
-          logoUrl: currentNode.introLogo ? images[currentNode.introLogo]?.image.src : null,
-          mapLogoUrl: currentNode.mapLogo ? images[currentNode.mapLogo]?.image.src : null,
+          backgroundUrl: currentNode.introBackground
+            ? images[currentNode.introBackground]?.image.src
+            : null,
+          logoUrl: currentNode.introLogo
+            ? images[currentNode.introLogo]?.image.src
+            : null,
+          mapLogoUrl: currentNode.mapLogo
+            ? images[currentNode.mapLogo]?.image.src
+            : null,
           logoMarginTop: currentNode.introLogoMarginTop,
           logoWidth: currentNode.introLogoWidth,
           logoHeight: currentNode.introLogoHeight,
@@ -282,12 +297,12 @@ export const getActions = (currentNode, data, condition) => {
     ret.push(buttonStyleAction);
   }
   if (currentNode.hasVariableUpdate) {
-    const variableUpdates = currentNode.variableUpdates.map( vu => ({
-      name: vu.variable? variables[vu.variable]?.name : null,
+    const variableUpdates = currentNode.variableUpdates.map((vu) => ({
+      name: vu.variable ? variables[vu.variable]?.name : null,
       operation: vu.operation,
       value: vu.value,
     }));
- 
+
     const variableAction = {
       id: currentNode.id + "-variable-update" + "",
       receiver: "?u",
@@ -295,23 +310,23 @@ export const getActions = (currentNode, data, condition) => {
       content: {
         task: {
           type: "VARIABLE_UPDATES",
-          updates: variableUpdates
+          updates: variableUpdates,
         },
         condition: condition,
       },
       description: currentNode.name,
-    }
+    };
     ret.push(variableAction);
   }
   if (currentNode.firstAction) {
     const updates = [];
     for (const key in variables) {
-      const v = variables[key]
+      const v = variables[key];
       updates.push({
         name: v.name,
-        operation: '=',
-        value: v.value
-      })
+        operation: "=",
+        value: v.value,
+      });
     }
     const variableAction = {
       id: currentNode.id + "-variable-default" + "",
@@ -320,12 +335,12 @@ export const getActions = (currentNode, data, condition) => {
       content: {
         task: {
           type: "VARIABLE_UPDATES",
-          updates: updates
+          updates: updates,
         },
         condition: condition,
       },
       description: currentNode.name,
-    }
+    };
     ret.push(variableAction);
   }
   return ret.map((a) => ({

@@ -23,21 +23,22 @@ export const CoordinateInput = (formData) => {
   }
 
   React.useEffect(() => {
-    navigator && navigator.geolocation.getCurrentPosition(position => {
-      // const { latitude, longitude } = position.coords;
-      if (!formData.lat) {
-        console.log('current position', position);
-        // form.change("lat", latitude)
-        // form.change("lon", longitude)
-        // setPosition({lat: latitude, lng: longitude})
-      } else {
-        if (initial) {
-          setPosition({lat: formData.lat, lng: formData.lon})
-          setInitial(false)
+    navigator &&
+      navigator.geolocation.getCurrentPosition((position) => {
+        // const { latitude, longitude } = position.coords;
+        if (!formData.lat) {
+          console.log("current position", position);
+          // form.change("lat", latitude)
+          // form.change("lon", longitude)
+          // setPosition({lat: latitude, lng: longitude})
+        } else {
+          if (initial) {
+            setPosition({ lat: formData.lat, lng: formData.lon });
+            setInitial(false);
+          }
         }
-      }
-    });
-  })
+      });
+  });
 
   return (
     <>

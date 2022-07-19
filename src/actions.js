@@ -27,7 +27,7 @@ import {
   SaveButton,
   useRecordContext,
   DeleteWithConfirmButton,
-  NumberInput
+  NumberInput,
 } from "react-admin";
 
 import {
@@ -49,11 +49,11 @@ import {
   variableUpdateInput,
   modalImage,
   validateBeforeSubmit,
-  comparisonTypes
+  comparisonTypes,
 } from "./actionCommon";
 
 import { getRecordField } from "./utils";
-import { DummyList } from "./dummy"
+import { DummyList } from "./dummy";
 
 const ActionFilter = (props) => (
   <Filter {...props}>
@@ -73,66 +73,84 @@ const getRowIndex = (record) => {
   const key = `a-${record.id}`;
   if (record.rowIndex) {
     localStorage.setItem(key, record.rowIndex);
-    return <div>{record.rowIndex}</div>
+    return <div>{record.rowIndex}</div>;
   } else {
-    return <div>{localStorage.getItem(key)}</div>
+    return <div>{localStorage.getItem(key)}</div>;
   }
-}
-
-export const ActionList = (props) => {
-  if (localStorage.getItem('scenario'))
-    return <List title={<Title />} {...props} perPage={100} filters={<ActionFilter />}>
-      <Datagrid>
-        <FunctionField label="編號" render={getRowIndex} />
-        <TextField label="名稱" source="name" />
-        <FunctionField label="條件" render={getConditionIcon} />
-        <FunctionField label="內容" render={getContentIcon} />
-        <EditButton label="編輯" />
-        <ArrayField label="上一步" source="prevs">
-          <Datagrid>
-            <ReferenceField label="" source="prev" reference="actions">
-              <ChipField source="name" />
-            </ReferenceField>
-          </Datagrid>
-        </ArrayField>
-        <NextButton source="id" label="下一步" />
-        <DeleteButton />
-      </Datagrid>
-    </List>
-   else return DummyList(props);
 };
 
-const DeleteButton = props => {
-    const record = useRecordContext();
-    return <DeleteWithConfirmButton {...props}
-            label="刪除"
-            confirmContent="將刪除此動作，確定嗎？"
-            confirmTitle={`確認刪除《${record.name}》`}
-            translateOptions={{ name: record.name }}
-        />
-}
+export const ActionList = (props) => {
+  if (localStorage.getItem("scenario"))
+    return (
+      <List
+        title={<Title />}
+        {...props}
+        perPage={100}
+        filters={<ActionFilter />}
+      >
+        <Datagrid>
+          <FunctionField label="編號" render={getRowIndex} />
+          <TextField label="名稱" source="name" />
+          <FunctionField label="條件" render={getConditionIcon} />
+          <FunctionField label="內容" render={getContentIcon} />
+          <EditButton label="編輯" />
+          <ArrayField label="上一步" source="prevs">
+            <Datagrid>
+              <ReferenceField label="" source="prev" reference="actions">
+                <ChipField source="name" />
+              </ReferenceField>
+            </Datagrid>
+          </ArrayField>
+          <NextButton source="id" label="下一步" />
+          <DeleteButton />
+        </Datagrid>
+      </List>
+    );
+  else return DummyList(props);
+};
 
-const ActionSaveButton = props => {
+const DeleteButton = (props) => {
+  const record = useRecordContext();
+  return (
+    <DeleteWithConfirmButton
+      {...props}
+      label="刪除"
+      confirmContent="將刪除此動作，確定嗎？"
+      confirmTitle={`確認刪除《${record.name}》`}
+      translateOptions={{ name: record.name }}
+    />
+  );
+};
+
+const ActionSaveButton = (props) => {
   if (props.record && props.record.id) {
-    const redirect = `/actions/create/?source={"prevs": [{"prev" : "${props.record.id}", "conditionType": "ALWAYS" }]}`
+    const redirect = `/actions/create/?source={"prevs": [{"prev" : "${props.record.id}", "conditionType": "ALWAYS" }]}`;
     return <SaveButton {...props} redirect={redirect} />;
   } else {
     return <SaveButton {...props} />;
   }
-}
+};
 
-const EditToolbar = props => {
-    return <Toolbar {...props}>
+const EditToolbar = (props) => {
+  return (
+    <Toolbar {...props}>
       <span>
         <SaveButton label="儲存" {...props} /> &nbsp;
-        { props.record && props.record.id && <ActionSaveButton label="儲存並建下一步" {...props} /> }
+        {props.record && props.record.id && (
+          <ActionSaveButton label="儲存並建下一步" {...props} />
+        )}
       </span>
     </Toolbar>
+  );
 };
-  
+
 const InputForm = (props) => {
   return (
-    <SimpleForm {...props} validate={validateBeforeSubmit} toolbar={<EditToolbar />} >
+    <SimpleForm
+      {...props}
+      validate={validateBeforeSubmit}
+      toolbar={<EditToolbar />}
+    >
       <FormDataConsumer>
         {({ formData }) => {
           const enableDelay =
@@ -217,7 +235,9 @@ const InputForm = (props) => {
                   </SimpleFormIterator>
                 </ArrayInput>
               )}
-              {!formData.firstAction && <BooleanInput label="進階流程控制" source="advancedFlow" />}
+              {!formData.firstAction && (
+                <BooleanInput label="進階流程控制" source="advancedFlow" />
+              )}
               {!formData.firstAction && formData.advancedFlow && (
                 <>
                   <ReferenceArrayInput
@@ -230,14 +250,14 @@ const InputForm = (props) => {
                     <AutocompleteArrayInput optionText="name" />
                   </ReferenceArrayInput>
                   <ArrayInput label="附加條件" source="preconditions">
-                     <SimpleFormIterator>
-                       <ReferenceInput
-                         label="變數"
-                         source="variable"
-                         reference="variables"
-                         sort={{ field: "lastupdate", order: "DESC" }}
-                         perPage={1000}
-                       >
+                    <SimpleFormIterator>
+                      <ReferenceInput
+                        label="變數"
+                        source="variable"
+                        reference="variables"
+                        sort={{ field: "lastupdate", order: "DESC" }}
+                        perPage={1000}
+                      >
                         <SelectInput optionText="name" />
                       </ReferenceInput>
                       <SelectInput
@@ -245,7 +265,7 @@ const InputForm = (props) => {
                         source="comparison"
                         choices={comparisonTypes}
                       />
-                      <NumberInput label="數值" source="value"/>
+                      <NumberInput label="數值" source="value" />
                     </SimpleFormIterator>
                   </ArrayInput>
                 </>
@@ -271,7 +291,7 @@ const InputForm = (props) => {
               <h3>進階內容</h3>
               <BooleanInput label="開啟進階內容" source="advancedActionType" />
               <hr />
-              {formData.advancedActionType && 
+              {formData.advancedActionType && (
                 <>
                   <BooleanInput label="來電" source="hasIncomingCall" />
                   {formData.hasIncomingCall && incomingCallInput(enableDelay)}
@@ -283,7 +303,8 @@ const InputForm = (props) => {
                   {formData.hasMapStyle && mapStyleInput(enableDelay, formData)}
                   <hr />
                   <BooleanInput label="首頁背景" source="hasIntroImage" />
-                  {formData.hasIntroImage && introImageInput(formData, enableDelay)}
+                  {formData.hasIntroImage &&
+                    introImageInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput label="按鈕顏色" source="hasButtonStyle" />
                   {formData.hasButtonStyle && buttonStyleInput(enableDelay)}
@@ -291,7 +312,7 @@ const InputForm = (props) => {
                   <BooleanInput label="更新變數" source="hasVariableUpdate" />
                   {formData.hasVariableUpdate && variableUpdateInput()}
                 </>
-              }
+              )}
             </>
           );
         }}
@@ -308,10 +329,9 @@ export const ActionCreate = (props) => {
   );
 };
 
-
 export const ActionEdit = (props) => {
   return (
-    <Edit title={<Title />} {...props} >
+    <Edit title={<Title />} {...props}>
       <InputForm {...props} showid="true" />
     </Edit>
   );

@@ -15,7 +15,7 @@ import {
   FileInput,
 } from "react-admin";
 
-import { DummyList } from "./dummy"
+import { DummyList } from "./dummy";
 const MapStyleFilter = (props) => (
   <Filter {...props}>
     <TextInput label="Search" source="name" alwaysOn />
@@ -32,22 +32,24 @@ const Title = ({ record }) => {
 };
 
 export const MapStyleList = (props) => {
-  if (localStorage.getItem('scenario')) { 
-    return <List
-      title={<Title />}
-      {...props}
-      perPage="100"
-      sort={{ field: "name", order: "ASC" }}
-      filters={<MapStyleFilter />}
-    >
-      <Datagrid>
-        <TextField label="編號" source="rowIndex" />
-        <TextField label="名稱" source="name" />
-        <FileField label="地圖樣式" source="mapStyle.src" title={"連結"} />
-        <EditButton label="" />
-        <DeleteButton label="" redirect={false} />
-      </Datagrid>
-    </List>
+  if (localStorage.getItem("scenario")) {
+    return (
+      <List
+        title={<Title />}
+        {...props}
+        perPage="100"
+        sort={{ field: "name", order: "ASC" }}
+        filters={<MapStyleFilter />}
+      >
+        <Datagrid>
+          <TextField label="編號" source="rowIndex" />
+          <TextField label="名稱" source="name" />
+          <FileField label="地圖樣式" source="mapStyle.src" title={"連結"} />
+          <EditButton label="" />
+          <DeleteButton label="" redirect={false} />
+        </Datagrid>
+      </List>
+    );
   } else return DummyList(props);
 };
 

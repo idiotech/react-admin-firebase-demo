@@ -11,9 +11,7 @@ const uiConfig = {
   // Redirect to /signedIn after sign in is successful. Alternatively you can provide a callbacks.signInSuccess function.
   signInSuccessUrl: "#/",
   // We will display Google and Facebook as auth providers.
-  signInOptions: [
-    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-  ],
+  signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
   // Optional callbacks in order to get Access Token from Google,Facebook,... etc
   callbacks: {
     signInSuccessWithAuthResult: (result) => {
@@ -22,8 +20,8 @@ const uiConfig = {
       const user = result.user;
       // This gives you a Facebook Access Token. You can use it to access the Facebook API.
       const accessToken = credential.accessToken;
-      console.log('login data', { result, user, accessToken });
-      localStorage.setItem('uid', user.uid);
+      console.log("login data", { result, user, accessToken });
+      localStorage.setItem("uid", user.uid);
       return true;
     },
   },
@@ -34,22 +32,26 @@ const SignInScreen = () => (
 );
 
 const CustomLoginForm = (props) => {
-  return <div>
-    <LoginForm {...props} />
-    <SignInScreen />
-  </div>
+  return (
+    <div>
+      <LoginForm {...props} />
+      <SignInScreen />
+    </div>
+  );
 };
 
 const CustomLoginPage = (props) => {
-  React.useEffect( () => {
-    localStorage.removeItem('uid');
-    localStorage.removeItem('scenario');
-    localStorage.removeItem('scenarioName');
-    console.log('effect happened');
-  })
-  return <Login {...props}>
-    <CustomLoginForm {...props} />
-  </Login>
+  React.useEffect(() => {
+    localStorage.removeItem("uid");
+    localStorage.removeItem("scenario");
+    localStorage.removeItem("scenarioName");
+    console.log("effect happened");
+  });
+  return (
+    <Login {...props}>
+      <CustomLoginForm {...props} />
+    </Login>
+  );
 };
 
 export default CustomLoginPage;
