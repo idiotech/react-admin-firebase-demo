@@ -44,7 +44,10 @@ const destinations = [
   { id: "ALERT", name: "提示視窗" },
   { id: "INTRO", name: "首頁" },
 ];
-const dismissalDestinations = [{ id: "APP", name: "對話視窗" }];
+const dismissalDestinations = [
+  { id: "APP", name: "對話視窗" },
+  { id: "ALERT", name: "提示視窗" },
+];
 const soundModes = [
   { id: "STATIC_VOLUME", name: "固定音量" },
   { id: "DYNAMIC_VOLUME", name: "越遠越小聲" },
@@ -89,12 +92,14 @@ const getConditionIcon = (record) => {
     (record.hasHangUp && record.hangUpDelay) ||
     (record.hasIncomingCall && record.incomingCallDelay) ||
     (record.hasMarker && record.markerDelay) ||
-    (record.hasMarkerRemoval && record.markerRemovalDelay) ||
+    (record.hasmarkerremoval && record.markerremovaldelay) ||
     (record.hasPopup && record.popupDelay) ||
     (record.hasPopupDismissal && record.popupDismissalDelay) ||
     (record.hasMapStyle && record.mapStyleDelay) ||
     (record.hasIntroImage && record.introImageDelay) ||
-    (record.hasButtonStyle && record.buttonStyleDelay);
+    (record.hasButtonStyle && record.buttonStyleDelay) ||
+    (record.hasGuideImage && record.guideImageDelay) ||
+    (record.hasGuideImageRemoval && record.hasGuideImageRemovalDelay);
 
   return (
     <>
@@ -320,7 +325,7 @@ const validateBeforeSubmit = (value) => {
   return error;
 };
 
-const popupInput = (enableDelay) => {
+const popupInput = (formData, enableDelay) => {
   const initialDestination = React.useMemo(() => ["ALERT"], []);
   return (
     <>
@@ -376,6 +381,13 @@ const popupInput = (enableDelay) => {
         )}
       </span>
       <br />
+      {/* {formData.destinations && formData.destinations.has("ALERT") && (
+        <BooleanInput
+          label="回覆後關閉提示視窗"
+          source="closeAlertAfterReply"
+          initialValue={true}
+        />
+      )} */}
       {enableDelay && (
         <NumberInput
           label="延遲時間 (千分之一秒)"
@@ -670,6 +682,56 @@ const variableUpdateInput = () => (
   </ArrayInput>
 );
 
+const endgameInput = (enableDelay) => (
+  <>
+    <BooleanInput
+      label="結束活動，返回劇本選擇畫面"
+      source="endgame"
+      initialValue={false}
+    />
+    <br />
+    {enableDelay && (
+      <NumberInput
+        label="延遲時間 (千分之一秒)"
+        source="endgameDelay"
+        validate={[number()]}
+      />
+    )}
+  </>
+);
+
+const guideImageInput = (enableDelay) => (
+  <>
+    <ImageReferenceInput
+      label="指示圖"
+      source="guideImage"
+      reference="images"
+      sort={{ field: "lastupdate", order: "DESC" }}
+      perPage={1000}
+    />
+    <br />
+    {enableDelay && (
+      <NumberInput
+        label="延遲時間 (千分之一秒)"
+        source="guideImageDelay"
+        validate={[number()]}
+      />
+    )}
+  </>
+);
+
+const guideImageRemovalInput = (enableDelay) => (
+  <>
+    {enableDelay && (
+      <NumberInput
+        label="延遲時間 (千分之一秒)"
+        source="guideImageRemovalDelay"
+        validate={[number()]}
+      />
+    )}
+  </>
+);
+
 export {
   destinations,
   soundModes,
@@ -695,4 +757,7 @@ export {
   introImageInput,
   buttonStyleInput,
   variableUpdateInput,
+  endgameInput,
+  guideImageInput,
+  guideImageRemovalInput,
 };

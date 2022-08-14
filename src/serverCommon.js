@@ -119,6 +119,7 @@ export const getActions = (currentNode, data, condition) => {
             : // ? currentNode.pictures.map(p => `${cdnRoot}/${props.record.id}/images/${p.pictureId}/image`)
               [],
           allowTextReply: currentNode.allowTextReply ? true : false,
+          closeAlertAfterReply: currentNode.closeAlertAfterReply || null,
         },
         condition: condition,
       },
@@ -342,6 +343,58 @@ export const getActions = (currentNode, data, condition) => {
       description: currentNode.name,
     };
     ret.push(variableAction);
+  }
+  if (currentNode.endgame) {
+    const endgameAction = {
+      id: currentNode.id + "-endgame",
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: "END_GAME",
+        },
+        condition: condition,
+      },
+      delay: currentNode.endgameDelay,
+      description: currentNode.name,
+    };
+    ret.push(endgameAction);
+  }
+  if (currentNode.hasGuideImage) {
+    const guideImageAction = {
+      id: currentNode.id + "-guide-image",
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: "GUIDE_IMAGE",
+          image: currentNode.guideImage
+            ? images[currentNode.guideImage]?.image.src
+            : null,
+        },
+        condition: condition,
+      },
+      delay: currentNode.guideImageDelay,
+      description: currentNode.name,
+    };
+    ret.push(guideImageAction);
+  }
+  if (currentNode.hasGuideImageRemoval) {
+    const guideImageRemovalAction = {
+      id: currentNode.id + "-guide-image-removal",
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: "GUIDE_IMAGE_REMOVAL",
+          id: currentNode.guideImageId,
+        },
+        condition: condition,
+      },
+      delay: currentNode.guideImageRemovalDelay,
+      description: currentNode.name,
+    };
+    ret.push(guideImageRemovalAction);
   }
   return ret.map((a) => ({
     ...a,

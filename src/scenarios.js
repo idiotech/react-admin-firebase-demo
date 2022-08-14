@@ -139,6 +139,8 @@ function getTrigger(currentNode, parentNode) {
       ? parentNode.id + "-marker-removal"
       : parentNode.hasMapStyle
       ? parentNode.id + "-map-style"
+      : parentNode.hasGuideImage
+      ? parentNode.id + "-guide-image"
       : parentNode.hasPopupDismissal
       ? parentNode.id + "-popup-dismissal"
       : parentNode.hasIntroImage
@@ -163,7 +165,7 @@ function getCondition(currentNode, data) {
   const { locations, beacons } = data;
   const active =
     currentNode.prevs &&
-    currentNode.prevs.find((p) => p.conditionType != "TEXT");
+    currentNode.prevs.find((p) => p.conditionType != "TEXT" && p.conditionType);
   if (active) {
     return {
       type: active.conditionType,

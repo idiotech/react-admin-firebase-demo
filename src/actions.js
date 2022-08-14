@@ -50,6 +50,9 @@ import {
   modalImage,
   validateBeforeSubmit,
   comparisonTypes,
+  endgameInput,
+  guideImageInput,
+  guideImageRemovalInput,
 } from "./actionCommon";
 
 import { getRecordField } from "./utils";
@@ -277,7 +280,7 @@ const InputForm = (props) => {
               {formData.hasSound && soundInput(formData, enableDelay)}
               <hr />
               <BooleanInput label="圖文訊息" source="hasPopup" />
-              {formData.hasPopup && popupInput(enableDelay)}
+              {formData.hasPopup && popupInput(formData, enableDelay)}
               <hr />
               <BooleanInput label="關閉圖文框" source="hasPopupDismissal" />
               {formData.hasPopupDismissal && popupDismissalInput(enableDelay)}
@@ -288,11 +291,23 @@ const InputForm = (props) => {
               <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
               {formData.hasMarkerRemoval && markerRemovalInput(enableDelay)}
               <hr />
+              {endgameInput(enableDelay)}
+              <hr />
               <h3>進階內容</h3>
               <BooleanInput label="開啟進階內容" source="advancedActionType" />
               <hr />
               {formData.advancedActionType && (
                 <>
+                  <BooleanInput label="指示圖" source="hasGuideImage" />
+                  {formData.hasGuideImage && guideImageInput(enableDelay)}
+                  <hr />
+                  <BooleanInput
+                    label="移除指示圖"
+                    source="hasGuideImageRemoval"
+                  />
+                  {formData.hasGuideImageRemoval &&
+                    guideImageRemovalInput(enableDelay)}
+                  <hr />
                   <BooleanInput label="來電" source="hasIncomingCall" />
                   {formData.hasIncomingCall && incomingCallInput(enableDelay)}
                   <hr />
