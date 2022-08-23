@@ -53,6 +53,7 @@ import {
   endgameInput,
   guideImageInput,
   guideImageRemovalInput,
+  silenceInput,
 } from "./actionCommon";
 
 import { getRecordField } from "./utils";
@@ -298,6 +299,9 @@ const InputForm = (props) => {
               <hr />
               {formData.advancedActionType && (
                 <>
+                  <BooleanInput label="停止聲音" source="hasSilence" />
+                  {formData.hasSilence && silenceInput(enableDelay)}
+                  <hr />
                   <BooleanInput label="指示圖" source="hasGuideImage" />
                   {formData.hasGuideImage && guideImageInput(enableDelay)}
                   <hr />

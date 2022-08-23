@@ -396,6 +396,24 @@ export const getActions = (currentNode, data, condition) => {
     };
     ret.push(guideImageRemovalAction);
   }
+  if (currentNode.hasSilence) {
+    const silenceAction = {
+      id: currentNode.id + "-silence",
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: "SILENCE",
+          id: currentNode.silencedSound + "-sound",
+          fadeOutSeconds: currentNode.forceFadeOutSeconds,
+        },
+        condition: condition,
+      },
+      delay: currentNode.silenceDelay,
+      description: currentNode.name,
+    };
+    ret.push(silenceAction);
+  }
   return ret.map((a) => ({
     ...a,
     session: {

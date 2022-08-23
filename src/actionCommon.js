@@ -43,6 +43,7 @@ const destinations = [
   { id: "APP", name: "對話視窗" },
   { id: "ALERT", name: "提示視窗" },
   { id: "INTRO", name: "首頁" },
+  { id: "DIALER", name: "撥號視窗" },
 ];
 const dismissalDestinations = [
   { id: "APP", name: "對話視窗" },
@@ -55,7 +56,7 @@ const soundModes = [
 const soundTypes = [
   { id: "MAIN", name: "主劇情" },
   { id: "BACKGROUND", name: "背景單次" },
-  // { id: "LOOP", name: "背景循環" },
+  { id: "LOOP", name: "背景循環" },
 ];
 const conditionTypes = [
   { id: "ALWAYS", name: "上個動作結束" },
@@ -732,6 +733,35 @@ const guideImageRemovalInput = (enableDelay) => (
   </>
 );
 
+const silenceInput = (enableDelay) => (
+  <>
+    <ReferenceInput
+      label="聲音"
+      source="silencedSound"
+      reference="actions"
+      sort={{ field: "lastupdate", order: "DESC" }}
+      filter={{ hasSound: true }}
+      perPage={1000}
+    >
+      <SelectInput optionText="name" />
+    </ReferenceInput>
+    <NumberInput
+      label="淡出秒數"
+      source="forceFadeOutSeconds"
+      validate={[number()]}
+    />
+    在幾秒內淡出到消失。設為0代表立即停止。
+    <br />
+    {enableDelay && (
+      <NumberInput
+        label="延遲時間 (千分之一秒)"
+        source="silenceDelay"
+        validate={[number()]}
+      />
+    )}
+  </>
+);
+
 export {
   destinations,
   soundModes,
@@ -760,4 +790,5 @@ export {
   endgameInput,
   guideImageInput,
   guideImageRemovalInput,
+  silenceInput,
 };

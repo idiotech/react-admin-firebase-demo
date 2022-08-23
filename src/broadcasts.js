@@ -52,6 +52,7 @@ import {
   markerRemovalInput,
   mapStyleInput,
   validateBeforeSubmit,
+  silenceInput,
 } from "./actionCommon";
 
 import { useAllData, getActions } from "./serverCommon";
@@ -158,6 +159,9 @@ const InputForm = (props) => {
               <hr />
               <BooleanInput label="地圖樣式" source="hasMapStyle" />
               {formData.hasMapStyle && mapStyleInput()}
+              <hr />
+              <BooleanInput label="停止聲音" source="hasSilence" />
+              {formData.hasSilence && silenceInput()}
             </>
           );
         }}
