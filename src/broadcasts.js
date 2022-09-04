@@ -208,7 +208,6 @@ function getCondition(currentNode, data) {
 
 const getConditionIcon = (record) => {
   const delay =
-    (record.delay && record.delay != "0") ||
     (record.hasSound && record.soundDelay) ||
     (record.hasHangUp && record.hangUpDelay) ||
     (record.hasIncomingCall && record.incomingCallDelay) ||

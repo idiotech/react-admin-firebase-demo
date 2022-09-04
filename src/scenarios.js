@@ -221,7 +221,7 @@ function PublishButton(props) {
         triggers: getTriggers(tree.node, parents),
         performances: serverActions.map((a) => ({
           action: a,
-          delay: a.delay === 0 || a.delay ? a.delay : tree.node.delay || 0,
+          delay: a.delay === 0 || a.delay ? a.delay : 0,
         })),
         preconditions: tree.node.preconditions?.map((p) => ({
           name: variables[p.variable]?.name,

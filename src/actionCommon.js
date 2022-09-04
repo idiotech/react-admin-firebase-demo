@@ -33,6 +33,7 @@ import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import HourglassBottomIcon from "@material-ui/icons/HourglassEmpty";
 import ImageIcon from "@material-ui/icons/Image";
 import ButtonIcon from "@material-ui/icons/NavigateNext";
+import VolumeOffIcon from "@material-ui/icons/VolumeOff";
 
 import LocationReferenceInput from "./LocationReferenceInput";
 import SoundReferenceInput from "./SoundReferenceInput";
@@ -88,7 +89,6 @@ const getConditionIcon = (record) => {
     ? new Set(record.prevs.flatMap((p) => p.conditionType))
     : new Set();
   const delay =
-    (record.delay && record.delay != "0") ||
     (record.hasSound && record.soundDelay) ||
     (record.hasHangUp && record.hangUpDelay) ||
     (record.hasIncomingCall && record.incomingCallDelay) ||
@@ -126,6 +126,7 @@ const getContentIcon = (record) => {
       {record.hasMapStyle ? <MapIcon /> : <></>}
       {record.hasIntroImage ? <ImageIcon /> : <></>}
       {record.hasButtonStyle ? <ButtonIcon /> : <></>}
+      {record.hasSilence ? <VolumeOffIcon /> : <></>}
     </>
   );
 };
