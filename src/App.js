@@ -121,6 +121,7 @@ function createDataProvider(scenario) {
               ];
               data.forEach((e, index) => {
                 e.rowIndex = index + 1;
+                e.sorted = true;
               });
               return {
                 data: data.slice(page * perPage, (page + 1) * perPage),

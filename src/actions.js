@@ -75,7 +75,7 @@ const Title = ({ record }) => {
 };
 const getRowIndex = (record) => {
   const key = `a-${record.id}`;
-  if (record.rowIndex) {
+  if (record.rowIndex && record.sorted) {
     localStorage.setItem(key, record.rowIndex);
     return <div>{record.rowIndex}</div>;
   } else {
@@ -165,6 +165,11 @@ const InputForm = (props) => {
                 c.conditionType == "GEOFENCE" ||
                 c.conditionType == "BEACON"
             );
+          const forbidDelay = !enableDelay && formData.prevs;
+
+          const forbidDelayNotification = forbidDelay && (
+            <>(因系統限制，Geofence和Beacon觸發時，無法使用延遲。)</>
+          );
           return (
             <>
               {props.showid === "true" ? (
@@ -275,6 +280,7 @@ const InputForm = (props) => {
                 </>
               )}
               <h3>常用內容</h3>
+              {forbidDelayNotification}
               <hr />
               {modalImage}
               <BooleanInput label="聲音" source="hasSound" />
@@ -296,6 +302,7 @@ const InputForm = (props) => {
               <hr />
               <h3>進階內容</h3>
               <BooleanInput label="開啟進階內容" source="advancedActionType" />
+              {forbidDelayNotification}
               <hr />
               {formData.advancedActionType && (
                 <>
