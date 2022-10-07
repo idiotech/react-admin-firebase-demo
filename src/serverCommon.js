@@ -119,7 +119,8 @@ export const getActions = (currentNode, data, condition) => {
             : // ? currentNode.pictures.map(p => `${cdnRoot}/${props.record.id}/images/${p.pictureId}/image`)
               [],
           allowTextReply: currentNode.allowTextReply ? true : false,
-          closeAlertAfterReply: currentNode.closeAlertAfterReply || null,
+          closeAlertAfterReply: !currentNode.dontCloseAlertAfterReply,
+          clearDialog: currentNode.clearDialog,
         },
         condition: condition,
       },

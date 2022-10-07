@@ -183,6 +183,8 @@ function getCondition(currentNode, data) {
 const isSuperUser =
   localStorage.getItem("uid") === process.env.REACT_APP_SUPER_USER;
 
+console.log("REACT_APP_SUPER_USER", process.env.REACT_APP_SUPER_USER);
+
 function PublishButton(props) {
   const disabled = !isCurrentScenario(props);
   const notify = useNotify();

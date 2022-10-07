@@ -353,6 +353,7 @@ const popupInput = (formData, enableDelay) => {
         source="allowTextReply"
         initialValue={false}
       />
+
       {modalButton(
         "https://storage.googleapis.com/daqiaotou/editor/image/text-input.jpg",
         "文字回應示意圖"
@@ -363,6 +364,21 @@ const popupInput = (formData, enableDelay) => {
         choices={destinations}
         initialValue={initialDestination}
       />
+      {formData.destinations && formData.destinations.includes("ALERT") && (
+        <BooleanInput
+          label="回覆後保留提示視窗"
+          source="dontCloseAlertAfterReply"
+          initialValue={false}
+        />
+      )}
+      {formData.destinations && formData.destinations.includes("APP") && (
+        <BooleanInput
+          label="移除先前對話"
+          source="clearDialog"
+          initialValue={false}
+        />
+      )}
+
       <span>
         示意圖：
         {modalButton(
@@ -383,13 +399,7 @@ const popupInput = (formData, enableDelay) => {
         )}
       </span>
       <br />
-      {/* {formData.destinations && formData.destinations.has("ALERT") && (
-        <BooleanInput
-          label="回覆後關閉提示視窗"
-          source="closeAlertAfterReply"
-          initialValue={true}
-        />
-      )} */}
+
       {enableDelay && (
         <NumberInput
           label="延遲時間 (千分之一秒)"
