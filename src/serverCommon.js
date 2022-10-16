@@ -69,7 +69,17 @@ export const useAllData = () => {
 export const getActions = (currentNode, data, condition) => {
   const { sounds, locations, images, mapStyles, variables } = data;
   const ret = [];
-  if (currentNode.hasSound) {
+  // if (currentNode.hasSound && !sounds[currentNode.soundId]) {
+  //   console.log("bad sound:", currentNode.name);
+  // }
+  if (currentNode.hasSound && !sounds[currentNode.soundId]) {
+    const sound = sounds[currentNode.soundId];
+    if (!sound) {
+      throw `聲音不存在: ${currentNode.name}`;
+    }
+    if (currentNode.soundCenterId && !locations[currentNode.soundCenterId]) {
+      throw `聲音中心點不存在: ${currentNode.name}\n`;
+    }
     const soundAction = {
       id: currentNode.id + "-sound",
       receiver: "?u",
@@ -77,11 +87,7 @@ export const getActions = (currentNode, data, condition) => {
       content: {
         task: {
           type: "SOUND",
-          url: currentNode.soundId
-            ? // ? `${cdnRoot}/${props.record.id}/sounds/${currentNode.soundId}/sound`
-              sounds[currentNode.soundId].sound.src ||
-              "http://daqiaotou-storage.floraland.tw/sounds/entrance.mp3"
-            : "http://daqiaotou-storage.floraland.tw/sounds/entrance.mp3",
+          url: sound ? sound.sound.src : null,
           volumeSetting: {
             type: currentNode.mode || "STATIC_VOLUME",
             center: currentNode.soundCenterId
@@ -101,7 +107,16 @@ export const getActions = (currentNode, data, condition) => {
     };
     ret.push(soundAction);
   }
+
   if (currentNode.hasPopup) {
+    const ps = currentNode.pictures;
+    if (ps) {
+      ps.forEach((p) => {
+        if (!images[p.pictureId] || !images[p.pictureId].image.src) {
+          throw `圖片不存在：${currentNode.name}`;
+        }
+      });
+    }
     const popupAction = {
       id: currentNode.id + "-popup",
       receiver: "?u",
@@ -114,10 +129,7 @@ export const getActions = (currentNode, data, condition) => {
           choices: currentNode.choices
             ? currentNode.choices.map((c) => c.choice)
             : [],
-          pictures: currentNode.pictures
-            ? currentNode.pictures.map((p) => images[p.pictureId].image.src)
-            : // ? currentNode.pictures.map(p => `${cdnRoot}/${props.record.id}/images/${p.pictureId}/image`)
-              [],
+          pictures: ps ? ps.map((p) => images[p.pictureId].image.src) : [],
           allowTextReply: currentNode.allowTextReply ? true : false,
           closeAlertAfterReply: !currentNode.dontCloseAlertAfterReply,
           clearDialog: currentNode.clearDialog,
@@ -130,6 +142,8 @@ export const getActions = (currentNode, data, condition) => {
     ret.push(popupAction);
   }
   if (currentNode.hasIncomingCall) {
+    const portrait = images[currentNode.portrait];
+    if (!portrait) throw `頭像不存在: ${currentNode.name}`;
     const incomingCallAction = {
       id: currentNode.id + "-incoming-call",
       receiver: "?u",
@@ -138,9 +152,7 @@ export const getActions = (currentNode, data, condition) => {
         task: {
           type: "INCOMING_CALL",
           caller: currentNode.caller,
-          portrait: currentNode.portrait
-            ? images[currentNode.portrait].image.src
-            : null,
+          portrait: currentNode.portrait ? portrait.image.src : null,
           status: currentNode.callStatus,
         },
         condition: condition,
@@ -151,6 +163,8 @@ export const getActions = (currentNode, data, condition) => {
     ret.push(incomingCallAction);
   }
   if (currentNode.hasHangUp) {
+    const portrait = images[currentNode.portrait];
+    if (!portrait) throw `頭像不存在: ${currentNode.name}`;
     const hangUpAction = {
       id: currentNode.id + "-hang-up",
       receiver: "?u",
@@ -172,6 +186,10 @@ export const getActions = (currentNode, data, condition) => {
     ret.push(hangUpAction);
   }
   if (currentNode.hasMarker) {
+    const icon = images[currentNode.markerIcon];
+    if (!icon) throw `圖釘不存在: ${currentNode.name}`;
+    const location = locations[currentNode.locationId];
+    if (!location) throw `地點不存在: ${currentNode.name}`;
     const markerAction = {
       id: currentNode.id + "-marker",
       receiver: "?u",
@@ -180,12 +198,10 @@ export const getActions = (currentNode, data, condition) => {
         task: {
           type: "MARKER",
           icon: currentNode.markerIcon
-            ? images[currentNode.markerIcon].image.src
+            ? icon.image.src
             : // ? `${cdnRoot}/${props.record.id}/images/${currentNode.markerIcon}/image`
               null,
-          location: currentNode.locationId
-            ? locations[currentNode.locationId]
-            : null,
+          location: currentNode.locationId ? location : null,
           title: currentNode.title,
           id: currentNode.markerId,
         },
@@ -230,7 +246,8 @@ export const getActions = (currentNode, data, condition) => {
     };
     ret.push(popupDismissalAction);
   }
-  if (currentNode.hasMapStyle) {
+  if (currentNode.hasMapStyle && mapStyles[currentNode.mapStyle]) {
+    const mapStyle = mapStyles[currentNode.mapStyle];
     const mapStyleAction = {
       id: currentNode.id + "-map-style",
       receiver: "?u",
@@ -241,7 +258,7 @@ export const getActions = (currentNode, data, condition) => {
           url: currentNode.satellite
             ? null
             : currentNode.mapStyle
-            ? mapStyles[currentNode.mapStyle]?.mapStyle.src
+            ? mapStyle.mapStyle.src
             : null,
           satellite: currentNode.satellite,
         },
@@ -253,6 +270,12 @@ export const getActions = (currentNode, data, condition) => {
     ret.push(mapStyleAction);
   }
   if (currentNode.hasIntroImage) {
+    const introBackground = images[currentNode.introBackground];
+    if (!introBackground) throw `背景不存在: ${currentNode.name}`;
+    const introLogo = images[currentNode.introLogo];
+    if (!introLogo) throw `Logo不存在: ${currentNode.name}`;
+    const mapLogo = images[currentNode.mapLogo];
+    if (!mapLogo) throw `地圖Logo不存在: ${currentNode.name}`;
     const introImageAction = {
       id: currentNode.id + "-intro-image",
       receiver: "?u",
@@ -261,14 +284,11 @@ export const getActions = (currentNode, data, condition) => {
         task: {
           type: "INTRO_IMAGE",
           backgroundUrl: currentNode.introBackground
-            ? images[currentNode.introBackground]?.image.src
+            ? introBackground.image.src
             : null,
-          logoUrl: currentNode.introLogo
-            ? images[currentNode.introLogo]?.image.src
-            : null,
-          mapLogoUrl: currentNode.mapLogo
-            ? images[currentNode.mapLogo]?.image.src
-            : null,
+          logoUrl: currentNode.introLogo ? introLogo.image.src : null,
+          textColor: currentNode.introTextColor || null,
+          mapLogoUrl: currentNode.mapLogo ? mapLogo.image.src : null,
           logoMarginTop: currentNode.introLogoMarginTop,
           logoWidth: currentNode.introLogoWidth,
           logoHeight: currentNode.introLogoHeight,
@@ -362,6 +382,8 @@ export const getActions = (currentNode, data, condition) => {
     ret.push(endgameAction);
   }
   if (currentNode.hasGuideImage) {
+    const guideImage = images[currentNode.guideImage];
+    if (!guideImage) throw `指引圖片不存在: ${currentNode.name}`;
     const guideImageAction = {
       id: currentNode.id + "-guide-image",
       receiver: "?u",
@@ -369,9 +391,7 @@ export const getActions = (currentNode, data, condition) => {
       content: {
         task: {
           type: "GUIDE_IMAGE",
-          image: currentNode.guideImage
-            ? images[currentNode.guideImage]?.image.src
-            : null,
+          image: currentNode.guideImage ? guideImage.image.src : null,
         },
         condition: condition,
       },

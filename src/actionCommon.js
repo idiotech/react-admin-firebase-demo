@@ -606,6 +606,7 @@ const introImageInput = (formData, enableDelay) => (
       perPage={1000}
     />
     地圖logo建議比例: 寬62 / 高100
+    <ColorInput label="首頁文字顏色" source="introTextColor" />
     <ImageReferenceInput
       label="地圖頁logo"
       source="mapLogo"

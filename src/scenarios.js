@@ -239,49 +239,55 @@ function PublishButton(props) {
         [getNode(tree)]
       );
     }
-    const payload = getNodes(actionTree);
-    const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(
-      props,
-      "id"
-    )}`;
-    const url = new URL(urlString);
-    const displayName = getRecordField(props, "displayName") || null;
-    const params = {
-      name: getRecordField(props, "name"),
-      displayName: displayName,
-      overwrite: true,
-      public: getRecordField(props, "public"),
-    };
-    console.log("displayName", params);
-    url.search = new URLSearchParams(params).toString();
-    // console.log('payload', payload.map(p => p.performances.map(p => p.action.content)))
-    console.log("payload", payload);
+    try {
+      const payload = getNodes(actionTree);
+      const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(
+        props,
+        "id"
+      )}`;
+      const url = new URL(urlString);
+      const displayName = getRecordField(props, "displayName") || null;
+      const params = {
+        name: getRecordField(props, "name"),
+        displayName: displayName,
+        overwrite: true,
+        public: getRecordField(props, "public"),
+        owner: getRecordField(props, "owner") || null,
+      };
+      url.search = new URLSearchParams(params).toString();
+      console.log("payload", payload);
 
-    fetch(url, {
-      method: "PUT",
-      body: JSON.stringify(payload),
-      headers: {
-        "content-type": "application/json",
-      },
-    })
-      .then((response) => {
-        if (response.ok) {
-          notify("成功發佈" + getRecordField(props, "name"), "success");
-        } else {
-          notify(
-            "發佈失敗；原因 =" + response.body + " " + response.status,
-            "error"
-          );
-        }
+      fetch(url, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+        headers: {
+          "content-type": "application/json",
+        },
       })
-      .catch((e) => {
-        notify("發佈失敗；原因 =" + e, "error");
-      })
-      .finally(() => {
-        setLoading(false);
-        setOpen(false);
-        dispatch(fetchEnd());
-      });
+        .then((response) => {
+          if (response.ok) {
+            notify("成功發佈" + getRecordField(props, "name"), "success");
+          } else {
+            notify(
+              "發佈失敗；原因 =" + response.body + " " + response.status,
+              "error"
+            );
+          }
+        })
+        .catch((e) => {
+          notify("發佈失敗；原因 =" + e, "error");
+        })
+        .finally(() => {
+          setLoading(false);
+          setOpen(false);
+          dispatch(fetchEnd());
+        });
+    } catch (e) {
+      notify(e, "error");
+      setLoading(false);
+      setOpen(false);
+      dispatch(fetchEnd());
+    }
   }
 
   return (
@@ -417,53 +423,60 @@ function GpxButton(props) {
         [getNode(tree)]
       );
     }
-    const payload = getNodes(actionTree);
-    const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(
-      props,
-      "id"
-    )}`;
-    const url = new URL(urlString);
-    const params = { name: getRecordField(props, "name"), overwrite: true };
-    url.search = new URLSearchParams(params).toString();
+    try {
+      const payload = getNodes(actionTree);
+      const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(
+        props,
+        "id"
+      )}`;
+      const url = new URL(urlString);
+      const params = { name: getRecordField(props, "name"), overwrite: true };
+      url.search = new URLSearchParams(params).toString();
 
-    const points = payload
-      .map((n) =>
-        n.performances
-          .map((p) => p.action.content.condition)
-          .find((c) => c.type === "GEOFENCE")
-      )
-      .filter((c) => c)
-      .map((c) => c.location)
-      .map(
-        (l) => new Point(l.lat, l.lon, { ele: 10, time: new Date(), hr: 121 })
-      );
+      const points = payload
+        .map((n) =>
+          n.performances
+            .map((p) => p.action.content.condition)
+            .find((c) => c.type === "GEOFENCE")
+        )
+        .filter((c) => c)
+        .map((c) => c.location)
+        .map(
+          (l) => new Point(l.lat, l.lon, { ele: 10, time: new Date(), hr: 121 })
+        );
 
-    const gpxData = new BaseBuilder();
-    const segs = [];
-    for (var i = 1; i < points.length; i++) {
-      segs.push(new Segment([points[i - 1], points[i]]));
+      const gpxData = new BaseBuilder();
+      const segs = [];
+      for (var i = 1; i < points.length; i++) {
+        segs.push(new Segment([points[i - 1], points[i]]));
+      }
+      const track = new Track(segs, {
+        name: "main",
+        cmt: "comment",
+        desc: "desc",
+      });
+      gpxData.setWayPoints(points);
+      gpxData.setTracks([track]);
+      const gpx = buildGPX(gpxData.toObject());
+      const cleanGpx = gpx
+        .split("\n")
+        .filter((l) => !l.includes("<time"))
+        .join("\n");
+      const link = document.createElement("a");
+      const blob = new Blob([cleanGpx], { type: "application/gpx+xml" });
+      const gpxUrl = window.URL.createObjectURL(blob);
+      link.href = gpxUrl;
+      link.download = getRecordField(props, "name") + ".gpx";
+      setLoading(false);
+      setOpen(false);
+      dispatch(fetchEnd());
+      link.click();
+    } catch (e) {
+      notify(e, "error");
+      setLoading(false);
+      setOpen(false);
+      dispatch(fetchEnd());
     }
-    const track = new Track(segs, {
-      name: "main",
-      cmt: "comment",
-      desc: "desc",
-    });
-    gpxData.setWayPoints(points);
-    gpxData.setTracks([track]);
-    const gpx = buildGPX(gpxData.toObject());
-    const cleanGpx = gpx
-      .split("\n")
-      .filter((l) => !l.includes("<time"))
-      .join("\n");
-    const link = document.createElement("a");
-    const blob = new Blob([cleanGpx], { type: "application/gpx+xml" });
-    const gpxUrl = window.URL.createObjectURL(blob);
-    link.href = gpxUrl;
-    link.download = getRecordField(props, "name") + ".gpx";
-    setLoading(false);
-    setOpen(false);
-    dispatch(fetchEnd());
-    link.click();
   }
   return (
     <>
@@ -744,6 +757,7 @@ export const ScenarioEdit = (props) => {
           source="public"
           disabled={!isSuperUser}
         />
+        <TextInput label="專輯" source="owner" disabled={!isSuperUser} />
         <DateTimeInput label="建立時間" disabled source="createdate" />
         <DateTimeInput label="修改時間" disabled source="lastupdate" />
         <TextInput label="user id" source="uid" disabled initialValue={uid} />
