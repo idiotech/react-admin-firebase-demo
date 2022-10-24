@@ -122,6 +122,8 @@ function createDataProvider(scenario) {
               data.forEach((e, index) => {
                 e.rowIndex = index + 1;
                 e.sorted = true;
+                const key = `a-${e.id}`;
+                localStorage.setItem(key, e.rowIndex);
               });
               return {
                 data: data.slice(page * perPage, (page + 1) * perPage),

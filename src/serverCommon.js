@@ -72,7 +72,7 @@ export const getActions = (currentNode, data, condition) => {
   // if (currentNode.hasSound && !sounds[currentNode.soundId]) {
   //   console.log("bad sound:", currentNode.name);
   // }
-  if (currentNode.hasSound && !sounds[currentNode.soundId]) {
+  if (currentNode.hasSound && sounds[currentNode.soundId]) {
     const sound = sounds[currentNode.soundId];
     if (!sound) {
       throw `聲音不存在: ${currentNode.name}`;

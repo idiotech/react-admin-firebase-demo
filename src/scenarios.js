@@ -111,7 +111,6 @@ function getTriggers(currentNode, parents) {
 }
 
 function getTrigger(currentNode, parentNode) {
-  console.log("current node condition", currentNode);
   const condition = currentNode.prevs.find((p) => p.prev == parentNode.id);
   if (!condition) {
     console.log(
@@ -125,7 +124,7 @@ function getTrigger(currentNode, parentNode) {
   const actionId =
     condition.conditionType === "TEXT"
       ? parentNode.id + "-popup"
-      : parentNode.hasSound
+      : parentNode.hasSound && parentNode.soundType == "MAIN"
       ? parentNode.id + "-sound"
       : parentNode.hasPopup
       ? parentNode.id + "-popup"
@@ -145,6 +144,8 @@ function getTrigger(currentNode, parentNode) {
       ? parentNode.id + "-popup-dismissal"
       : parentNode.hasIntroImage
       ? parentNode.id + "-intro-image"
+      : parentNode.hasSound && parentNode.soundType == "BACKGROUND"
+      ? parentNode.id + "-sound"
       : parentNode.id + "-button-style";
   return {
     id: "",
@@ -519,8 +520,16 @@ function CloneButton(props) {
   const [open, setOpen] = useState(false);
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
-  const { actions, sounds, locations, beacons, images, mapStyles, broadcasts } =
-    useAllData();
+  const {
+    actions,
+    sounds,
+    locations,
+    beacons,
+    images,
+    mapStyles,
+    broadcasts,
+    variables,
+  } = useAllData();
   const createData = JSON.parse(JSON.stringify(props.record));
   const cloneId = xid.next();
   createData.id = cloneId;
@@ -531,7 +540,6 @@ function CloneButton(props) {
     payload: { data: createData },
   });
   const baseProvider = getProvider(createData.id);
-
   // TODO copy UID
   const refresh = useRefresh();
   const idMap = new Map();
@@ -542,6 +550,7 @@ function CloneButton(props) {
   Object.keys(sounds).forEach((a) => idMap.set(a, xid.next()));
   Object.keys(mapStyles).forEach((a) => idMap.set(a, xid.next()));
   Object.keys(broadcasts).forEach((a) => idMap.set(a, xid.next()));
+  Object.keys(variables).forEach((a) => idMap.set(a, xid.next()));
   async function handleConfirm() {
     setOpen(false);
     setLoading(true);
@@ -564,6 +573,7 @@ function CloneButton(props) {
       ...createFields(sounds, "sounds"),
       ...createFields(mapStyles, "mapStyles"),
       ...createFields(locations, "locations"),
+      ...createFields(variables, "variables"),
     ]);
     function updateValueFor(obj, field) {
       const value = obj[field];
@@ -584,7 +594,20 @@ function CloneButton(props) {
       updateValueFor(a, "markerId");
       updateValueFor(a, "introBackground");
       updateValueFor(a, "introLogo");
-      updateValueFor(a, "markerLogo");
+      updateValueFor(a, "mapLogo");
+      updateValueFor(a, "variable");
+      updateValueFor(a, "guideImage");
+      updateValueFor(a, "silencedSound");
+      if (a.variableUpdates) {
+        a.variableUpdates.forEach((u) => {
+          updateValuesFor(u, "name");
+        });
+      }
+      if (a.preconditions) {
+        a.preconditions.forEach((p) => {
+          updateValuesFor(p, "variable");
+        });
+      }
       if (a.pictures) {
         a.pictures.forEach((p) => {
           const newId = idMap.get(p.pictureId);

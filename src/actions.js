@@ -75,12 +75,7 @@ const Title = ({ record }) => {
 };
 const getRowIndex = (record) => {
   const key = `a-${record.id}`;
-  if (record.rowIndex && record.sorted) {
-    localStorage.setItem(key, record.rowIndex);
-    return <div>{record.rowIndex}</div>;
-  } else {
-    return <div>{localStorage.getItem(key)}</div>;
-  }
+  return <div>{localStorage.getItem(key)}</div>;
 };
 
 export const ActionList = (props) => {

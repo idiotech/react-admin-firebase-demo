@@ -75,7 +75,7 @@ const callTypes = [
 ];
 const comparisonTypes = [
   { id: "<=", name: "<=" },
-  { id: "=", name: "==" },
+  { id: "==", name: "==" },
   { id: ">=", name: ">=" },
 ];
 const operationTypes = [
