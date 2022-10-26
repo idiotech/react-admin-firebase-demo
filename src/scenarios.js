@@ -107,57 +107,71 @@ function getTriggers(currentNode, parents) {
         scenarioId: "",
       },
     ];
-  } else return parents.map((p) => getTrigger(currentNode, p));
+  } else {
+    const ret = parents.flatMap((p) => getTriggerList(currentNode, p));
+    return ret.filter((value, index) => {
+      const _value = JSON.stringify(value);
+      return (
+        index ===
+        ret.findIndex((obj) => {
+          return JSON.stringify(obj) === _value;
+        })
+      );
+    });
+  }
 }
 
-function getTrigger(currentNode, parentNode) {
-  const condition = currentNode.prevs.find((p) => p.prev == parentNode.id);
-  if (!condition) {
-    console.log(
-      "bad parent",
-      currentNode.name,
-      parentNode.name,
-      parentNode.id,
-      currentNode.prevs.map((p) => p.prev)
-    );
-  }
-  const actionId =
-    condition.conditionType === "TEXT"
-      ? parentNode.id + "-popup"
-      : parentNode.hasSound && parentNode.soundType == "MAIN"
-      ? parentNode.id + "-sound"
-      : parentNode.hasPopup
-      ? parentNode.id + "-popup"
-      : parentNode.hasIncomingCall
-      ? parentNode.id + "-incoming-call"
-      : parentNode.hasHangUp
-      ? parentNode.id + "-hang-up"
-      : parentNode.hasMarker
-      ? parentNode.id + "-marker"
-      : parentNode.hasMarkerRemoval
-      ? parentNode.id + "-marker-removal"
-      : parentNode.hasMapStyle
-      ? parentNode.id + "-map-style"
-      : parentNode.hasGuideImage
-      ? parentNode.id + "-guide-image"
-      : parentNode.hasPopupDismissal
-      ? parentNode.id + "-popup-dismissal"
-      : parentNode.hasIntroImage
-      ? parentNode.id + "-intro-image"
-      : parentNode.hasSound && parentNode.soundType == "BACKGROUND"
-      ? parentNode.id + "-sound"
-      : parentNode.id + "-button-style";
-  return {
-    id: "",
-    actionId: actionId,
-    receiver: "ghost",
-    sender: "?u",
-    payload: {
-      type: condition.conditionType === "TEXT" ? "TEXT" : "END",
-      text: condition.fallback ? "fallback:" : condition.userReply,
-    },
-    scenarioId: "",
-  };
+function getTriggerList(currentNode, parentNode) {
+  return currentNode.prevs
+    .filter((p) => p.prev == parentNode.id)
+    .map((condition) => {
+      if (!condition) {
+        console.log(
+          "bad parent",
+          currentNode.name,
+          parentNode.name,
+          parentNode.id,
+          currentNode.prevs.map((p) => p.prev)
+        );
+      }
+      const actionId =
+        condition.conditionType === "TEXT"
+          ? parentNode.id + "-popup"
+          : parentNode.hasSound && parentNode.soundType == "MAIN"
+          ? parentNode.id + "-sound"
+          : parentNode.hasPopup
+          ? parentNode.id + "-popup"
+          : parentNode.hasIncomingCall
+          ? parentNode.id + "-incoming-call"
+          : parentNode.hasHangUp
+          ? parentNode.id + "-hang-up"
+          : parentNode.hasMarker
+          ? parentNode.id + "-marker"
+          : parentNode.hasMarkerRemoval
+          ? parentNode.id + "-marker-removal"
+          : parentNode.hasMapStyle
+          ? parentNode.id + "-map-style"
+          : parentNode.hasGuideImage
+          ? parentNode.id + "-guide-image"
+          : parentNode.hasPopupDismissal
+          ? parentNode.id + "-popup-dismissal"
+          : parentNode.hasIntroImage
+          ? parentNode.id + "-intro-image"
+          : parentNode.hasSound && parentNode.soundType == "BACKGROUND"
+          ? parentNode.id + "-sound"
+          : parentNode.id + "-button-style";
+      return {
+        id: "",
+        actionId: actionId,
+        receiver: "ghost",
+        sender: "?u",
+        payload: {
+          type: condition.conditionType === "TEXT" ? "TEXT" : "END",
+          text: condition.fallback ? "fallback:" : condition.userReply,
+        },
+        scenarioId: "",
+      };
+    });
 }
 
 // TODO: system hole
