@@ -23,6 +23,7 @@ import {
   useMutation,
   BooleanField,
   BooleanInput,
+  NumberInput,
 } from "react-admin";
 import { createStore } from "redux";
 import { useState } from "react";
@@ -268,6 +269,7 @@ function PublishButton(props) {
         overwrite: true,
         public: getRecordField(props, "public"),
         owner: getRecordField(props, "owner") || null,
+        ordinal: getRecordField(props, "ordinal") || null,
       };
       url.search = new URLSearchParams(params).toString();
       console.log("payload", payload);
@@ -548,6 +550,7 @@ function CloneButton(props) {
   const cloneId = xid.next();
   createData.id = cloneId;
   createData.name = getRecordField(props, "name") + "-" + cloneId;
+  createData.cloned = true;
   const [create] = useMutation({
     type: "create",
     resource: "scenarios",
@@ -734,7 +737,7 @@ export const ScenarioList = (props) => {
     <List
       title={<Title />}
       {...props}
-      sort={{ field: "lastupdate", order: "DESC" }}
+      sort={{ field: "ordinal", order: "ASC" }}
       perPage={20}
       filters={<ScenarioFilter />}
     >
@@ -789,6 +792,7 @@ export const ScenarioEdit = (props) => {
         <TextInput label="名稱" source="name" />
         <TextInput label="顯示名稱" source="displayName" />
         <TextInput label="說明" source="description" />
+        <NumberInput label="順序" source="ordinal" initialValue={Date.now()} />
         <BooleanInput
           label="正式上架"
           source="public"

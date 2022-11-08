@@ -27,27 +27,31 @@ class CompositeDataProvider {
     return this._delegate("getManyReference", resource, params);
   }
   create(resource, params) {
-    return this._delegate("create", resource, params).then((r) => {
-      if (resource == "scenarios") {
-        const defaultImage = {
-          data: {
-            image: {
-              src: "http://daqiaotou-storage.floraland.tw/images/default-marker.png",
-              name: "default-marker.png",
+    if (resource == "scenarios") {
+      params.ordinal = Date.now();
+      return this._delegate("create", resource, params).then((r) => {
+        if (!params.data.cloned) {
+          const defaultImage = {
+            data: {
+              image: {
+                src: "http://daqiaotou-storage.floraland.tw/images/default-marker.png",
+                name: "default-marker.png",
+              },
+              name: "預設圖釘",
             },
-            name: "預設圖釘",
-          },
-        };
-        const scenario = r.data.id;
-        const scenarioOtions = {
-          logging: true,
-          rootRef: "ghostspeak_editor/" + scenario,
-        };
-        const tempProvider = FirebaseDataProvider(config, scenarioOtions);
-        return tempProvider.create("images", defaultImage).then(() => r);
-      }
-      return Promise.resolve(r);
-    });
+          };
+          const scenario = r.data.id;
+          const scenarioOtions = {
+            logging: true,
+            rootRef: "ghostspeak_editor/" + scenario,
+          };
+          const tempProvider = FirebaseDataProvider(config, scenarioOtions);
+          return tempProvider.create("images", defaultImage).then(() => r);
+        } else return Promise.resolve(r);
+      });
+    } else {
+      return this._delegate("create", resource, params);
+    }
   }
   update(resource, params) {
     return this._delegate("update", resource, params);
