@@ -1,0 +1,19 @@
+FROM node:18.6-bullseye-slim
+
+WORKDIR /app
+
+RUN apt-get update &&  apt-get install -y make gcc g++ python  && rm -rf /var/lib/apt/lists/*
+
+ENV TZ=Asia/Taipei
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN npm install -g serve
+COPY package.json /app/
+RUN npm install --force
+COPY src /app/src
+COPY public /app/public
+ENV NODE_OPTIONS=--openssl-legacy-provider 
+RUN npm run build
+
+#COPY .env /app/
+CMD ["serve", "-s", "build", "-l", "4444"]
