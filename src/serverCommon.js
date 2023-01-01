@@ -271,11 +271,11 @@ export const getActions = (currentNode, data, condition) => {
   }
   if (currentNode.hasIntroImage) {
     const introBackground = images[currentNode.introBackground];
-    if (!introBackground) throw `背景不存在: ${currentNode.name}`;
+    // if (!introBackground) throw `背景不存在: ${currentNode.name}`;
     const introLogo = images[currentNode.introLogo];
-    if (!introLogo) throw `Logo不存在: ${currentNode.name}`;
+    // if (!introLogo) throw `Logo不存在: ${currentNode.name}`;
     const mapLogo = images[currentNode.mapLogo];
-    if (!mapLogo) throw `地圖Logo不存在: ${currentNode.name}`;
+    // if (!mapLogo) throw `地圖Logo不存在: ${currentNode.name}`;
     const introImageAction = {
       id: currentNode.id + "-intro-image",
       receiver: "?u",

@@ -269,7 +269,7 @@ function PublishButton(props) {
         overwrite: true,
         public: getRecordField(props, "public"),
         owner: getRecordField(props, "owner") || null,
-        ordinal: getRecordField(props, "ordinal") || null,
+        ordinal: getRecordField(props, "ordinal") || Date.now(),
       };
       url.search = new URLSearchParams(params).toString();
       console.log("payload", payload);
