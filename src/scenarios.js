@@ -138,7 +138,8 @@ function getTriggerList(currentNode, parentNode) {
       const actionId =
         condition.conditionType === "TEXT"
           ? parentNode.id + "-popup"
-          : parentNode.hasSound && parentNode.soundType == "MAIN"
+          : parentNode.hasSound &&
+            (parentNode.soundType == "MAIN" || !parentNode.soundType)
           ? parentNode.id + "-sound"
           : parentNode.hasPopup
           ? parentNode.id + "-popup"
