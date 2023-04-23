@@ -241,6 +241,7 @@ function PublishButton(props) {
         performances: serverActions.map((a) => ({
           action: a,
           delay: a.delay === 0 || a.delay ? a.delay : 0,
+          time: a.time,
         })),
         preconditions: tree.node.preconditions?.map((p) => ({
           name: variables[p.variable]?.name,

@@ -285,15 +285,17 @@ const InputForm = (props) => {
               {formData.hasPopup && popupInput(formData, enableDelay)}
               <hr />
               <BooleanInput label="關閉圖文框" source="hasPopupDismissal" />
-              {formData.hasPopupDismissal && popupDismissalInput(enableDelay)}
+              {formData.hasPopupDismissal &&
+                popupDismissalInput(formData, enableDelay)}
               <hr />
               <BooleanInput label="新圖釘" source="hasMarker" />
-              {formData.hasMarker && markerInput(enableDelay)}
+              {formData.hasMarker && markerInput(formData, enableDelay)}
               <hr />
               <BooleanInput label="移除圖釘" source="hasMarkerRemoval" />
-              {formData.hasMarkerRemoval && markerRemovalInput(enableDelay)}
+              {formData.hasMarkerRemoval &&
+                markerRemovalInput(formData, enableDelay)}
               <hr />
-              {endgameInput(enableDelay)}
+              {endgameInput(formData, enableDelay)}
               <hr />
               <h3>進階內容</h3>
               <BooleanInput label="開啟進階內容" source="advancedActionType" />
@@ -302,33 +304,36 @@ const InputForm = (props) => {
               {formData.advancedActionType && (
                 <>
                   <BooleanInput label="停止聲音" source="hasSilence" />
-                  {formData.hasSilence && silenceInput(enableDelay)}
+                  {formData.hasSilence && silenceInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput label="指示圖" source="hasGuideImage" />
-                  {formData.hasGuideImage && guideImageInput(enableDelay)}
+                  {formData.hasGuideImage &&
+                    guideImageInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput
                     label="移除指示圖"
                     source="hasGuideImageRemoval"
                   />
                   {formData.hasGuideImageRemoval &&
-                    guideImageRemovalInput(enableDelay)}
+                    guideImageRemovalInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput label="來電" source="hasIncomingCall" />
-                  {formData.hasIncomingCall && incomingCallInput(enableDelay)}
+                  {formData.hasIncomingCall &&
+                    incomingCallInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput label="掛電話" source="hasHangUp" />
-                  {formData.hasHangUp && hangUpInput(enableDelay)}
+                  {formData.hasHangUp && hangUpInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput label="地圖樣式" source="hasMapStyle" />
-                  {formData.hasMapStyle && mapStyleInput(enableDelay, formData)}
+                  {formData.hasMapStyle && mapStyleInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput label="首頁背景" source="hasIntroImage" />
                   {formData.hasIntroImage &&
                     introImageInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput label="按鈕顏色" source="hasButtonStyle" />
-                  {formData.hasButtonStyle && buttonStyleInput(enableDelay)}
+                  {formData.hasButtonStyle &&
+                    buttonStyleInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput label="更新變數" source="hasVariableUpdate" />
                   {formData.hasVariableUpdate && variableUpdateInput()}

@@ -50,8 +50,6 @@ function getProvider(scenarioId) {
   return FirebaseDataProvider(config, scenarioOtions);
 }
 
-const superUser = process.env.REACT_APP_SUPER_USER;
-
 function createAdminProvider() {
   const adminDataProvider = createAdminDataProvider();
   return {
@@ -75,11 +73,25 @@ function createAdminProvider() {
           localStorage.setItem("uid", authId);
         }
         const filterUid = authId || localUid || "dead";
-        // console.log('superuser', filterUid, superUser)
-        if (filterUid != superUser) {
-          params.filter.uid = filterUid;
-        }
-        return adminDataProvider.getList(resource, params);
+        return fetch(
+          `https://ghostspeak.floraland.tw/auth/user/${filterUid}/superuser`,
+          {
+            method: "GET",
+            headers: {
+              "content-type": "application/json",
+            },
+          }
+        )
+          .then((response) => {
+            if (!response.result) {
+              params.filter.uid = filterUid;
+            }
+            return adminDataProvider.getList(resource, params);
+          })
+          .catch((e) => {
+            console.log("failed to detect superuser", e);
+            return adminDataProvider.getList(resource, params);
+          });
       },
     },
     resources: ["scenarios"],

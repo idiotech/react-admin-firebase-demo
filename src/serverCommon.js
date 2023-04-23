@@ -1,5 +1,31 @@
 import { useGetList } from "react-admin";
 
+function getActTime(currentNode, name) {
+  const delayHour = currentNode[name + "DelayHour"] || 0;
+  const delayMin = currentNode[name + "DelayMinute"] || 0;
+  const delaySecond = currentNode[name + "DelaySecond"] || 0;
+  const delayMilli = currentNode[name + "DelayMilli"] || 0;
+  const delay =
+    (delayHour * 3600 + delayMin * 60 + delaySecond) * 1000 + delayMilli;
+  const randomHour = currentNode[name + "RandomHour"] || 0;
+  const randomMin = currentNode[name + "RandomMinute"] || 0;
+  const randomSecond = currentNode[name + "RandomSecond"] || 0;
+  const randomMilli = currentNode[name + "RandomMilli"] || 0;
+  const random =
+    (randomHour * 3600 + randomMin * 60 + randomSecond) * 1000 + randomMilli;
+
+  const clockTime = currentNode[name + "Time"]
+    ? currentNode[name + "Time"] + ":00"
+    : null;
+  if (clockTime || delay || random) {
+    return {
+      target: clockTime,
+      minAfter: delay,
+      range: random,
+    };
+  } else return null;
+}
+
 export const useAllData = () => {
   const actionResult = useGetList(
     "actions",
@@ -103,6 +129,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.soundDelay,
+      time: getActTime(currentNode, "sound"),
       description: currentNode.name,
     };
     ret.push(soundAction);
@@ -137,6 +164,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.popupDelay,
+      time: getActTime(currentNode, "popup"),
       description: currentNode.name,
     };
     ret.push(popupAction);
@@ -158,6 +186,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.incomingCallDelay,
+      time: getActTime(currentNode, "incomingCall"),
       description: currentNode.name,
     };
     ret.push(incomingCallAction);
@@ -181,6 +210,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.hangUpDelay,
+      time: getActTime(currentNode, "hangUp"),
       description: currentNode.name,
     };
     ret.push(hangUpAction);
@@ -208,6 +238,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.markerDelay,
+      time: getActTime(currentNode, "marker"),
       description: currentNode.name,
     };
     ret.push(markerAction);
@@ -225,6 +256,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.markerRemovalDelay,
+      time: getActTime(currentNode, "marker"),
       description: currentNode.name,
     };
     ret.push(markerRemovalAction);
@@ -242,6 +274,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.dismissalDelay,
+      time: getActTime(currentNode, "dismissal"),
       description: currentNode.name,
     };
     ret.push(popupDismissalAction);
@@ -265,6 +298,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.mapStyleDelay,
+      time: getActTime(currentNode, "mapStyle"),
       description: currentNode.name,
     };
     ret.push(mapStyleAction);
@@ -296,6 +330,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.introImageDelay,
+      time: getActTime(currentNode, "introImage"),
       description: currentNode.name,
     };
     ret.push(introImageAction);
@@ -314,6 +349,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.backgroundDelay,
+      time: getActTime(currentNode, "background"),
       description: currentNode.name,
     };
     ret.push(buttonStyleAction);
@@ -377,6 +413,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.endgameDelay,
+      time: getActTime(currentNode, "endgame"),
       description: currentNode.name,
     };
     ret.push(endgameAction);
@@ -396,6 +433,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.guideImageDelay,
+      time: getActTime(currentNode, "guideImage"),
       description: currentNode.name,
     };
     ret.push(guideImageAction);
@@ -413,6 +451,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.guideImageRemovalDelay,
+      time: getActTime(currentNode, "guideImage"),
       description: currentNode.name,
     };
     ret.push(guideImageRemovalAction);
@@ -431,6 +470,7 @@ export const getActions = (currentNode, data, condition) => {
         condition: condition,
       },
       delay: currentNode.silenceDelay,
+      time: getActTime(currentNode, "silence"),
       description: currentNode.name,
     };
     ret.push(silenceAction);

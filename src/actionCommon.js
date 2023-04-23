@@ -208,6 +208,117 @@ function modalButton(img, caption) {
   }
   return <Button label={caption} onClick={handleClick} primary="true" />;
 }
+
+function addDelay(formData, name) {
+  return (
+    <>
+      <BooleanInput
+        label="進階時間控制"
+        source={name + "AdvancedTime"}
+        initialValue={false}
+      />
+      {formData[name + "AdvancedTime"] && addAdvancedDelay(name)}
+      {!formData[name + "AdvancedTime"] && (
+        <NumberInput
+          label="延遲時間(毫秒)"
+          style={{ width: 130 }}
+          min={0}
+          step={1}
+          source={name + "Delay"}
+          validate={[number()]}
+        />
+      )}
+    </>
+  );
+}
+
+function addAdvancedDelay(name) {
+  return (
+    <>
+      <div>
+        延遲時間 <br />
+        <NumberInput
+          label="小時"
+          style={{ width: 100 }}
+          min={0}
+          step={1}
+          source={name + "DelayHour"}
+          validate={[number()]}
+        />
+        <NumberInput
+          style={{ width: 100 }}
+          min={0}
+          max={59}
+          step={1}
+          label="分鐘"
+          source={name + "DelayMinute"}
+          validate={[number()]}
+        />
+        <NumberInput
+          label="秒鐘"
+          style={{ width: 100 }}
+          min={0}
+          max={59}
+          step={1}
+          source={name + "DelaySecond"}
+          validate={[number()]}
+        />
+        <NumberInput
+          label="毫秒"
+          style={{ width: 130 }}
+          min={0}
+          max={999}
+          step={1}
+          source={name + "DelayMilli"}
+          validate={[number()]}
+        />
+      </div>
+      <div>
+        發送時刻 <br />
+        <TimeInput label="發送時刻" source={name + "Time"} />
+      </div>
+      <div>
+        隨機前後調整 <br />
+        <NumberInput
+          label="小時"
+          style={{ width: 100 }}
+          min={0}
+          step={1}
+          source={name + "RandomHour"}
+          validate={[number()]}
+        />
+        <NumberInput
+          style={{ width: 100 }}
+          min={0}
+          max={59}
+          step={1}
+          label="分鐘"
+          source={name + "RandomMinute"}
+          validate={[number()]}
+        />
+        <NumberInput
+          label="秒鐘"
+          style={{ width: 100 }}
+          min={0}
+          max={59}
+          step={1}
+          source={name + "RandomSecond"}
+          validate={[number()]}
+        />
+        <NumberInput
+          label="毫秒"
+          style={{ width: 130 }}
+          min={0}
+          max={999}
+          step={1}
+          source={name + "RandomMilli"}
+          validate={[number()]}
+        />
+      </div>
+    </>
+  );
+}
+
 const soundInput = (formData, enableDelay) => (
   <>
     <SoundReferenceInput
@@ -294,13 +405,7 @@ const soundInput = (formData, enableDelay) => (
         </div>
       </>
     )}
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="soundDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay(formData, "sound")}
   </>
 );
 
@@ -399,19 +504,12 @@ const popupInput = (formData, enableDelay) => {
         )}
       </span>
       <br />
-
-      {enableDelay && (
-        <NumberInput
-          label="延遲時間 (千分之一秒)"
-          source="popupDelay"
-          validate={[number()]}
-        />
-      )}
+      {enableDelay && addDelay(formData, "popup")}
     </>
   );
 };
 
-const popupDismissalInput = (enableDelay) => {
+const popupDismissalInput = (formData, enableDelay) => {
   return (
     <>
       <CheckboxGroupInput
@@ -420,18 +518,12 @@ const popupDismissalInput = (enableDelay) => {
         choices={dismissalDestinations}
       />{" "}
       <br />
-      {enableDelay && (
-        <NumberInput
-          label="延遲時間 (千分之一秒)"
-          source="dismissalDelay"
-          validate={[number()]}
-        />
-      )}
+      {enableDelay && addDelay(formData, "dismissal")}
     </>
   );
 };
 
-const incomingCallInput = (enableDelay) => (
+const incomingCallInput = (formData, enableDelay) => (
   <>
     <TextInput label="來電人" source="caller" validate={[required()]} />
     <ImageReferenceInput
@@ -459,15 +551,10 @@ const incomingCallInput = (enableDelay) => (
       "接通"
     )}
     <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="incomingCallDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay(formData, "incomingCall")}
   </>
 );
+
 const hangUpInput = (enableDelay) => (
   <>
     <TextInput label="來電人" source="caller" validate={[required()]} />
@@ -479,17 +566,11 @@ const hangUpInput = (enableDelay) => (
       sort={{ field: "lastupdate", order: "DESC" }}
       perPage={1000}
     />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="hangUpDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay("hangUp")}
   </>
 );
 
-const markerInput = (enableDelay) => (
+const markerInput = (formData, enableDelay) => (
   <>
     <TextInput label="標題" source="title" validate={[required()]} />
     <br />
@@ -517,17 +598,11 @@ const markerInput = (enableDelay) => (
       "示意圖"
     )}
     <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="markerDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay(formData, "marker")}
   </>
 );
 
-const markerRemovalInput = (enableDelay) => (
+const markerRemovalInput = (formData, enableDelay) => (
   <>
     <ReferenceInput
       label="圖釘"
@@ -541,17 +616,11 @@ const markerRemovalInput = (enableDelay) => (
       <SelectInput optionText="title" />
     </ReferenceInput>
     <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="markerRemovalDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay(formData, "markerRemoval")}
   </>
 );
 
-const mapStyleInput = (enableDelay, formData) => (
+const mapStyleInput = (formData, enableDelay) => (
   <>
     {!formData.satellite && (
       <ReferenceInput
@@ -578,13 +647,7 @@ const mapStyleInput = (enableDelay, formData) => (
       )}
     </span>
     <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="mapStyleDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay(formData, "mapStyle")}
   </>
 );
 
@@ -644,17 +707,11 @@ const introImageInput = (formData, enableDelay) => (
       "示意圖"
     )}
     <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="introImageDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay(formData, "introImage")}
   </>
 );
 
-const buttonStyleInput = (enableDelay) => (
+const buttonStyleInput = (formData, enableDelay) => (
   <>
     <ColorInput label="背景顏色" source="backgroundColor" />
     <ColorInput label="文字顏色" source="textColor" />
@@ -663,13 +720,7 @@ const buttonStyleInput = (enableDelay) => (
       "示意圖"
     )}
     <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="buttonStyleDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay(formData, "buttonStyle")}
   </>
 );
 
@@ -695,7 +746,7 @@ const variableUpdateInput = () => (
   </ArrayInput>
 );
 
-const endgameInput = (enableDelay) => (
+const endgameInput = (formData, enableDelay) => (
   <>
     <BooleanInput
       label="結束活動，返回劇本選擇畫面"
@@ -703,17 +754,11 @@ const endgameInput = (enableDelay) => (
       initialValue={false}
     />
     <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="endgameDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay(formData, "endgame")}
   </>
 );
 
-const guideImageInput = (enableDelay) => (
+const guideImageInput = (formData, enableDelay) => (
   <>
     <ImageReferenceInput
       label="指示圖"
@@ -723,29 +768,15 @@ const guideImageInput = (enableDelay) => (
       perPage={1000}
     />
     <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="guideImageDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay(formData, "guideImage")}
   </>
 );
 
-const guideImageRemovalInput = (enableDelay) => (
-  <>
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="guideImageRemovalDelay"
-        validate={[number()]}
-      />
-    )}
-  </>
+const guideImageRemovalInput = (formData, enableDelay) => (
+  <>{enableDelay && addDelay(formData, "guideImageRemoval")}</>
 );
 
-const silenceInput = (enableDelay) => (
+const silenceInput = (formData, enableDelay) => (
   <>
     <ReferenceInput
       label="聲音"
@@ -764,13 +795,7 @@ const silenceInput = (enableDelay) => (
     />
     在幾秒內淡出到消失。設為0代表立即停止。
     <br />
-    {enableDelay && (
-      <NumberInput
-        label="延遲時間 (千分之一秒)"
-        source="silenceDelay"
-        validate={[number()]}
-      />
-    )}
+    {enableDelay && addDelay(formData, "silence")}
   </>
 );
 
