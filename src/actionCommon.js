@@ -555,7 +555,7 @@ const incomingCallInput = (formData, enableDelay) => (
   </>
 );
 
-const hangUpInput = (enableDelay) => (
+const hangUpInput = (formdata, enableDelay) => (
   <>
     <TextInput label="來電人" source="caller" validate={[required()]} />
     <ImageReferenceInput
@@ -566,7 +566,7 @@ const hangUpInput = (enableDelay) => (
       sort={{ field: "lastupdate", order: "DESC" }}
       perPage={1000}
     />
-    {enableDelay && addDelay("hangUp")}
+    {enableDelay && addDelay(formdata, "hangUp")}
   </>
 );
 
