@@ -26,7 +26,7 @@ import {
   NumberInput,
 } from "react-admin";
 import { createStore } from "redux";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
@@ -38,6 +38,7 @@ import * as xid from "xid-js";
 import { getRecordField } from "./utils";
 
 import { useAllData, getActions } from "./serverCommon";
+import { isSuperUser } from "./App";
 
 export function scenarioReducer(state = { value: "" }, action) {
   switch (action.type) {
@@ -196,11 +197,6 @@ function getCondition(currentNode, data) {
     return { type: "ALWAYS" };
   }
 }
-
-const isSuperUser =
-  localStorage.getItem("uid") === process.env.REACT_APP_SUPER_USER;
-
-console.log("REACT_APP_SUPER_USER", process.env.REACT_APP_SUPER_USER);
 
 function PublishButton(props) {
   const disabled = !isCurrentScenario(props);
@@ -774,11 +770,7 @@ export const ScenarioCreate = (props) => {
           disabled
           initialValue={anotherUid}
         />
-        <BooleanInput
-          label="正式上架"
-          source="public"
-          disabled={!isSuperUser}
-        />
+        <BooleanInput label="正式上架" source="public" />
       </SimpleForm>
     </Create>
   );
@@ -787,6 +779,12 @@ export const ScenarioCreate = (props) => {
 export const ScenarioEdit = (props) => {
   const baseProvider = getProvider("dummy");
   const uid = baseProvider.app.auth().currentUser?.uid || "dead";
+  const [isSuper, setIsSuper] = useState(false);
+  useEffect(() => {
+    isSuperUser(localStorage.getItem("uid")).then((s) => {
+      setIsSuper(s);
+    });
+  }, []);
   return (
     <Edit title={<Title />} {...props}>
       <SimpleForm>
@@ -795,11 +793,7 @@ export const ScenarioEdit = (props) => {
         <TextInput label="顯示名稱" source="displayName" />
         <TextInput label="說明" source="description" />
         <NumberInput label="順序" source="ordinal" initialValue={Date.now()} />
-        <BooleanInput
-          label="正式上架"
-          source="public"
-          disabled={!isSuperUser}
-        />
+        <BooleanInput label="正式上架" source="public" disabled={!isSuper} />
         <TextInput label="專輯" source="owner" disabled={!isSuperUser} />
         <DateTimeInput label="建立時間" disabled source="createdate" />
         <DateTimeInput label="修改時間" disabled source="lastupdate" />

@@ -17,6 +17,7 @@ import {
 import "./modalImage.css";
 
 import { ColorInput } from "react-admin-color-input";
+import TimeInput from "./timepicker.js";
 
 import BluetoothIcon from "@material-ui/icons/Bluetooth";
 import AudiotrackIcon from "@material-ui/icons/Audiotrack";

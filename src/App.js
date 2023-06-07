@@ -50,6 +50,26 @@ function getProvider(scenarioId) {
   return FirebaseDataProvider(config, scenarioOtions);
 }
 
+export function isSuperUser(uid) {
+  return fetch(`https://ghostspeak.floraland.tw/auth/user/${uid}/superuser`, {
+    // return fetch(`http://localhost:8080/user/${uid}/superuser`, {
+    method: "GET",
+    headers: {
+      "content-type": "application/json",
+    },
+  })
+    .then((response) => {
+      return response.json().then((json) => {
+        console.log(uid, "isSuperUser", json);
+        return json.result;
+      });
+    })
+    .catch((e) => {
+      console.error("failed to detect superuser", e);
+      return false;
+    });
+}
+
 function createAdminProvider() {
   const adminDataProvider = createAdminDataProvider();
   return {
@@ -73,25 +93,12 @@ function createAdminProvider() {
           localStorage.setItem("uid", authId);
         }
         const filterUid = authId || localUid || "dead";
-        return fetch(
-          `https://ghostspeak.floraland.tw/auth/user/${filterUid}/superuser`,
-          {
-            method: "GET",
-            headers: {
-              "content-type": "application/json",
-            },
+        return isSuperUser(filterUid).then((isSuper) => {
+          if (!isSuper) {
+            params.filter.uid = filterUid;
           }
-        )
-          .then((response) => {
-            if (!response.result) {
-              params.filter.uid = filterUid;
-            }
-            return adminDataProvider.getList(resource, params);
-          })
-          .catch((e) => {
-            console.log("failed to detect superuser", e);
-            return adminDataProvider.getList(resource, params);
-          });
+          return adminDataProvider.getList(resource, params);
+        });
       },
     },
     resources: ["scenarios"],
