@@ -12,7 +12,6 @@ import {
   TextField,
   TextInput,
   EditButton,
-  DeleteButton,
   DateTimeInput,
   Button,
   useRefresh,
@@ -329,6 +328,12 @@ function PublishButton(props) {
   );
 }
 
+function unpublish(id) {
+  const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${id}`;
+  const url = new URL(urlString);
+  return fetch(url, { method: "DELETE" });
+}
+
 function UnpublishButton(props) {
   const disabled = !isCurrentScenario(props);
   const notify = useNotify();
@@ -341,14 +346,7 @@ function UnpublishButton(props) {
     setOpen(false);
     setLoading(true);
     dispatch(fetchStart());
-    const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(
-      props,
-      "id"
-    )}`;
-    const url = new URL(urlString);
-    fetch(url, {
-      method: "DELETE",
-    })
+    unpublish(getRecordField(props, "id"))
       .then((response) => {
         if (response.ok) {
           notify("成功解除發佈" + getRecordField(props, "name"), "success");
@@ -524,7 +522,67 @@ function getProvider(scenarioId) {
   return FirebaseDataProvider(config, scenarioOtions);
 }
 
-// NPke29IzKoLgFMZRm2Hc
+function DeleteButton(props) {
+  const notify = useNotify();
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const handleClick = () => setOpen(true);
+  const handleDialogClose = () => setOpen(false);
+  const scnId = getRecordField(props, "id");
+  const [deleteScenario] = useMutation({
+    type: "delete",
+    resource: "scenarios",
+    payload: { id: scnId },
+  });
+  const refresh = useRefresh();
+  async function handleConfirm() {
+    setOpen(false);
+    setLoading(true);
+    dispatch(fetchStart());
+    const response = await unpublish(scnId);
+    try {
+      if (response.ok) {
+        const result = await deleteScenario();
+        console.log("delete result:", scnId, result);
+        notify("成功刪除" + getRecordField(props, "name"), "success");
+      } else {
+        notify(
+          `刪除失敗；原因 = 無法解除發佈${response.body} ${response.status}`,
+          "error"
+        );
+      }
+    } catch (e) {
+      notify("解除發佈失敗；原因 =" + e, "error");
+    }
+    setLoading(false);
+    setOpen(false);
+    dispatch(fetchEnd());
+    refresh();
+  }
+  return (
+    <>
+      <Button
+        label="刪除"
+        onClick={handleClick}
+        disabled={loading}
+        primary="true"
+      />
+      <Confirm
+        isOpen={open}
+        title="確認刪除劇本"
+        content={`你即將刪除${getRecordField(
+          props,
+          "name"
+        )}；此動作無法回復。確定嗎？`}
+        onConfirm={handleConfirm}
+        onClose={handleDialogClose}
+        confirm="確認刪除"
+        cancel="取消"
+      />
+    </>
+  );
+}
 
 function CloneButton(props) {
   const disabled = !isCurrentScenario(props);
@@ -534,6 +592,7 @@ function CloneButton(props) {
   const [open, setOpen] = useState(false);
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
+
   const {
     actions,
     sounds,
