@@ -14,7 +14,14 @@ import { SoundList, SoundCreate, SoundEdit } from "./sounds";
 import { MapStyleList, MapStyleCreate, MapStyleEdit } from "./mapStyles";
 import { BroadcastList, BroadcastCreate, BroadcastEdit } from "./broadcasts";
 import { VariableList, VariableCreate, VariableEdit } from "./variables";
+import {
+  CategoryList,
+  CategoryCreate,
+  CategoryEdit,
+  // CatPublishButton,
+} from "./categories";
 import { Admin, Resource } from "react-admin";
+import { useState, useEffect } from "react";
 import {
   FirebaseDataProvider,
   FirebaseAuthProvider,
@@ -76,32 +83,40 @@ function createAdminProvider() {
     dataProvider: {
       ...adminDataProvider,
       getList: (resource, params) => {
-        const baseProvider = getProvider("dummy");
-        const authUid = baseProvider.app.auth().currentUser?.uid;
-        const authUid2 = baseProvider.app.auth()?._delegate?.currentUser?.uid;
-        const localUid = localStorage.getItem("uid");
-        // console.log(
-        //   "uid",
-        //   authUid,
-        //   authUid2,
-        //   localUid,
-        //   baseProvider.app.auth(),
-        //   baseProvider.app.auth()._delegate.currentUser
-        // );
-        const authId = authUid || authUid2;
-        if (authId && !localUid) {
-          localStorage.setItem("uid", authId);
-        }
-        const filterUid = authId || localUid || "dead";
-        return isSuperUser(filterUid).then((isSuper) => {
-          if (!isSuper) {
-            params.filter.uid = filterUid;
+        if (resource === "scenarios") {
+          const baseProvider = getProvider("dummy");
+          const authUid = baseProvider.app.auth().currentUser?.uid;
+          const authUid2 = baseProvider.app.auth()?._delegate?.currentUser?.uid;
+          const localUid = localStorage.getItem("uid");
+          // console.log(
+          //   "uid",
+          //   authUid,
+          //   authUid2,
+          //   localUid,
+          //   baseProvider.app.auth(),
+          //   baseProvider.app.auth()._delegate.currentUser
+          // );
+          const authId = authUid || authUid2;
+          if (authId && !localUid) {
+            localStorage.setItem("uid", authId);
           }
+          const filterUid = authId || localUid || "dead";
+          return isSuperUser(filterUid).then((isSuper) => {
+            console.log("is super?", isSuper);
+            if (!isSuper) {
+              params.filter.uid = filterUid;
+            }
+            return adminDataProvider.getList(resource, params);
+          });
+        } else if (resource === "categories") {
+          // params.sort = { field: "order", order: "ASC" };
           return adminDataProvider.getList(resource, params);
-        });
+        } else {
+          return adminDataProvider.getList(resource, params);
+        }
       },
     },
-    resources: ["scenarios"],
+    resources: ["scenarios", "categories"],
   };
 }
 
@@ -190,6 +205,21 @@ function Main() {
     onMissingKey: (key) => key,
   });
   // localStorage.removeItem('scenario')
+  const baseProvider = getProvider("dummy");
+  const authUid = baseProvider.app.auth().currentUser?.uid;
+  const authUid2 = baseProvider.app.auth()?._delegate?.currentUser?.uid;
+  const authId = authUid || authUid2;
+  const localUid = localStorage.getItem("uid");
+  const filterUid = authId || localUid || "dead";
+  // const isSuper = await isSuperUser(filterUid);
+
+  const [isSuper, setIsSuper] = useState(false);
+  useEffect(() => {
+    isSuperUser(filterUid).then((s) => {
+      setIsSuper(s);
+    });
+  }, []);
+  console.log("is super?", isSuper);
   return (
     <Admin
       loginPage={CustomLoginPage}
@@ -206,6 +236,17 @@ function Main() {
         create={ScenarioCreate}
         edit={ScenarioEdit}
       />
+      {isSuper ? (
+        <Resource
+          name="categories"
+          options={{ label: "分類" }}
+          list={CategoryList}
+          create={CategoryCreate}
+          edit={CategoryEdit}
+        />
+      ) : (
+        <Resource name="categories" />
+      )}
       <Resource
         name="images"
         options={{ label: "圖片" }}

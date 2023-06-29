@@ -23,6 +23,11 @@ import {
   BooleanField,
   BooleanInput,
   NumberInput,
+  ArrayInput,
+  ReferenceInput,
+  SimpleFormIterator,
+  AutocompleteInput,
+  required,
 } from "react-admin";
 import { createStore } from "redux";
 import { useState, useEffect } from "react";
@@ -254,12 +259,17 @@ function PublishButton(props) {
     }
     try {
       const payload = getNodes(actionTree);
+      // const urlString = `http://localhost:8080/v1/scenario/graphscript/${getRecordField(
       const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(
         props,
         "id"
       )}`;
       const url = new URL(urlString);
       const displayName = getRecordField(props, "displayName") || null;
+      console.log("omg props", props);
+      const catString = (
+        getRecordField(props, "categories")?.map((c) => c.category) || []
+      ).join(",");
       const params = {
         name: getRecordField(props, "name"),
         displayName: displayName,
@@ -267,6 +277,7 @@ function PublishButton(props) {
         public: getRecordField(props, "public"),
         owner: getRecordField(props, "owner") || null,
         ordinal: getRecordField(props, "ordinal") || Date.now(),
+        categories: catString,
       };
       url.search = new URLSearchParams(params).toString();
       console.log("payload", payload);
@@ -795,7 +806,7 @@ export const ScenarioList = (props) => {
       title={<Title />}
       {...props}
       sort={{ field: "ordinal", order: "ASC" }}
-      perPage={20}
+      perPage={25}
       filters={<ScenarioFilter />}
     >
       <Datagrid>
@@ -817,19 +828,36 @@ export const ScenarioList = (props) => {
 export const ScenarioCreate = (props) => {
   const baseProvider = getProvider("dummy");
   const anotherUid = baseProvider.app.auth().currentUser?.uid || "dead";
+  const [isSuper, setIsSuper] = useState(false);
+  useEffect(() => {
+    isSuperUser(localStorage.getItem("uid")).then((s) => {
+      setIsSuper(s);
+    });
+  }, []);
   return (
     <Create title={<Title />} {...props}>
       <SimpleForm>
         <TextInput label="名稱" source="name" />
         <TextInput label="顯示名稱" source="displayName" />
         <TextInput label="說明" source="description" />
+        <ArrayInput label="分類" source="categories" disabled={!isSuper}>
+          <SimpleFormIterator>
+            <ReferenceInput
+              source="category"
+              reference="categories"
+              validate={[required()]}
+            >
+              <AutocompleteInput optionText="name" />
+            </ReferenceInput>
+          </SimpleFormIterator>
+        </ArrayInput>
         <TextInput
           label="User ID"
           source="uid"
           disabled
           initialValue={anotherUid}
         />
-        <BooleanInput label="正式上架" source="public" />
+        <BooleanInput label="正式上架" source="public" disabled={!isSuper} />
       </SimpleForm>
     </Create>
   );
@@ -852,8 +880,20 @@ export const ScenarioEdit = (props) => {
         <TextInput label="顯示名稱" source="displayName" />
         <TextInput label="說明" source="description" />
         <NumberInput label="順序" source="ordinal" initialValue={Date.now()} />
+        <ArrayInput label="分類" source="categories" disabled={!isSuper}>
+          <SimpleFormIterator>
+            <ReferenceInput
+              label="類別"
+              source="category"
+              reference="categories"
+              validate={[required()]}
+            >
+              <AutocompleteInput optionText="name" />
+            </ReferenceInput>
+          </SimpleFormIterator>
+        </ArrayInput>
         <BooleanInput label="正式上架" source="public" disabled={!isSuper} />
-        <TextInput label="專輯" source="owner" disabled={!isSuperUser} />
+        <TextInput label="專輯" source="owner" disabled={!isSuper} />
         <DateTimeInput label="建立時間" disabled source="createdate" />
         <DateTimeInput label="修改時間" disabled source="lastupdate" />
         <TextInput label="user id" source="uid" disabled initialValue={uid} />
