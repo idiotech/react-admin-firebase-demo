@@ -421,6 +421,16 @@ const validateBeforeSubmit = (value) => {
     error.destinations = "「前情提要」/「對話視窗」/「提示視窗」只能選其中一個";
   } else if (dests && dests.length === 0) {
     error.destinations = "至少要選其中一個";
+  } else if (
+    dests &&
+    dests.filter((d) => d === "APP" || d === "ALERT" || d === "INTRO").length >=
+      1 &&
+    (!value.choices || value.choices.length == 0) &&
+    !value.allowTextReply &&
+    !value.allowNoReply
+  ) {
+    error.allowTextReply =
+      "必須要有回應方式 (按鈕或打字)，否則圖文視窗不會自行消失！";
   }
   if (
     value.hasIntroImage &&
@@ -435,55 +445,89 @@ const validateBeforeSubmit = (value) => {
 
 const popupInput = (formData, enableDelay) => {
   const initialDestination = React.useMemo(() => ["ALERT"], []);
+  const dests = formData.destinations || [];
+  const hasDialog = dests.includes("APP");
+  const hasAlert = dests.includes("ALERT");
+  const blockingPopup = hasAlert || dests.includes("INTRO");
   return (
     <>
-      <TextInput multiline label="文字" source="text" />
-      <ArrayInput label="圖片" source="pictures">
-        <SimpleFormIterator>
-          <ImageReferenceInput
-            label="圖檔"
-            source="pictureId"
-            reference="images"
-            sort={{ field: "lastupdate", order: "DESC" }}
-            perPage={1000}
-          />
-        </SimpleFormIterator>
-      </ArrayInput>
-      <ArrayInput label="回應按鈕" source="choices">
-        <SimpleFormIterator>
-          <TextInput source="choice" label="選擇" />
-        </SimpleFormIterator>
-      </ArrayInput>
-      <BooleanInput
-        label="允許文字回應"
-        source="allowTextReply"
-        initialValue={false}
-      />
+      <h4>
+        <u>圖文內容</u>
+      </h4>
+      <table border="1" cellPadding="10">
+        <tr>
+          <td>
+            <TextInput multiline label="文字" source="text" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <ArrayInput label="圖片" source="pictures">
+              <SimpleFormIterator>
+                <ImageReferenceInput
+                  label="圖檔"
+                  source="pictureId"
+                  reference="images"
+                  sort={{ field: "lastupdate", order: "DESC" }}
+                  perPage={1000}
+                />
+              </SimpleFormIterator>
+            </ArrayInput>
+          </td>
+        </tr>
+      </table>
+      <h4>
+        <u>回應方式</u>
+      </h4>
+      <table border="1" cellPadding="10">
+        {!formData.allowNoReply && (
+          <tr>
+            <td>
+              <ArrayInput label="回應按鈕" source="choices">
+                <SimpleFormIterator>
+                  <TextInput source="choice" label="選擇" />
+                </SimpleFormIterator>
+              </ArrayInput>
+            </td>
+          </tr>
+        )}
+        {!formData.allowNoReply && (
+          <tr>
+            <td>
+              <BooleanInput
+                label="允許打字回應"
+                source="allowTextReply"
+                initialValue={false}
+              />
+              {modalButton(
+                "https://storage.googleapis.com/daqiaotou/editor/image/text-input.jpg",
+                "打字回應示意圖"
+              )}
+            </td>
+          </tr>
+        )}
+        {blockingPopup && (
+          <tr>
+            <td>
+              <BooleanInput
+                label="不需用戶回應 (我了解必須自行計時關閉視窗)"
+                source="allowNoReply"
+                initialValue={false}
+              />
+            </td>
+          </tr>
+        )}
+      </table>
 
-      {modalButton(
-        "https://storage.googleapis.com/daqiaotou/editor/image/text-input.jpg",
-        "文字回應示意圖"
-      )}
+      <h4>
+        <u>顯示區域</u>
+      </h4>
       <CheckboxGroupInput
         label="顯示於"
         source="destinations"
         choices={destinations}
         initialValue={initialDestination}
       />
-      {formData.destinations && formData.destinations.includes("ALERT") && (
-        <BooleanInput
-          label="回覆後保留提示視窗"
-          source="dontCloseAlertAfterReply"
-          initialValue={false}
-        />
-      )}
-      {formData.destinations && formData.destinations.includes("APP") && (
-        <BooleanInput
-          label="移除先前對話"
-          source="clearDialog"
-          initialValue={false}
-        />
-      )}
 
       <span>
         示意圖：
@@ -504,7 +548,23 @@ const popupInput = (formData, enableDelay) => {
           "首頁(不支援圖片)"
         )}
       </span>
-      <br />
+      <h4>
+        <u>進階功能</u>
+      </h4>
+      {hasAlert && (
+        <BooleanInput
+          label="回覆後保留提示視窗"
+          source="dontCloseAlertAfterReply"
+          initialValue={false}
+        />
+      )}
+      {hasDialog && (
+        <BooleanInput
+          label="移除先前對話"
+          source="clearDialog"
+          initialValue={false}
+        />
+      )}
       {enableDelay && addDelay(formData, "popup")}
     </>
   );

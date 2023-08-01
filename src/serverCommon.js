@@ -153,11 +153,15 @@ export const getActions = (currentNode, data, condition) => {
           type: "POPUP",
           destinations: currentNode.destinations,
           text: currentNode.text,
-          choices: currentNode.choices
-            ? currentNode.choices.map((c) => c.choice)
-            : [],
+          choices:
+            currentNode.choices && !currentNode.allowNoReply
+              ? currentNode.choices.map((c) => c.choice)
+              : [],
           pictures: ps ? ps.map((p) => images[p.pictureId].image.src) : [],
-          allowTextReply: currentNode.allowTextReply ? true : false,
+          allowTextReply:
+            currentNode.allowTextReply && !currentNode.allowNoReply
+              ? true
+              : false,
           closeAlertAfterReply: !currentNode.dontCloseAlertAfterReply,
           clearDialog: currentNode.clearDialog,
         },
