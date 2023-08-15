@@ -54,7 +54,10 @@ import {
   guideImageInput,
   guideImageRemovalInput,
   silenceInput,
+  getPrevDesc,
 } from "./actionCommon";
+
+import { makeStyles } from "@material-ui/core/styles";
 
 import { getRecordField } from "./utils";
 import { DummyList } from "./dummy";
@@ -144,6 +147,13 @@ const EditToolbar = (props) => {
 };
 
 const InputForm = (props) => {
+  const useStyles = makeStyles({
+    button: {
+      width: "400px",
+    },
+  });
+
+  const classes = useStyles();
   return (
     <SimpleForm
       {...props}
@@ -165,6 +175,10 @@ const InputForm = (props) => {
           const forbidDelayNotification = forbidDelay && (
             <>(因系統限制，Geofence和Beacon觸發時，無法使用延遲。)</>
           );
+          console.log("prevs", formData.prevs);
+          function prevRenderer(p) {
+            return p.name + " ➜ " + getPrevDesc(p) + "之後";
+          }
           return (
             <>
               {props.showid === "true" ? (
@@ -191,8 +205,12 @@ const InputForm = (props) => {
                       reference="actions"
                       sort={{ field: "lastupdate", order: "DESC" }}
                       perPage={1000}
+                      className={classes.button}
                     >
-                      <SelectInput optionText="name" />
+                      <SelectInput
+                        optionText={prevRenderer}
+                        className={classes.button}
+                      />
                     </ReferenceInput>
                     <SelectInput
                       label="觸發條件"

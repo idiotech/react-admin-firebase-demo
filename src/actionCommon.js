@@ -12,6 +12,7 @@ import {
   number,
   CheckboxGroupInput,
   Button,
+  useGetMany,
 } from "react-admin";
 
 import "./modalImage.css";
@@ -176,6 +177,92 @@ const beaconCondition = (getSource) => (
     />
   </>
 );
+
+export function getMainType(action) {
+  function isDialog() {
+    const dests = action.destinations || [];
+    return (
+      action.hasPopup &&
+      (dests.includes("DIALER") ||
+        dests.allowTextReply ||
+        (action.choices && action.choices.length > 0))
+    );
+  }
+  return isDialog()
+    ? "dialog"
+    : action.hasSound && (action.soundType == "MAIN" || !action.soundType)
+    ? "sound"
+    : action.hasPopup
+    ? "popup"
+    : action.hasIncomingCall
+    ? "incoming-call"
+    : action.hasHangUp
+    ? "hang-up"
+    : action.hasMarker
+    ? "marker"
+    : action.hasMarkerRemoval
+    ? "marker-removal"
+    : action.hasMapStyle
+    ? "map-style"
+    : action.hasGuideImage
+    ? "guide-image"
+    : action.hasPopupDismissal
+    ? "popup-dismissal"
+    : action.hasIntroImage
+    ? "intro-image"
+    : action.hasGuideImageRemoval
+    ? "guide-image-removal"
+    : action.hasSound && action.soundType == "BACKGROUND"
+    ? "sound"
+    : "button-style";
+}
+
+export function getPrevDesc(action) {
+  switch (getMainType(action)) {
+    case "dialog":
+      return "訊息出現";
+    case "sound":
+      return "聲音播完";
+    case "popup":
+      return "顯示完畢";
+    case "incoming-call":
+      return "電話接通";
+    case "hang-up":
+      return "電話掛斷";
+    case "marker":
+      return "圖釘出現";
+    case "marker-removal":
+      return "圖釘移除";
+    case "map-style":
+      return "地圖樣式改變";
+    case "guide-image":
+      return "指示圖出現";
+    case "guide-image-removal":
+      return "指示圖消失";
+    case "popup-dismissal":
+      return "圖文訊息關閉";
+    case "intro-image":
+      return "背景圖出現";
+    case "sound-background":
+      return "背景聲音播完";
+    case "button-style":
+      return "按鈕樣式改變";
+    default:
+      return "動作執行完畢";
+  }
+}
+
+export function getPrevId(action) {
+  const mainType = getMainType(action);
+  switch (mainType) {
+    case "dialog":
+      return `${action.id}-popup`;
+    case "sound-background":
+      return `${action.id}-sound`;
+    default:
+      return `${action.id}-${mainType}`;
+  }
+}
 
 export const modalImage = (
   <>
@@ -411,18 +498,19 @@ const soundInput = (formData, enableDelay) => (
 );
 
 const validateBeforeSubmit = (value) => {
-  const dests = value.destinations;
+  const dests = value.destinations || [];
   const error = {};
   if (
     dests &&
-    dests.filter((d) => d === "APP" || d === "ALERT" || d === "INTRO").length >=
-      2
+    dests.filter(
+      (d) => d === "APP" || d === "ALERT" || d === "INTRO" || d === "DIALER"
+    ).length >= 2
   ) {
-    error.destinations = "「前情提要」/「對話視窗」/「提示視窗」只能選其中一個";
-  } else if (dests && dests.length === 0) {
+    error.destinations =
+      "「前情提要」/「對話視窗」/「提示視窗」/「撥號視窗」只能選其中一個";
+  } else if (dests.length === 0) {
     error.destinations = "至少要選其中一個";
   } else if (
-    dests &&
     dests.filter((d) => d === "APP" || d === "ALERT" || d === "INTRO").length >=
       1 &&
     (!value.choices || value.choices.length == 0) &&
@@ -449,75 +537,89 @@ const popupInput = (formData, enableDelay) => {
   const hasDialog = dests.includes("APP");
   const hasAlert = dests.includes("ALERT");
   const blockingPopup = hasAlert || dests.includes("INTRO");
-  return (
+  const hasDialer = dests.includes("DIALER");
+  const hasIntro = dests.includes("INTRO");
+  const contentPane = (
     <>
       <h4>
         <u>圖文內容</u>
       </h4>
-      <table border="1" cellPadding="10">
-        <tr>
-          <td>
-            <TextInput multiline label="文字" source="text" />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <ArrayInput label="圖片" source="pictures">
-              <SimpleFormIterator>
-                <ImageReferenceInput
-                  label="圖檔"
-                  source="pictureId"
-                  reference="images"
-                  sort={{ field: "lastupdate", order: "DESC" }}
-                  perPage={1000}
-                />
-              </SimpleFormIterator>
-            </ArrayInput>
-          </td>
-        </tr>
-      </table>
-      <h4>
-        <u>回應方式</u>
-      </h4>
-      <table border="1" cellPadding="10">
-        {!formData.allowNoReply && (
+      {!hasDialer ? (
+        <table border="1" cellPadding="10">
           <tr>
             <td>
-              <ArrayInput label="回應按鈕" source="choices">
-                <SimpleFormIterator>
-                  <TextInput source="choice" label="選擇" />
-                </SimpleFormIterator>
-              </ArrayInput>
+              <TextInput multiline label="文字" source="text" />
             </td>
           </tr>
-        )}
-        {!formData.allowNoReply && (
           <tr>
             <td>
-              <BooleanInput
-                label="允許打字回應"
-                source="allowTextReply"
-                initialValue={false}
-              />
-              {modalButton(
-                "https://storage.googleapis.com/daqiaotou/editor/image/text-input.jpg",
-                "打字回應示意圖"
+              {!hasIntro ? (
+                <ArrayInput label="圖片" source="pictures">
+                  <SimpleFormIterator>
+                    <ImageReferenceInput
+                      label="圖檔"
+                      source="pictureId"
+                      reference="images"
+                      sort={{ field: "lastupdate", order: "DESC" }}
+                      perPage={1000}
+                    />
+                  </SimpleFormIterator>
+                </ArrayInput>
+              ) : (
+                <>(要改變首頁背景圖片，請到「進階內容」→「首頁背景」)</>
               )}
             </td>
           </tr>
-        )}
-        {blockingPopup && (
-          <tr>
-            <td>
-              <BooleanInput
-                label="不需用戶回應 (我了解必須自行計時關閉視窗)"
-                source="allowNoReply"
-                initialValue={false}
-              />
-            </td>
-          </tr>
-        )}
-      </table>
+        </table>
+      ) : (
+        <>撥號視窗目前不支援圖文顯示</>
+      )}
+      {!hasDialer && (
+        <div>
+          <h4>
+            <u>回應方式</u>
+          </h4>
+          <table border="1" cellPadding="10">
+            {!formData.allowNoReply && (
+              <tr>
+                <td>
+                  <ArrayInput label="回應按鈕" source="choices">
+                    <SimpleFormIterator>
+                      <TextInput source="choice" label="選擇" />
+                    </SimpleFormIterator>
+                  </ArrayInput>
+                </td>
+              </tr>
+            )}
+            {!formData.allowNoReply && (
+              <tr>
+                <td>
+                  <BooleanInput
+                    label="允許打字回應"
+                    source="allowTextReply"
+                    initialValue={false}
+                  />
+                  {modalButton(
+                    "https://storage.googleapis.com/daqiaotou/editor/image/text-input.jpg",
+                    "打字回應示意圖"
+                  )}
+                </td>
+              </tr>
+            )}
+            {blockingPopup && (
+              <tr>
+                <td>
+                  <BooleanInput
+                    label="不需用戶回應 (我了解必須自行計時關閉視窗)"
+                    source="allowNoReply"
+                    initialValue={false}
+                  />
+                </td>
+              </tr>
+            )}
+          </table>
+        </div>
+      )}
 
       <h4>
         <u>顯示區域</u>
@@ -528,24 +630,12 @@ const popupInput = (formData, enableDelay) => {
         choices={destinations}
         initialValue={initialDestination}
       />
-
+      <br />
       <span>
         示意圖：
         {modalButton(
           "https://storage.googleapis.com/daqiaotou/editor/image/notification.jpg",
           "通知列(iOS不支援按鈕)"
-        )}
-        {modalButton(
-          "https://storage.googleapis.com/daqiaotou/editor/image/dialog.jpg",
-          "對話視窗"
-        )}
-        {modalButton(
-          "https://storage.googleapis.com/daqiaotou/editor/image/alert.jpg",
-          "提示視窗"
-        )}
-        {modalButton(
-          "https://storage.googleapis.com/daqiaotou/editor/image/intro.jpg",
-          "首頁(不支援圖片)"
         )}
       </span>
       <h4>
@@ -567,6 +657,354 @@ const popupInput = (formData, enableDelay) => {
       )}
       {enableDelay && addDelay(formData, "popup")}
     </>
+  );
+  const pictures = (formData.pictures || []).filter((x) => x);
+  const imageData = useGetMany(
+    "images",
+    pictures.map((p) => p.pictureId)
+  ).data;
+
+  const previewPane = (
+    <>
+      <h4>
+        <u>示意圖</u>
+      </h4>
+      僅供編輯時參考，與實際手機上佈局不同！
+      <table>
+        {hasAlert && (
+          <tr>
+            <td style={{ background: "#555555" }}>
+              <div
+                style={{
+                  width: 320,
+                  paddingLeft: 24,
+                  paddingRight: 24,
+                  paddingTop: 32,
+                  paddingBottom: 32,
+                  margin: 24,
+                  background:
+                    "linear-gradient(160deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 100%)",
+                  borderRadius: 30,
+                  overflow: "hidden",
+                  border: "0.50px rgba(255, 255, 255, 0.30) solid",
+                  backdropFilter: "blur(30px)",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 40,
+                  display: "inline-flex",
+                }}
+              >
+                <div
+                  style={{
+                    width: 320,
+                    position: "relative",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {imageData.length > 0 && (
+                    <img src={imageData[0].image.src} style={{ width: 300 }} />
+                  )}
+                </div>
+                <div
+                  style={{
+                    width: 240,
+                    textAlign: "center",
+                    color: "#F2F2F7",
+                    fontSize: 15,
+                    fontFamily: "Noto Sans TC",
+                    fontWeight: "400",
+                    wordWrap: "break-word",
+                  }}
+                >
+                  {formData.text}
+                </div>
+                <div
+                  style={{
+                    alignSelf: "stretch",
+                    overflow: "hidden",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 10,
+                    display: "inline-flex",
+                  }}
+                >
+                  {(formData.choices || []).map((c, i) => (
+                    <div
+                      key={"choice" + i}
+                      style={{
+                        textAlign: "center",
+                        color: "black",
+                        fontSize: 16,
+                        paddingLeft: 16,
+                        paddingRight: 16,
+                        paddingTop: 8,
+                        paddingBottom: 8,
+                        background: "#68E3DC",
+                        borderRadius: 12,
+                        fontFamily: "Noto Sans TC",
+                        fontWeight: "500",
+                        letterSpacing: 2,
+                        wordWrap: "break-word",
+                      }}
+                    >
+                      {c && c.choice}
+                    </div>
+                  ))}
+                </div>
+                {formData.allowTextReply && (
+                  <div
+                    style={{
+                      width: 272,
+                      height: 39,
+                      paddingLeft: 16,
+                      paddingRight: 16,
+                      paddingTop: 8,
+                      paddingBottom: 8,
+                      background: "black",
+                      borderRadius: 12,
+                      overflow: "hidden",
+                      border: "0.50px rgba(255, 255, 255, 0.60) solid",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: 10,
+                      display: "inline-flex",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 157,
+                        alignSelf: "stretch",
+                        opacity: 0.5,
+                        color: "white",
+                        fontSize: 16,
+                        fontFamily: "Noto Sans TC",
+                        fontWeight: "700",
+                        wordWrap: "break-word",
+                      }}
+                    >
+                      |
+                    </div>
+                  </div>
+                )}
+              </div>
+            </td>
+          </tr>
+        )}
+        {hasDialog && (
+          <tr>
+            <td style={{ background: "#555555" }}>
+              <div
+                style={{
+                  width: 320,
+                  paddingBottom: 32,
+                  paddingTop: 32,
+                  background:
+                    "linear-gradient(160deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0) 100%)",
+                  borderRadius: 30,
+                  overflow: "hidden",
+                  border: "0.50px rgba(255, 255, 255, 0.30) solid",
+                  backdropFilter: "blur(30px)",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  display: "inline-flex",
+                }}
+              >
+                <div
+                  style={{
+                    alignSelf: "stretch",
+                    paddingBottom: 24,
+                    paddingLeft: 24,
+                    paddingRight: 24,
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    gap: 24,
+                    display: "flex",
+                  }}
+                >
+                  <div
+                    style={{
+                      alignSelf: "stretch",
+                      padding: 24,
+                      background:
+                        "linear-gradient(160deg, rgba(143.33, 242.25, 224.44, 0.15) 0%, rgba(143, 242, 224, 0.35) 100%)",
+                      borderTopLeftRadius: 30,
+                      borderTopRightRadius: 30,
+                      borderBottomLeftRadius: 30,
+                      overflow: "hidden",
+                      border: "0.50px rgba(255, 255, 255, 0.30) solid",
+                      backdropFilter: "blur(30px)",
+                      justifyContent: "flex-start",
+                      alignItems: "flex-start",
+                      gap: 40,
+                      display: "inline-flex",
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: "1 1 0",
+                        color: "#F2F2F7",
+                        fontSize: 14,
+                        fontFamily: "Noto Sans TC",
+                        wordWrap: "break-word",
+                      }}
+                    >
+                      .........
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      alignSelf: "stretch",
+                      padding: 24,
+                      background:
+                        "linear-gradient(160deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.40) 100%)",
+                      borderTopLeftRadius: 30,
+                      borderTopRightRadius: 30,
+                      borderBottomRightRadius: 30,
+                      overflow: "hidden",
+                      border: "0.50px rgba(255, 255, 255, 0.30) solid",
+                      backdropFilter: "blur(30px)",
+                      justifyContent: "flex-start",
+                      alignItems: "flex-start",
+                      gap: 40,
+                      display: "inline-flex",
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: "1 1 0",
+                        color: "#F2F2F7",
+                        fontSize: 14,
+                        fontFamily: "Noto Sans TC",
+                        wordWrap: "break-word",
+                      }}
+                    >
+                      {formData.text}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style={{
+                    alignSelf: "stretch",
+                    paddingTop: 24,
+                    paddingLeft: 24,
+                    paddingRight: 24,
+                    borderTop: "0.50px rgba(255, 255, 255, 0.20) solid",
+                    flexDirection: "column",
+                    justifyContent: "flex-start",
+                    alignItems: "flex-start",
+                    gap: 16,
+                    display: "flex",
+                  }}
+                >
+                  <div
+                    style={{
+                      alignSelf: "stretch",
+                      justifyContent: "center",
+                      alignItems: "flex-start",
+                      gap: 16,
+                      display: "inline-flex",
+                    }}
+                  >
+                    {(formData.choices || []).map((c, i) => (
+                      <div
+                        key={"choice" + i}
+                        style={{
+                          textAlign: "center",
+                          color: "black",
+                          paddingLeft: 16,
+                          paddingRight: 16,
+                          paddingTop: 8,
+                          paddingBottom: 8,
+                          background: "#68E3DC",
+                          borderRadius: 12,
+                          fontFamily: "Noto Sans TC",
+                          fontWeight: "500",
+                          wordWrap: "break-word",
+                          fontSize: 14,
+                          flex: "1 1 0",
+                        }}
+                      >
+                        {c && c.choice}
+                      </div>
+                    ))}
+                  </div>
+                  {formData.allowTextReply && (
+                    <div
+                      style={{
+                        alignSelf: "stretch",
+                        paddingLeft: 16,
+                        paddingRight: 16,
+                        paddingTop: 8,
+                        paddingBottom: 8,
+                        background: "black",
+                        borderRadius: 12,
+                        overflow: "hidden",
+                        border: "0.50px rgba(255, 255, 255, 0.60) solid",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        gap: 10,
+                        display: "inline-flex",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 157,
+                          alignSelf: "stretch",
+                          opacity: 0.5,
+                          color: "white",
+                          fontSize: 16,
+                          fontFamily: "Noto Sans TC",
+                          fontWeight: "700",
+                          wordWrap: "break-word",
+                        }}
+                      >
+                        |
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </td>
+          </tr>
+        )}
+        {hasIntro && (
+          <tr>
+            <td>
+              <img
+                src="https://storage.googleapis.com/daqiaotou/editor/image/intro.jpg"
+                width="300"
+              />
+            </td>
+          </tr>
+        )}
+        {hasDialer && (
+          <tr>
+            <td>
+              <img
+                src="https://storage.googleapis.com/daqiaotou/editor/image/dialer.png"
+                width="300"
+              />
+            </td>
+          </tr>
+        )}
+      </table>
+    </>
+  );
+  return (
+    <table border="0">
+      <tr>
+        <td style={{ verticalAlign: "top", width: "1%", whiteSpace: "nowrap" }}>
+          {contentPane}
+        </td>
+        <td style={{ verticalAlign: "top", horizontalAlign: "left" }}>
+          {previewPane}
+        </td>
+      </tr>
+    </table>
   );
 };
 

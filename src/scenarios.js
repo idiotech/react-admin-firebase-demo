@@ -42,6 +42,7 @@ import * as xid from "xid-js";
 import { getRecordField } from "./utils";
 
 import { useAllData, getActions } from "./serverCommon";
+import { getPrevId } from "./actionCommon";
 import { isSuperUser } from "./App";
 
 export function scenarioReducer(state = { value: "" }, action) {
@@ -132,7 +133,7 @@ function getTriggerList(currentNode, parentNode) {
     .filter((p) => p.prev == parentNode.id)
     .map((condition) => {
       if (!condition) {
-        console.log(
+        console.error(
           "bad parent",
           currentNode.name,
           parentNode.name,
@@ -143,30 +144,8 @@ function getTriggerList(currentNode, parentNode) {
       const actionId =
         condition.conditionType === "TEXT"
           ? parentNode.id + "-popup"
-          : parentNode.hasSound &&
-            (parentNode.soundType == "MAIN" || !parentNode.soundType)
-          ? parentNode.id + "-sound"
-          : parentNode.hasPopup
-          ? parentNode.id + "-popup"
-          : parentNode.hasIncomingCall
-          ? parentNode.id + "-incoming-call"
-          : parentNode.hasHangUp
-          ? parentNode.id + "-hang-up"
-          : parentNode.hasMarker
-          ? parentNode.id + "-marker"
-          : parentNode.hasMarkerRemoval
-          ? parentNode.id + "-marker-removal"
-          : parentNode.hasMapStyle
-          ? parentNode.id + "-map-style"
-          : parentNode.hasGuideImage
-          ? parentNode.id + "-guide-image"
-          : parentNode.hasPopupDismissal
-          ? parentNode.id + "-popup-dismissal"
-          : parentNode.hasIntroImage
-          ? parentNode.id + "-intro-image"
-          : parentNode.hasSound && parentNode.soundType == "BACKGROUND"
-          ? parentNode.id + "-sound"
-          : parentNode.id + "-button-style";
+          : getPrevId(parentNode);
+
       return {
         id: "",
         actionId: actionId,
