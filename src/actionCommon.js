@@ -41,6 +41,8 @@ import LocationReferenceInput from "./LocationReferenceInput";
 import SoundReferenceInput from "./SoundReferenceInput";
 import ImageReferenceInput from "./ImageReferenceInput";
 
+import { makeStyles } from "@material-ui/core/styles";
+
 const destinations = [
   { id: "NOTIFICATION", name: "通知列" },
   { id: "APP", name: "對話視窗" },
@@ -297,6 +299,12 @@ function modalButton(img, caption) {
   return <Button label={caption} onClick={handleClick} primary="true" />;
 }
 
+export const useStyles = makeStyles({
+  longInput: {
+    width: "400px",
+  },
+});
+
 function addDelay(formData, name) {
   return (
     <>
@@ -532,6 +540,7 @@ const validateBeforeSubmit = (value) => {
 };
 
 const popupInput = (formData, enableDelay) => {
+  const classes = useStyles();
   const initialDestination = React.useMemo(() => ["ALERT"], []);
   const dests = formData.destinations || [];
   const hasDialog = dests.includes("APP");
@@ -548,7 +557,12 @@ const popupInput = (formData, enableDelay) => {
         <table border="1" cellPadding="10">
           <tr>
             <td>
-              <TextInput multiline label="文字" source="text" />
+              <TextInput
+                multiline
+                label="文字"
+                className={classes.longInput}
+                source="text"
+              />
             </td>
           </tr>
           <tr>
@@ -669,7 +683,7 @@ const popupInput = (formData, enableDelay) => {
       <h4>
         <u>示意圖</u>
       </h4>
-      僅供編輯時參考，與實際手機上佈局不同！
+      僅供編輯時參考，非實際手機上佈局。
       <table>
         {hasAlert && (
           <tr>
@@ -888,6 +902,18 @@ const popupInput = (formData, enableDelay) => {
                 </div>
                 <div
                   style={{
+                    width: 280,
+                    position: "relative",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {imageData.length > 0 && (
+                    <img src={imageData[0].image.src} style={{ width: 280 }} />
+                  )}
+                </div>
+                <div
+                  style={{
                     alignSelf: "stretch",
                     paddingTop: 24,
                     paddingLeft: 24,
@@ -973,11 +999,72 @@ const popupInput = (formData, enableDelay) => {
         )}
         {hasIntro && (
           <tr>
-            <td>
-              <img
-                src="https://storage.googleapis.com/daqiaotou/editor/image/intro.jpg"
-                width="300"
-              />
+            <td
+              style={{
+                background: "#555555",
+                paddingLeft: 24,
+                paddingRight: 24,
+                paddingTop: 80,
+                paddingBottom: 80,
+              }}
+            >
+              <div
+                style={{
+                  width: 230,
+                  height: 400,
+                  paddingLeft: 24,
+                  paddingRight: 24,
+                  paddingTop: 32,
+                  paddingBottom: 32,
+                  background:
+                    "linear-gradient(160deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 100%)",
+                  borderRadius: 30,
+                  border: "0.50px rgba(255, 255, 255, 0.30) solid",
+                  backdropFilter: "blur(30px)",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 24,
+                  display: "inline-flex",
+                }}
+              >
+                <div
+                  style={{
+                    alignSelf: "stretch",
+                    flex: "1 1 0",
+                    textAlign: "center",
+                    color: "#F2F2F7",
+                    fontSize: 15,
+                    fontFamily: "Noto Sans TC",
+                    wordWrap: "break-word",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {formData.text}
+                </div>
+                {(formData.choices || []).map((c, i) => (
+                  <div
+                    key={"choice" + i}
+                    style={{
+                      alignSelf: "stretch",
+                      paddingLeft: 16,
+                      paddingRight: 16,
+                      paddingTop: 8,
+                      paddingBottom: 8,
+                      background: "#68E3DC",
+                      borderRadius: 12,
+                      overflow: "hidden",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: 10,
+                      display: "inline-flex",
+                    }}
+                  >
+                    {c && c.choice}
+                  </div>
+                ))}
+              </div>
             </td>
           </tr>
         )}

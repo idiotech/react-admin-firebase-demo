@@ -55,9 +55,8 @@ import {
   guideImageRemovalInput,
   silenceInput,
   getPrevDesc,
+  useStyles,
 } from "./actionCommon";
-
-import { makeStyles } from "@material-ui/core/styles";
 
 import { getRecordField } from "./utils";
 import { DummyList } from "./dummy";
@@ -147,12 +146,6 @@ const EditToolbar = (props) => {
 };
 
 const InputForm = (props) => {
-  const useStyles = makeStyles({
-    button: {
-      width: "400px",
-    },
-  });
-
   const classes = useStyles();
   return (
     <SimpleForm
@@ -205,11 +198,11 @@ const InputForm = (props) => {
                       reference="actions"
                       sort={{ field: "lastupdate", order: "DESC" }}
                       perPage={1000}
-                      className={classes.button}
+                      className={classes.longInput}
                     >
                       <SelectInput
                         optionText={prevRenderer}
-                        className={classes.button}
+                        className={classes.longInput}
                       />
                     </ReferenceInput>
                     <SelectInput
