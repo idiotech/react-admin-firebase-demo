@@ -4,9 +4,12 @@ import PropTypes from "prop-types";
 import { NumberInput, TextInput, required, number } from "react-admin";
 import { useForm } from "react-final-form";
 
+import { useStyles } from "./actionCommon";
+
 const validateCoordinate = [required(), number()];
 
 export const CoordinateInput = (formData) => {
+  const classes = useStyles();
   const form = useForm();
   function handleLatLngChange(event) {
     const parts = event.target.value.replace(" ", "").split(",");
@@ -25,6 +28,7 @@ export const CoordinateInput = (formData) => {
           label="經緯度"
           onChange={handleLatLngChange}
           initialValue={initialLatLng}
+          className={classes.longInput}
         />
         <br />
         <NumberInput
