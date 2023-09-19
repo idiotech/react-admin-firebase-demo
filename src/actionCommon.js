@@ -507,27 +507,30 @@ const soundInput = (formData, enableDelay) => (
 
 const validateBeforeSubmit = (value) => {
   const dests = value.destinations || [];
+
   const error = {};
-  if (
-    dests &&
-    dests.filter(
-      (d) => d === "APP" || d === "ALERT" || d === "INTRO" || d === "DIALER"
-    ).length >= 2
-  ) {
-    error.destinations =
-      "「前情提要」/「對話視窗」/「提示視窗」/「撥號視窗」只能選其中一個";
-  } else if (dests.length === 0) {
-    error.destinations = "至少要選其中一個";
-  } else if (
-    dests.filter((d) => d === "APP" || d === "ALERT" || d === "INTRO").length >=
-      1 &&
-    (!value.choices || value.choices.length == 0) &&
-    !value.allowTextReply &&
-    !value.allowNoReply
-  ) {
-    error.allowTextReply =
-      "必須要有回應方式 (按鈕或打字)，否則圖文視窗不會自行消失！";
+  if (value.hasPopup) {
+    if (
+      dests &&
+      dests.filter(
+        (d) => d === "APP" || d === "ALERT" || d === "INTRO" || d === "DIALER"
+      ).length >= 2
+    ) {
+      error.destinations =
+        "「前情提要」/「對話視窗」/「提示視窗」/「撥號視窗」只能選其中一個";
+    } else if (dests.length === 0) {
+      error.destinations = "至少要選其中一個";
+    } else if (
+      dests.filter((d) => d === "ALERT" || d === "INTRO").length >= 1 &&
+      (!value.choices || value.choices.length == 0) &&
+      !value.allowTextReply &&
+      !value.allowNoReply
+    ) {
+      error.allowTextReply =
+        "必須要有回應方式 (按鈕或打字)，否則圖文視窗不會自行消失！";
+    }
   }
+
   if (
     value.hasIntroImage &&
     !value.introBackground &&

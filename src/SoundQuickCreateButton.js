@@ -71,18 +71,7 @@ function SoundQuickCreateButton({ onChange, source }) {
             <>
               <DialogContent>
                 <TextInput label="名稱" source="name" validate={required()} />
-                <FileInput
-                  label="音檔"
-                  source="sound"
-                  accept={[
-                    "audio/ogg",
-                    "audio/mpeg",
-                    "audio/mp3",
-                    "audio/mp4",
-                    "audio/webm",
-                  ]}
-                  validate={required()}
-                >
+                <FileInput label="音檔" source="sound" validate={required()}>
                   <FileField source="src" title="name" />
                 </FileInput>
               </DialogContent>
