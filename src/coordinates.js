@@ -18,7 +18,8 @@ export const CoordinateInput = (formData) => {
       form.change("lon", parts[1]);
     }
   }
-  const initialLatLng = formData.lat + "," + formData.lon;
+  const initialLatLng =
+    formData.lat && formData.lon ? formData.lat + "," + formData.lon : "0,0";
 
   return (
     <>
