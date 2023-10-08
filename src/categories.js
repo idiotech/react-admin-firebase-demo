@@ -25,10 +25,19 @@ import {
   fetchEnd,
   useGetList,
   useNotify,
+  SelectInput,
 } from "react-admin";
 
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+
+const displayTypes = [
+  { id: "CAROUSEL", name: "左右滑動" },
+  { id: "TWO_IN_A_ROW", name: "兩個一列" },
+  { id: "ONE_IN_A_ROW", name: "一個一列" },
+  { id: "LIST", name: "列表" },
+];
+
 const CategoryFilter = (props) => (
   <Filter {...props}>
     <TextInput label="Search" source="name" alwaysOn />
@@ -63,9 +72,8 @@ function CatPublishButton() {
     setLoading(true);
     dispatch(fetchStart());
     try {
-      console.log("cats", categoryResult);
+      console.log("cats", categories);
       const urlString = "https://ghostspeak.floraland.tw/agent/v1/category";
-      // const urlString = "http://localhost:8080/v1/category/";
       const url = new URL(urlString);
       const metadata = { categories: Object.values(categories) };
       fetch(url, {
@@ -156,7 +164,14 @@ export const CategoryCreate = (props) => (
   <Create title={<Title />} {...props}>
     <SimpleForm>
       <TextInput label="名稱" source="name" />
-      <TextInput label="說明" source="description" />
+      <TextInput label="簡介" source="description" />
+      <SelectInput
+        label="顯示方式"
+        source="displayType"
+        choices={displayTypes}
+        initialValue="ONE_IN_A_ROW"
+      />
+      <NumberInput label="顯示個數" source="displayCount" initialValue={3} />
       <NumberInput label="順序" source="order" initialValue={1} />
       <BooleanInput label="隱藏" source="hidden" initialValue={false} />
     </SimpleForm>
@@ -168,7 +183,14 @@ export const CategoryEdit = (props) => (
     <SimpleForm>
       <TextInput disabled source="id" />
       <TextInput label="名稱" source="name" />
-      <TextInput label="說明" source="description" />
+      <TextInput label="簡介" source="description" />
+      <SelectInput
+        label="顯示方式"
+        source="displayType"
+        choices={displayTypes}
+        initialValue="ONE_IN_A_ROW"
+      />
+      <NumberInput label="顯示個數" source="displayCount" initialValue={3} />
       <NumberInput label="順序" source="order" />
       <BooleanInput label="隱藏" source="hidden" />
       <DateTimeInput label="建立時間" disabled source="createdate" />

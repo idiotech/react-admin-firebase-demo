@@ -28,6 +28,7 @@ import {
   SimpleFormIterator,
   AutocompleteInput,
   required,
+  FormDataConsumer,
 } from "react-admin";
 import { createStore } from "redux";
 import { useState, useEffect } from "react";
@@ -38,12 +39,14 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { useSelector, useDispatch } from "react-redux";
 import { FirebaseDataProvider } from "react-admin-firebase";
 import * as xid from "xid-js";
+import RichTextInput from "ra-input-rich-text";
 
 import { getRecordField } from "./utils";
 
 import { useAllData, getActions } from "./serverCommon";
 import { getPrevId } from "./actionCommon";
 import { isSuperUser } from "./App";
+import ImageReferenceInput from "./ImageReferenceInput";
 
 export function scenarioReducer(state = { value: "" }, action) {
   switch (action.type) {
@@ -784,7 +787,7 @@ export const ScenarioList = (props) => {
     <List
       title={<Title />}
       {...props}
-      sort={{ field: "ordinal", order: "ASC" }}
+      sort={{ field: "ordinal", order: "DESC" }}
       perPage={25}
       filters={<ScenarioFilter />}
     >
@@ -804,45 +807,7 @@ export const ScenarioList = (props) => {
   );
 };
 
-export const ScenarioCreate = (props) => {
-  const baseProvider = getProvider("dummy");
-  const anotherUid = baseProvider.app.auth().currentUser?.uid || "dead";
-  const [isSuper, setIsSuper] = useState(false);
-  useEffect(() => {
-    isSuperUser(localStorage.getItem("uid")).then((s) => {
-      setIsSuper(s);
-    });
-  }, []);
-  return (
-    <Create title={<Title />} {...props}>
-      <SimpleForm>
-        <TextInput label="名稱" source="name" />
-        <TextInput label="顯示名稱" source="displayName" />
-        <TextInput label="說明" source="description" />
-        <ArrayInput label="分類" source="categories" disabled={!isSuper}>
-          <SimpleFormIterator>
-            <ReferenceInput
-              source="category"
-              reference="categories"
-              validate={[required()]}
-            >
-              <AutocompleteInput optionText="name" />
-            </ReferenceInput>
-          </SimpleFormIterator>
-        </ArrayInput>
-        <TextInput
-          label="User ID"
-          source="uid"
-          disabled
-          initialValue={anotherUid}
-        />
-        <BooleanInput label="正式上架" source="public" disabled={!isSuper} />
-      </SimpleForm>
-    </Create>
-  );
-};
-
-export const ScenarioEdit = (props) => {
+const InputForm = (props) => {
   const baseProvider = getProvider("dummy");
   const uid = baseProvider.app.auth().currentUser?.uid || "dead";
   const [isSuper, setIsSuper] = useState(false);
@@ -852,34 +817,69 @@ export const ScenarioEdit = (props) => {
     });
   }, []);
   return (
-    <Edit title={<Title />} {...props}>
-      <SimpleForm>
-        <TextInput disabled source="id" />
-        <TextInput label="名稱" source="name" />
-        <TextInput label="顯示名稱" source="displayName" />
-        <TextInput label="說明" source="description" />
-        <NumberInput label="順序" source="ordinal" initialValue={Date.now()} />
-        <ArrayInput label="分類" source="categories" disabled={!isSuper}>
-          <SimpleFormIterator>
-            <ReferenceInput
-              label="類別"
-              source="category"
-              reference="categories"
-              validate={[required()]}
-            >
-              <AutocompleteInput optionText="name" />
-            </ReferenceInput>
-          </SimpleFormIterator>
-        </ArrayInput>
+    <SimpleForm {...props}>
+      <TextInput disabled source="id" />
+      <TextInput label="名稱" source="name" />
+      <TextInput label="顯示名稱" source="displayName" />
+      <TextInput label="說明" source="description" />
+      <ArrayInput label="分類" source="categories" disabled={!isSuper}>
+        <SimpleFormIterator>
+          <ReferenceInput
+            label="類別"
+            source="category"
+            reference="categories"
+            validate={[required()]}
+          >
+            <AutocompleteInput optionText="name" />
+          </ReferenceInput>
+        </SimpleFormIterator>
+      </ArrayInput>
+      {!props.create && (
         <BooleanInput label="正式上架" source="public" disabled={!isSuper} />
-        <TextInput label="專輯" source="owner" disabled={!isSuper} />
+      )}
+      <FormDataConsumer>
+        {({ formData }) =>
+          formData.public && (
+            <ImageReferenceInput
+              label="圖片"
+              source="pictureId"
+              reference="images"
+              sort={{ field: "lastupdate", order: "DESC" }}
+              perPage={1000}
+            />
+          )
+        }
+      </FormDataConsumer>
+      <FormDataConsumer>
+        {({ formData }) =>
+          formData.public && <RichTextInput label="詳細說明" source="details" />
+        }
+      </FormDataConsumer>
+      {!props.create && (
+        <NumberInput label="順序" source="ordinal" initialValue={Date.now()} />
+      )}
+      {!props.create && (
         <DateTimeInput label="建立時間" disabled source="createdate" />
+      )}
+      {!props.create && (
         <DateTimeInput label="修改時間" disabled source="lastupdate" />
-        <TextInput label="user id" source="uid" disabled initialValue={uid} />
-      </SimpleForm>
-    </Edit>
+      )}
+      <TextInput label="user id" source="uid" disabled initialValue={uid} />
+    </SimpleForm>
   );
 };
+
+export const ScenarioCreate = (props) => (
+  <Create title={<Title />} {...props}>
+    <InputForm {...props} create={true} />
+  </Create>
+);
+
+export const ScenarioEdit = (props) => (
+  <Edit title={<Title />} {...props}>
+    <InputForm {...props} create={false} />
+  </Edit>
+);
 
 export function getActionTree(actions) {
   const initial = actions.find((a) => a.firstAction);
