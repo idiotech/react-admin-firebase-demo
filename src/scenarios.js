@@ -195,7 +195,7 @@ function PublishButton(props) {
   const { actions, variables } = data;
   const [open, setOpen] = useState(false);
 
-  function handleConfirm() {
+  async function handleConfirm() {
     setOpen(false);
     setLoading(true);
     dispatch(fetchStart());
@@ -240,33 +240,43 @@ function PublishButton(props) {
       );
     }
     try {
-      const payload = getNodes(actionTree);
+      const scenarioId = getRecordField(props, "id");
+      const template = getNodes(actionTree);
       // const urlString = `http://localhost:8080/v1/scenario/graphscript/${getRecordField(
-      const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(
-        props,
-        "id"
-      )}`;
+      const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${scenarioId}`;
       const url = new URL(urlString);
       const displayName = getRecordField(props, "displayName") || null;
       console.log("omg props", props);
-      const catString = (
-        getRecordField(props, "categories")?.map((c) => c.category) || []
-      ).join(",");
+      const categories =
+        getRecordField(props, "categories")?.map((c) => c.category) || [];
       const params = {
+        overwrite: true,
+      };
+
+      const provider = getProvider(scenarioId);
+      const pictureId = getRecordField(props, "pictureId");
+      let imageUrl = null;
+      if (pictureId) {
+        const result = await provider.getOne("images", { id: pictureId });
+        imageUrl = result.data?.image?.src;
+      }
+      const metadata = {
         name: getRecordField(props, "name"),
         displayName: displayName,
-        overwrite: true,
         public: getRecordField(props, "public"),
-        owner: getRecordField(props, "owner") || null,
         ordinal: getRecordField(props, "ordinal") || Date.now(),
-        categories: catString,
+        categories: categories,
+        details: getRecordField(props, "details") || null,
+        image: imageUrl,
       };
       url.search = new URLSearchParams(params).toString();
-      console.log("payload", payload);
+      console.log("payload", template);
+      console.log("params", params);
+      console.log("metadata", metadata);
 
       fetch(url, {
         method: "PUT",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ template, metadata }),
         headers: {
           "content-type": "application/json",
         },
@@ -821,7 +831,7 @@ const InputForm = (props) => {
       <TextInput disabled source="id" />
       <TextInput label="名稱" source="name" />
       <TextInput label="顯示名稱" source="displayName" />
-      <TextInput label="說明" source="description" />
+      <TextInput label="說明" source="description" multiline />
       <ArrayInput label="分類" source="categories" disabled={!isSuper}>
         <SimpleFormIterator>
           <ReferenceInput
