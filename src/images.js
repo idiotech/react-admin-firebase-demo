@@ -13,10 +13,10 @@ import {
   EditButton,
   DeleteButton,
   DateTimeInput,
-  ImageField,
   ImageInput,
 } from "react-admin";
 
+import { MyImageField } from "./MyImageField";
 import { DummyList } from "./dummy";
 
 const ImageFilter = (props) => (
@@ -41,7 +41,7 @@ export const ImageList = (props) => {
         <Datagrid>
           <TextField label="編號" source="rowIndex" />
           <TextField label="名稱" source="name" />
-          <ImageField label="圖片" source="image.src" />
+          <MyImageField label="圖片" source="image.src" />
           <EditButton label="" />
           <DeleteButton label="" redirect={false} />
         </Datagrid>
@@ -55,7 +55,7 @@ export const ImageCreate = (props) => (
     <SimpleForm>
       <TextInput label="名稱" source="name" />
       <ImageInput label="圖片" source="image">
-        <ImageField source="src" title="name" />
+        <MyImageField source="src" title="name" />
       </ImageInput>
       <>(圖釘建議大小： 150 x 150)</>
     </SimpleForm>
@@ -68,7 +68,7 @@ export const ImageEdit = (props) => (
       <TextInput disabled source="id" />
       <TextInput label="名稱" source="name" />
       <ImageInput label="圖片" source="image">
-        <ImageField source="src" title="name" />
+        <MyImageField source="src" title="name" />
       </ImageInput>
       <>(圖釘建議大小： 150 x 150)</>
       <DateTimeInput label="建立時間" disabled source="createdate" />

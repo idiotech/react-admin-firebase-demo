@@ -46,6 +46,7 @@ import {
   mapStyleInput,
   introImageInput,
   buttonStyleInput,
+  popupStyleInput,
   variableUpdateInput,
   modalImage,
   validateBeforeSubmit,
@@ -345,6 +346,10 @@ const InputForm = (props) => {
                   <BooleanInput label="按鈕顏色" source="hasButtonStyle" />
                   {formData.hasButtonStyle &&
                     buttonStyleInput(formData, enableDelay)}
+                  <hr />
+                  <BooleanInput label="視窗文字顏色" source="hasPopupStyle" />
+                  {formData.hasPopupStyle &&
+                    popupStyleInput(formData, enableDelay)}
                   <hr />
                   <BooleanInput label="更新變數" source="hasVariableUpdate" />
                   {formData.hasVariableUpdate && variableUpdateInput()}

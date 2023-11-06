@@ -28,13 +28,13 @@ class CompositeDataProvider {
   }
   create(resource, params) {
     if (resource == "scenarios") {
-      params.ordinal = Date.now();
+      params.data.ordinal = Date.now();
       return this._delegate("create", resource, params).then((r) => {
         if (!params.data.cloned) {
           const defaultImage = {
             data: {
               image: {
-                src: "http://daqiaotou-storage.floraland.tw/images/default-marker.png",
+                src: "https://storage.googleapis.com/daqiaotou/images/default-marker.png",
                 name: "default-marker.png",
               },
               name: "預設圖釘",

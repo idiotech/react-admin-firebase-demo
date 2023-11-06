@@ -358,6 +358,24 @@ export const getActions = (currentNode, data, condition) => {
     };
     ret.push(buttonStyleAction);
   }
+  if (currentNode.hasPopupStyle) {
+    const popupStyleAction = {
+      id: currentNode.id + "-popup-style",
+      receiver: "?u",
+      sender: "ghost",
+      content: {
+        task: {
+          type: "POPUP_STYLE",
+          alertTextColor: currentNode.alertTextColor,
+        },
+        condition: condition,
+      },
+      delay: currentNode.backgroundDelay,
+      time: getActTime(currentNode, "popStyle"),
+      description: currentNode.name,
+    };
+    ret.push(popupStyleAction);
+  }
   if (currentNode.hasVariableUpdate) {
     const variableUpdates = currentNode.variableUpdates.map((vu) => ({
       name: vu.variable ? variables[vu.variable]?.name : null,

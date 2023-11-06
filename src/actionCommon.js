@@ -249,6 +249,8 @@ export function getPrevDesc(action) {
       return "背景聲音播完";
     case "button-style":
       return "按鈕樣式改變";
+    case "popup-style":
+      return "圖文樣式改變";
     default:
       return "動作執行完畢";
   }
@@ -1313,6 +1315,13 @@ const buttonStyleInput = (formData, enableDelay) => (
   </>
 );
 
+const popupStyleInput = (formData, enableDelay) => (
+  <>
+    <ColorInput label="提示文字顏色" source="alertTextColor" />
+    {enableDelay && addDelay(formData, "popupStyle")}
+  </>
+);
+
 const variableUpdateInput = () => (
   <ArrayInput label="更新變數" source="variableUpdates">
     <SimpleFormIterator>
@@ -1404,6 +1413,7 @@ export {
   soundInput,
   popupInput,
   popupDismissalInput,
+  popupStyleInput,
   incomingCallInput,
   hangUpInput,
   markerInput,

@@ -2,13 +2,13 @@ import React, { useState, useCallback } from "react";
 import {
   ReferenceInput,
   AutocompleteInput,
-  ImageField,
   FormDataConsumer,
   ReferenceField,
 } from "react-admin";
 import { makeStyles } from "@material-ui/core/styles";
 
 import ImageQuickCreateButton from "./ImageQuickCreateButton";
+import { MyImageField } from "./MyImageField";
 
 const useStyles = makeStyles({
   root: {
@@ -44,7 +44,7 @@ const ImageReferenceInput = (props) => {
             source={props.source}
             reference="images"
           >
-            <ImageField source="image.src" />
+            <MyImageField source="image.src" />
           </ReferenceField>
         )}
       </FormDataConsumer>
