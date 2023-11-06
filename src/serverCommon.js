@@ -370,7 +370,7 @@ export const getActions = (currentNode, data, condition) => {
         },
         condition: condition,
       },
-      delay: currentNode.backgroundDelay,
+      delay: currentNode.popupStyleDelay,
       time: getActTime(currentNode, "popStyle"),
       description: currentNode.name,
     };
