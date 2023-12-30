@@ -11,13 +11,13 @@ import {
   TextField,
   TextInput,
   EditButton,
-  DeleteButton,
   DateTimeInput,
   ImageInput,
 } from "react-admin";
 
 import { MyImageField } from "./MyImageField";
 import { DummyList } from "./dummy";
+import { getDeleteButton } from "./deleteResource";
 
 const ImageFilter = (props) => (
   <Filter {...props}>
@@ -43,11 +43,24 @@ export const ImageList = (props) => {
           <TextField label="名稱" source="name" />
           <MyImageField label="圖片" source="image.src" />
           <EditButton label="" />
-          <DeleteButton label="" redirect={false} />
+          <ImageDelete label="" redirect={false} />
         </Datagrid>
       </List>
     );
   } else return DummyList(props);
+};
+
+export const ImageDelete = (props) => {
+  const paths = [
+    "pictures.pictureId",
+    "introBackground",
+    "introLogo",
+    "mapLogo",
+    "portrait",
+    "markerIcon",
+    "guideImage",
+  ];
+  return getDeleteButton(props, "images", "圖片", paths.join(","));
 };
 
 export const ImageCreate = (props) => (
