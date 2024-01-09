@@ -9,11 +9,11 @@ import {
   TextField,
   TextInput,
   EditButton,
-  DeleteButton,
   DateTimeInput,
   FileField,
   FileInput,
 } from "react-admin";
+import { getDeleteButton } from "./deleteResource";
 
 import { DummyList } from "./dummy";
 const MapStyleFilter = (props) => (
@@ -31,6 +31,11 @@ const Title = ({ record }) => {
   );
 };
 
+const MapStyleDelete = (props) => {
+  const paths = ["mapStyle"];
+  return getDeleteButton(props, "mapStyles", "地圖樣式", paths.join(","));
+};
+
 export const MapStyleList = (props) => {
   if (localStorage.getItem("scenario")) {
     return (
@@ -46,7 +51,7 @@ export const MapStyleList = (props) => {
           <TextField label="名稱" source="name" />
           <FileField label="地圖樣式" source="mapStyle.src" title={"連結"} />
           <EditButton label="" />
-          <DeleteButton label="" redirect={false} />
+          <MapStyleDelete label="" redirect={false} />
         </Datagrid>
       </List>
     );

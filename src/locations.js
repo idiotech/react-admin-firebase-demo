@@ -12,11 +12,11 @@ import {
   TextField,
   TextInput,
   EditButton,
-  DeleteButton,
   DateTimeInput,
   FormDataConsumer,
 } from "react-admin";
 
+import { getDeleteButton } from "./deleteResource";
 import { CoordinateInput, CoordinateField } from "./coordinates";
 import { DummyList } from "./dummy";
 
@@ -35,6 +35,11 @@ const Title = ({ record }) => {
   );
 };
 
+const LocationDelete = (props) => {
+  const paths = ["soundCenterId", "locationId", "geofenceCenter"];
+  return getDeleteButton(props, "locations", "地點", paths.join(","));
+};
+
 export const LocationList = (props) => {
   if (localStorage.getItem("scenario")) {
     return (
@@ -51,7 +56,7 @@ export const LocationList = (props) => {
           <CoordinateField label="座標" source="coordinates" />
           <TextField label="說明" source="description" />
           <EditButton label="" />
-          <DeleteButton label="" redirect={false} />
+          <LocationDelete label="" redirect={false} />
         </Datagrid>
       </List>
     );

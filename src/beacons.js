@@ -11,9 +11,9 @@ import {
   TextField,
   TextInput,
   EditButton,
-  DeleteButton,
   DateTimeInput,
 } from "react-admin";
+import { getDeleteButton } from "./deleteResource";
 import { DummyList } from "./dummy";
 
 const BeaconFilter = (props) => (
@@ -31,6 +31,11 @@ const Title = ({ record }) => {
   );
 };
 
+const BeaconDelete = (props) => {
+  const paths = ["beacon"];
+  return getDeleteButton(props, "beacons", "beacon", paths.join(","));
+};
+
 export const BeaconList = (props) => {
   if (localStorage.getItem("scenario"))
     return (
@@ -41,7 +46,7 @@ export const BeaconList = (props) => {
           <TextField label="Beacon ID" source="beaconId" />
           <TextField label="說明" source="description" />
           <EditButton label="" />
-          <DeleteButton label="" redirect={false} />
+          <BeaconDelete label="" redirect={false} />
         </Datagrid>
       </List>
     );

@@ -11,7 +11,6 @@ import {
   TextField,
   TextInput,
   EditButton,
-  DeleteButton,
   DateTimeInput,
   required,
   number,
@@ -19,6 +18,7 @@ import {
   NumberField,
 } from "react-admin";
 import { DummyList } from "./dummy";
+import { getDeleteButton } from "./deleteResource";
 
 const VariableFilter = (props) => (
   <Filter {...props}>
@@ -35,6 +35,11 @@ const Title = ({ record }) => {
   );
 };
 
+const VariableDelete = (props) => {
+  const paths = ["variable"];
+  return getDeleteButton(props, "variables", "變數", paths.join(","));
+};
+
 export const VariableList = (props) => {
   if (localStorage.getItem("scenario"))
     return (
@@ -45,7 +50,7 @@ export const VariableList = (props) => {
           <NumberField label="初始值" source="value" />
           <TextField label="說明" source="description" />
           <EditButton label="" />
-          <DeleteButton label="" redirect={false} />
+          <VariableDelete label="" redirect={false} />
         </Datagrid>
       </List>
     );

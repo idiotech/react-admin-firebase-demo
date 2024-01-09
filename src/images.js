@@ -50,7 +50,7 @@ export const ImageList = (props) => {
   } else return DummyList(props);
 };
 
-export const ImageDelete = (props) => {
+const ImageDelete = (props) => {
   const paths = [
     "pictures.pictureId",
     "introBackground",

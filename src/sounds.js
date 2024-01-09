@@ -11,11 +11,11 @@ import {
   TextField,
   TextInput,
   EditButton,
-  DeleteButton,
   DateTimeInput,
   FileField,
   FileInput,
 } from "react-admin";
+import { getDeleteButton } from "./deleteResource";
 
 import { DummyList } from "./dummy";
 const SoundFilter = (props) => (
@@ -33,6 +33,11 @@ const Title = ({ record }) => {
   );
 };
 
+const SoundDelete = (props) => {
+  const paths = ["soundId"];
+  return getDeleteButton(props, "sounds", "聲音", paths.join(","));
+};
+
 export const SoundList = (props) => {
   if (localStorage.getItem("scenario")) {
     return (
@@ -48,7 +53,7 @@ export const SoundList = (props) => {
           <TextField label="名稱" source="name" />
           <FileField label="音檔" source="sound.src" title={"連結"} />
           <EditButton label="" />
-          <DeleteButton label="" redirect={false} />
+          <SoundDelete label="" redirect={false} />
         </Datagrid>
       </List>
     );
