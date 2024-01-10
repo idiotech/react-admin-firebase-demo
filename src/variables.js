@@ -36,7 +36,7 @@ const Title = ({ record }) => {
 };
 
 const VariableDelete = (props) => {
-  const paths = ["variable"];
+  const paths = ["variableUpdates.variable"];
   return getDeleteButton(props, "variables", "變數", paths.join(","));
 };
 
