@@ -263,6 +263,8 @@ function PublishButton(props) {
       const metadata = {
         name: getRecordField(props, "name"),
         displayName: displayName,
+        description: getRecordField(props, "description"),
+        featured: getRecordField(props, "featured"),
         public: getRecordField(props, "public"),
         ordinal: getRecordField(props, "ordinal") || Date.now(),
         categories: categories,
@@ -832,6 +834,7 @@ const InputForm = (props) => {
       <TextInput label="名稱" source="name" />
       <TextInput label="顯示名稱" source="displayName" />
       <TextInput label="說明" source="description" multiline />
+      <BooleanInput label="精選" source="featured" disabled={!isSuper} />
       <ArrayInput label="分類" source="categories" disabled={!isSuper}>
         <SimpleFormIterator>
           <ReferenceInput
