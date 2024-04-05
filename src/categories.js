@@ -30,6 +30,7 @@ import {
 
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { agentUrl } from "./serverCommon";
 
 const displayTypes = [
   { id: "CAROUSEL", name: "左右滑動" },
@@ -73,7 +74,7 @@ function CatPublishButton() {
     dispatch(fetchStart());
     try {
       console.log("cats", categories);
-      const urlString = "https://ghostspeak.floraland.tw/agent/v1/category";
+      const urlString = `${agentUrl}/category`;
       const url = new URL(urlString);
       const metadata = { categories: Object.values(categories) };
       fetch(url, {

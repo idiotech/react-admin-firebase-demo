@@ -47,6 +47,7 @@ import { useAllData, getActions } from "./serverCommon";
 import { getPrevId } from "./actionCommon";
 import { isSuperUser } from "./App";
 import ImageReferenceInput from "./ImageReferenceInput";
+import { agentUrl } from "./serverCommon";
 
 export function scenarioReducer(state = { value: "" }, action) {
   switch (action.type) {
@@ -243,7 +244,7 @@ function PublishButton(props) {
       const scenarioId = getRecordField(props, "id");
       const template = getNodes(actionTree);
       // const urlString = `http://localhost:8080/v1/scenario/graphscript/${getRecordField(
-      const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${scenarioId}`;
+      const urlString = `${agentUrl}/scenario/graphscript/${scenarioId}`;
       const url = new URL(urlString);
       const displayName = getRecordField(props, "displayName") || null;
       console.log("omg props", props);
@@ -334,7 +335,7 @@ function PublishButton(props) {
 }
 
 function unpublish(id) {
-  const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${id}`;
+  const urlString = `${agentUrl}/scenario/graphscript/${id}`;
   const url = new URL(urlString);
   return fetch(url, { method: "DELETE" });
 }
@@ -443,7 +444,7 @@ function GpxButton(props) {
     }
     try {
       const payload = getNodes(actionTree);
-      const urlString = `https://ghostspeak.floraland.tw/agent/v1/scenario/graphscript/${getRecordField(
+      const urlString = `${agentUrl}/scenario/graphscript/${getRecordField(
         props,
         "id"
       )}`;
