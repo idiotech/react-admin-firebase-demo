@@ -57,7 +57,8 @@ function getProvider(scenarioId) {
   return FirebaseDataProvider(config, scenarioOtions);
 }
 
-const authUrl = process.env.REACT_APP_AUTH_URL || 'https://ghostspeak.floraland.tw/auth';
+const authUrl =
+  window.appConfigs?.auth_url || "https://ghostspeak.floraland.tw/auth";
 
 export function isSuperUser(uid) {
   return fetch(`${authUrl}/user/${uid}/superuser`, {

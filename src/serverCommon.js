@@ -1,6 +1,7 @@
 import { useGetList } from "react-admin";
 
-export const agentUrl = process.env.REACT_APP_AGENT_URL || 'https://ghostspeak.floraland.tw/agent/v1';
+export const agentUrl =
+  window.appConfigs?.agent_url || "https://ghostspeak.floraland.tw/agent/v1";
 
 function getActTime(currentNode, name) {
   const delayHour = currentNode[name + "DelayHour"] || 0;
