@@ -30,7 +30,7 @@ import {
 
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { agentUrl } from "./serverCommon";
+import { apiUrl } from "./serverCommon";
 
 const displayTypes = [
   { id: "CAROUSEL", name: "左右滑動" },
@@ -74,7 +74,7 @@ function CatPublishButton() {
     dispatch(fetchStart());
     try {
       console.log("cats", categories);
-      const urlString = `${agentUrl}/category`;
+      const urlString = `${apiUrl}/v1/category`;
       const url = new URL(urlString);
       const metadata = { categories: Object.values(categories) };
       fetch(url, {

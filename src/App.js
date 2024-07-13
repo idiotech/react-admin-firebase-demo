@@ -34,6 +34,7 @@ import { createHashHistory } from "history";
 import createAdminStore from "./createAdminStore";
 
 import { firebaseConfig as config } from "./FIREBASE_CONFIG";
+import { apiUrl } from "./serverCommon";
 
 import polyglotI18nProvider from "ra-i18n-polyglot"; // install the package
 import englishMessages from "ra-language-english"; // install the package
@@ -57,11 +58,8 @@ function getProvider(scenarioId) {
   return FirebaseDataProvider(config, scenarioOtions);
 }
 
-const authUrl =
-  window.appConfigs?.auth_url || "https://ghostspeak.floraland.tw/auth";
-
 export function isSuperUser(uid) {
-  return fetch(`${authUrl}/user/${uid}/superuser`, {
+  return fetch(`${apiUrl}/v1/user/${uid}/superuser`, {
     method: "GET",
     headers: {
       "content-type": "application/json",

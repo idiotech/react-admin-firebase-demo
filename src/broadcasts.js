@@ -32,7 +32,7 @@ import ReplyIcon from "@material-ui/icons/Reply";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import HourglassBottomIcon from "@material-ui/icons/HourglassEmpty";
 import { DummyList } from "./dummy";
-import { agentUrl } from "./serverCommon";
+import { apiUrl } from "./serverCommon";
 
 const conditionTypes = [
   { id: "ALWAYS", name: "立刻" },
@@ -262,7 +262,7 @@ function SendButton(props) {
         scenarioId: scenario,
       };
     });
-    const url = `${agentUrl}/broadcast`;
+    const url = `${apiUrl}/v1/broadcast`;
     Promise.all(
       messages.map((m) => {
         fetch(url, {

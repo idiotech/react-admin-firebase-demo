@@ -43,11 +43,10 @@ import RichTextInput from "ra-input-rich-text";
 
 import { getRecordField } from "./utils";
 
-import { useAllData, getActions } from "./serverCommon";
+import { useAllData, getActions, apiUrl } from "./serverCommon";
 import { getPrevId } from "./actionCommon";
 import { isSuperUser } from "./App";
 import ImageReferenceInput from "./ImageReferenceInput";
-import { agentUrl } from "./serverCommon";
 
 export function scenarioReducer(state = { value: "" }, action) {
   switch (action.type) {
@@ -244,7 +243,7 @@ function PublishButton(props) {
       const scenarioId = getRecordField(props, "id");
       const template = getNodes(actionTree);
       // const urlString = `http://localhost:8080/v1/scenario/graphscript/${getRecordField(
-      const urlString = `${agentUrl}/scenario/graphscript/${scenarioId}`;
+      const urlString = `${apiUrl}/v1/scenario/graphscript/${scenarioId}`;
       const url = new URL(urlString);
       const displayName = getRecordField(props, "displayName") || null;
       console.log("omg props", props);
@@ -269,6 +268,7 @@ function PublishButton(props) {
         public: getRecordField(props, "public"),
         ordinal: getRecordField(props, "ordinal") || Date.now(),
         categories: categories,
+        passcode: getRecordField(props, "passcode") || null,
         details: getRecordField(props, "details") || null,
         image: imageUrl,
       };
@@ -335,7 +335,7 @@ function PublishButton(props) {
 }
 
 function unpublish(id) {
-  const urlString = `${agentUrl}/scenario/graphscript/${id}`;
+  const urlString = `${apiUrl}/v1/scenario/graphscript/${id}`;
   const url = new URL(urlString);
   return fetch(url, { method: "DELETE" });
 }
@@ -444,7 +444,7 @@ function GpxButton(props) {
     }
     try {
       const payload = getNodes(actionTree);
-      const urlString = `${agentUrl}/scenario/graphscript/${getRecordField(
+      const urlString = `${apiUrl}/v1/scenario/graphscript/${getRecordField(
         props,
         "id"
       )}`;
@@ -836,6 +836,7 @@ const InputForm = (props) => {
       <TextInput label="顯示名稱" source="displayName" />
       <TextInput label="說明" source="description" multiline />
       <BooleanInput label="精選" source="featured" disabled={!isSuper} />
+      <TextInput label="通行碼" source="passcode" disabled={!isSuper} />
       <ArrayInput label="分類" source="categories" disabled={!isSuper}>
         <SimpleFormIterator>
           <ReferenceInput
