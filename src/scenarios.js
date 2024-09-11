@@ -835,41 +835,6 @@ const InputForm = (props) => {
       <TextInput label="名稱" source="name" />
       <TextInput label="顯示名稱" source="displayName" />
       <TextInput label="說明" source="description" multiline />
-      <BooleanInput label="精選" source="featured" disabled={!isSuper} />
-      <TextInput label="通行碼" source="passcode" disabled={!isSuper} />
-      <ArrayInput label="分類" source="categories" disabled={!isSuper}>
-        <SimpleFormIterator>
-          <ReferenceInput
-            label="類別"
-            source="category"
-            reference="categories"
-            validate={[required()]}
-          >
-            <AutocompleteInput optionText="name" />
-          </ReferenceInput>
-        </SimpleFormIterator>
-      </ArrayInput>
-      {!props.create && (
-        <BooleanInput label="正式上架" source="public" disabled={!isSuper} />
-      )}
-      <FormDataConsumer>
-        {({ formData }) =>
-          formData.public && (
-            <ImageReferenceInput
-              label="圖片"
-              source="pictureId"
-              reference="images"
-              sort={{ field: "lastupdate", order: "DESC" }}
-              perPage={1000}
-            />
-          )
-        }
-      </FormDataConsumer>
-      <FormDataConsumer>
-        {({ formData }) =>
-          formData.public && <RichTextInput label="詳細說明" source="details" />
-        }
-      </FormDataConsumer>
       {!props.create && (
         <NumberInput label="順序" source="ordinal" initialValue={Date.now()} />
       )}
@@ -879,6 +844,59 @@ const InputForm = (props) => {
       {!props.create && (
         <DateTimeInput label="修改時間" disabled source="lastupdate" />
       )}
+      <h3>進階內容</h3>
+      <BooleanInput label="開啟進階內容" source="advancedScenarioType" />
+      <FormDataConsumer>
+        {({ formData }) => (
+          <>
+            {formData.advancedScenarioType && (
+              <>
+                <ImageReferenceInput
+                  label="圖片"
+                  source="pictureId"
+                  reference="images"
+                  sort={{ field: "lastupdate", order: "DESC" }}
+                  perPage={1000}
+                />
+                <RichTextInput label="詳細說明" source="details" />
+                <BooleanInput
+                  label="精選"
+                  source="featured"
+                  disabled={!isSuper}
+                />
+                <TextInput
+                  label="通行碼"
+                  source="passcode"
+                  disabled={!isSuper}
+                />
+                <ArrayInput
+                  label="分類"
+                  source="categories"
+                  disabled={!isSuper}
+                >
+                  <SimpleFormIterator>
+                    <ReferenceInput
+                      label="類別"
+                      source="category"
+                      reference="categories"
+                      validate={[required()]}
+                    >
+                      <AutocompleteInput optionText="name" />
+                    </ReferenceInput>
+                  </SimpleFormIterator>
+                </ArrayInput>
+                {!props.create && (
+                  <BooleanInput
+                    label="正式上架"
+                    source="public"
+                    disabled={!isSuper}
+                  />
+                )}
+              </>
+            )}
+          </>
+        )}
+      </FormDataConsumer>
       <TextInput label="user id" source="uid" disabled initialValue={uid} />
     </SimpleForm>
   );
