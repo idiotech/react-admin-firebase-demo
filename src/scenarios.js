@@ -242,6 +242,45 @@ function PublishButton(props) {
     try {
       const scenarioId = getRecordField(props, "id");
       const template = getNodes(actionTree);
+      const initialNode = template[0];
+      if (initialNode) {
+        const tasks = initialNode.performances.map(
+          (p) => p.action.content.task
+        );
+        const validInitial = tasks.find(
+          (t) =>
+            t.type === "MARKER" ||
+            (t.type === "POPUP" && t.destinations.indexOf("INTRO") >= 0) ||
+            t.type === "INTRO_IMAGE"
+        );
+        if (!validInitial) {
+          initialNode.performances.push({
+            action: {
+              id: "shadow-intro",
+              receiver: "?u",
+              sender: "ghost",
+              content: {
+                task: {
+                  type: "POPUP",
+                  destinations: ["INTRO"],
+                  text: "",
+                  allowTextReply: false,
+                },
+                condition: {
+                  type: "ALWAYS",
+                },
+              },
+              delay: 0,
+              time: null,
+              description: "首頁",
+              session: {
+                scenario: "",
+                chapter: "",
+              },
+            },
+          });
+        }
+      }
       // const urlString = `http://localhost:8080/v1/scenario/graphscript/${getRecordField(
       const urlString = `${apiUrl}/v1/scenario/graphscript/${scenarioId}`;
       const url = new URL(urlString);
