@@ -20,13 +20,15 @@ import {
   CategoryEdit,
   // CatPublishButton,
 } from "./categories";
-import { Admin, Resource } from "react-admin";
+import { Admin, Resource, AppBar, Layout } from "react-admin";
 import { useState, useEffect } from "react";
 import {
   FirebaseDataProvider,
   FirebaseAuthProvider,
 } from "react-admin-firebase";
 import { Provider } from "react-redux";
+import { Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
 import CustomLoginPage from "./CustomLoginPage";
 import CompositeDataProvider from "./compositeDataProvider";
@@ -199,6 +201,63 @@ const dataProvider = new CompositeDataProvider([
 const customReducers = { currentScenario: scenarioReducer };
 
 const history = createHashHistory();
+
+const useStyles = makeStyles(
+  () => ({
+    toolbar: {
+      paddingRight: 24,
+    },
+    menuButton: {
+      marginLeft: "0.2em",
+      marginRight: "0.2em",
+    },
+    menuButtonIconClosed: {},
+    menuButtonIconOpen: {},
+    title: {
+      flex: 1,
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      color: "#FFFFFF",
+    },
+    link: {
+      // fontWeight: "bold",
+      color: "#BBFFFF",
+    },
+  }),
+  { name: "RaAppBar" }
+);
+export const MyAppBar = (props) => {
+  const classes = useStyles(props);
+  return (
+    <AppBar {...props} userMenu={true}>
+      <Typography
+        variant="h6"
+        color="inherit"
+        className={classes.title}
+        id="react-admin-title"
+      />
+      <span className={classes.title}>
+        公開活動授權歡迎與
+        <a
+          className={classes.link}
+          href="https://facebook.com/urbanbakers"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Urban Baker團隊
+        </a>
+        聯絡！
+      </span>
+    </AppBar>
+  );
+};
+
+// export const MyAppBar = () => <AppBar></AppBar>;
+export const MyLayout = ({ children }) => (
+  <Layout appBar={MyAppBar}>{children}</Layout>
+);
+
 function Main() {
   const i18nProvider = polyglotI18nProvider(() => englishMessages, "en", {
     allowMissing: true,
@@ -228,6 +287,7 @@ function Main() {
       i18nProvider={i18nProvider}
       history={history}
       customReducers={customReducers}
+      layout={MyLayout}
     >
       <Resource
         name="scenarios"
