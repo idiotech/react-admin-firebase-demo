@@ -349,6 +349,24 @@ function PublishButton(props) {
     }
   }
 
+  const name = getRecordField(props, "name");
+  const confirm = (
+    <span>
+      <p>你即將發佈《{name}》。使用者的進度將被中斷。確定嗎？</p>
+      <p>
+        (正式上架需求請與
+        <a
+          href="https://facebook.com/urbanbakers"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Urban Baker
+        </a>
+        聯絡)
+      </p>
+    </span>
+  );
+
   return (
     <>
       <Button
@@ -360,10 +378,7 @@ function PublishButton(props) {
       <Confirm
         isOpen={open}
         title="確認發佈"
-        content={`你即將發佈${getRecordField(
-          props,
-          "name"
-        )}；使用者的進度將被中斷。確定嗎？`}
+        content={confirm}
         onConfirm={handleConfirm}
         onClose={handleDialogClose}
         confirm="確認發佈"

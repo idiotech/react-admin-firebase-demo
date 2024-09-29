@@ -14,12 +14,7 @@ import { SoundList, SoundCreate, SoundEdit } from "./sounds";
 import { MapStyleList, MapStyleCreate, MapStyleEdit } from "./mapStyles";
 import { BroadcastList, BroadcastCreate, BroadcastEdit } from "./broadcasts";
 import { VariableList, VariableCreate, VariableEdit } from "./variables";
-import {
-  CategoryList,
-  CategoryCreate,
-  CategoryEdit,
-  // CatPublishButton,
-} from "./categories";
+import { CategoryList, CategoryCreate, CategoryEdit } from "./categories";
 import { Admin, Resource, AppBar, Layout } from "react-admin";
 import { useState, useEffect } from "react";
 import {
@@ -29,6 +24,7 @@ import {
 import { Provider } from "react-redux";
 import { Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Route } from "react-router-dom";
 
 import CustomLoginPage from "./CustomLoginPage";
 import CompositeDataProvider from "./compositeDataProvider";
@@ -40,6 +36,8 @@ import { apiUrl } from "./serverCommon";
 
 import polyglotI18nProvider from "ra-i18n-polyglot"; // install the package
 import englishMessages from "ra-language-english"; // install the package
+import { UrbanBaker } from "./urbanbaker";
+import Menu from "./menu";
 
 const adminOptions = {
   logging: true,
@@ -216,13 +214,14 @@ const useStyles = makeStyles(
     title: {
       flex: 1,
       textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-      overflow: "hidden",
       color: "#FFFFFF",
+      fontFamily: "sans-serif",
     },
     link: {
-      // fontWeight: "bold",
       color: "#BBFFFF",
+    },
+    header: {
+      flex: 2,
     },
   }),
   { name: "RaAppBar" }
@@ -237,8 +236,8 @@ export const MyAppBar = (props) => {
         className={classes.title}
         id="react-admin-title"
       />
-      <span className={classes.title}>
-        公開活動授權歡迎與
+      <span className={classes.header}>
+        <b>Urban Baker街區編輯器</b>（公開活動授權歡迎與
         <a
           className={classes.link}
           href="https://facebook.com/urbanbakers"
@@ -247,7 +246,7 @@ export const MyAppBar = (props) => {
         >
           Urban Baker團隊
         </a>
-        聯絡！
+        聯絡！）
       </span>
     </AppBar>
   );
@@ -257,6 +256,10 @@ export const MyAppBar = (props) => {
 export const MyLayout = ({ children }) => (
   <Layout appBar={MyAppBar}>{children}</Layout>
 );
+
+const routes = [
+  <Route key="urbanbaker" path="/urbanbaker" component={UrbanBaker} />,
+];
 
 function Main() {
   const i18nProvider = polyglotI18nProvider(() => englishMessages, "en", {
@@ -288,6 +291,8 @@ function Main() {
       history={history}
       customReducers={customReducers}
       layout={MyLayout}
+      customRoutes={routes}
+      menu={Menu}
     >
       <Resource
         name="scenarios"
@@ -362,6 +367,11 @@ function Main() {
         list={BroadcastList}
         create={BroadcastCreate}
         edit={BroadcastEdit}
+      />
+      <Resource
+        name="urbanbaker"
+        options={{ label: "Urban Baker簡介" }}
+        list={UrbanBaker}
       />
     </Admin>
   );
