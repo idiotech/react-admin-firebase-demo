@@ -157,6 +157,7 @@ function getTriggerList(currentNode, parentNode) {
         payload: {
           type: condition.conditionType === "TEXT" ? "TEXT" : "END",
           text: condition.fallback ? "fallback:" : condition.userReply,
+          asVariable: condition.asVariable,
         },
         scenarioId: "",
       };
@@ -807,6 +808,11 @@ function CloneButton(props) {
             if (fallback) {
               delete newA[`triggers_${oldId}_fallback`];
               rec.fallback = fallback;
+            }
+            const asVariable = newA[`triggers_${oldId}_asVariable`];
+            if (fallback) {
+              delete newA[`triggers_${oldId}_asVariable`];
+              rec.asVariable = asVariable;
             }
             return rec;
           });

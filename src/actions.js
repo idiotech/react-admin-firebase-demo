@@ -243,6 +243,19 @@ const InputForm = (props) => {
                                     }
                                   />
                                 }
+                                {
+                                  <BooleanInput
+                                    label="設為變數"
+                                    source={getSource("saveAsVariable")}
+                                  />
+                                }
+                                {scopedFormData.saveAsVariable && (
+                                  <TextInput
+                                    label="變數名"
+                                    source={getSource("asVariable")}
+                                    validate={[required()]}
+                                  />
+                                )}
                               </>
                             )}
                         </>
