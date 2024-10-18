@@ -335,7 +335,7 @@ function PublishButton(props) {
           }
         })
         .catch((e) => {
-          notify("發佈失敗；原因 =" + e, "error");
+          notify("發佈失敗；原因 = " + e, "error");
         })
         .finally(() => {
           setLoading(false);
@@ -343,7 +343,7 @@ function PublishButton(props) {
           dispatch(fetchEnd());
         });
     } catch (e) {
-      notify(e, "error");
+      notify("發佈失敗；原因 = " + e, "error");
       setLoading(false);
       setOpen(false);
       dispatch(fetchEnd());
@@ -686,6 +686,14 @@ function CloneButton(props) {
   Object.keys(mapStyles).forEach((a) => idMap.set(a, xid.next()));
   Object.keys(broadcasts).forEach((a) => idMap.set(a, xid.next()));
   Object.keys(variables).forEach((a) => idMap.set(a, xid.next()));
+  function updateValueFor(obj, field) {
+    const value = obj[field];
+    if (value) {
+      const newValue = idMap.get(value);
+      obj[field] = newValue ? newValue : null;
+    }
+  }
+  updateValueFor(createData, "pictureId");
   async function handleConfirm() {
     setOpen(false);
     setLoading(true);
@@ -710,13 +718,6 @@ function CloneButton(props) {
       ...createFields(locations, "locations"),
       ...createFields(variables, "variables"),
     ]);
-    function updateValueFor(obj, field) {
-      const value = obj[field];
-      if (value) {
-        const newValue = idMap.get(value);
-        obj[field] = newValue ? newValue : null;
-      }
-    }
     function updateValuesFor(a) {
       updateValueFor(a, "geofenceCenter");
       updateValueFor(a, "beacon");
