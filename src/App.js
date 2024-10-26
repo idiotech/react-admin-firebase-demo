@@ -89,7 +89,7 @@ function createAdminProvider() {
           const authUid2 = baseProvider.app.auth()?._delegate?.currentUser?.uid;
           const localUid = localStorage.getItem("uid");
           // console.log(
-          //   "uid",
+          //   'uid',
           //   authUid,
           //   authUid2,
           //   localUid,
@@ -109,7 +109,7 @@ function createAdminProvider() {
             return adminDataProvider.getList(resource, params);
           });
         } else if (resource === "categories") {
-          // params.sort = { field: "order", order: "ASC" };
+          // params.sort = { field: 'order', order: 'ASC' };
           return adminDataProvider.getList(resource, params);
         } else {
           return adminDataProvider.getList(resource, params);

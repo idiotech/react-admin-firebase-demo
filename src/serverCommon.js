@@ -96,10 +96,10 @@ export const useAllData = () => {
 };
 
 export const getActions = (currentNode, data, condition) => {
-  const { sounds, locations, images, mapStyles, variables } = data;
+  const { sounds, locations, images, mapStyles, variables, beacons } = data;
   const ret = [];
   // if (currentNode.hasSound && !sounds[currentNode.soundId]) {
-  //   console.log("bad sound:", currentNode.name);
+  //   console.log('bad sound:', currentNode.name);
   // }
   if (currentNode.hasSound && sounds[currentNode.soundId]) {
     const sound = sounds[currentNode.soundId];
@@ -109,6 +109,14 @@ export const getActions = (currentNode, data, condition) => {
     if (currentNode.soundCenterId && !locations[currentNode.soundCenterId]) {
       throw `聲音中心點不存在: ${currentNode.name}\n`;
     }
+    const fadeOutSeconds = currentNode.fadeOutSeconds;
+    const speechLength = currentNode.speechLength;
+    const mainVolume = currentNode.speechLength
+      ? {
+          speechLength,
+          fadeOutSeconds: fadeOutSeconds || 5,
+        }
+      : null;
     const soundAction = {
       id: currentNode.id + "-sound",
       receiver: "?u",
@@ -122,12 +130,21 @@ export const getActions = (currentNode, data, condition) => {
             center: currentNode.soundCenterId
               ? locations[currentNode.soundCenterId]
               : null,
-            fadeOutSeconds: currentNode.fadeOutSeconds,
-            speechLength: currentNode.speechLength,
+            fadeOutSeconds,
+            speechLength,
             radius: currentNode.range || 30,
-            minVolume: currentNode.minVolume,
+            minVolume:
+              currentNode.mode === "DYNAMIC_VOLUME"
+                ? currentNode.minVolume
+                : currentNode.beaconMinVolume,
+            minValue: currentNode.beaconMinValue,
+            maxValue: currentNode.beaconMaxValue,
+            beaconId: currentNode.beaconForSound
+              ? beacons[currentNode.beaconForSound].beaconId
+              : null,
           },
           mode: currentNode.soundType || "MAIN",
+          mainVolume,
         },
         condition: condition,
       },

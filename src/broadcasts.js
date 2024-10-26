@@ -62,7 +62,7 @@ const Title = ({ record }) => {
   return (
     <span>
       《{localStorage.getItem("scenarioName")}》廣播
-      {record && record.name ? `："${record.name}"` : ""}
+      {record && record.name ? `：'${record.name}'` : ""}
     </span>
   );
 };

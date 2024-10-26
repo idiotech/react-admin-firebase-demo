@@ -26,7 +26,7 @@ const Title = ({ record }) => {
   return (
     <span>
       《{localStorage.getItem("scenarioName")}》地圖樣式
-      {record && record.name ? `："${record.name}"` : ""}
+      {record && record.name ? `：'${record.name}'` : ""}
     </span>
   );
 };

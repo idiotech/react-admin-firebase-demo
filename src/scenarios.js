@@ -69,7 +69,7 @@ const ScenarioFilter = (props) => (
     <TextInput label="Search" source="name" alwaysOn />
   </Filter>
 );
-// const cdnRoot = "http://daqiaotou-storage.floraland.tw/ghostspeak_editor";
+// const cdnRoot = 'http://daqiaotou-storage.floraland.tw/ghostspeak_editor';
 
 function isCurrentScenario(props) {
   if (props && props.record) {
@@ -297,7 +297,9 @@ function PublishButton(props) {
       const pictureId = getRecordField(props, "pictureId");
       let imageUrl = null;
       if (pictureId) {
-        const result = await provider.getOne("images", { id: pictureId });
+        const result = await provider.getOne("images", {
+          id: pictureId,
+        });
         imageUrl = result.data?.image?.src;
       }
       const metadata = {
@@ -504,7 +506,10 @@ function GpxButton(props) {
         "id"
       )}`;
       const url = new URL(urlString);
-      const params = { name: getRecordField(props, "name"), overwrite: true };
+      const params = {
+        name: getRecordField(props, "name"),
+        overwrite: true,
+      };
       url.search = new URLSearchParams(params).toString();
 
       const points = payload
@@ -516,7 +521,12 @@ function GpxButton(props) {
         .filter((c) => c)
         .map((c) => c.location)
         .map(
-          (l) => new Point(l.lat, l.lon, { ele: 10, time: new Date(), hr: 121 })
+          (l) =>
+            new Point(l.lat, l.lon, {
+              ele: 10,
+              time: new Date(),
+              hr: 121,
+            })
         );
 
       const gpxData = new BaseBuilder();
@@ -916,7 +926,10 @@ const InputForm = (props) => {
                   label="圖片"
                   source="pictureId"
                   reference="images"
-                  sort={{ field: "lastupdate", order: "DESC" }}
+                  sort={{
+                    field: "lastupdate",
+                    order: "DESC",
+                  }}
                   perPage={1000}
                 />
                 <RichTextInput label="詳細說明" source="details" />

@@ -72,7 +72,7 @@ const Title = ({ record }) => {
   return (
     <span>
       《{localStorage.getItem("scenarioName")}》動作
-      {record && record.name ? `："${record.name}"` : ""}
+      {record && record.name ? `：'${record.name}'` : ""}
     </span>
   );
 };
@@ -126,7 +126,7 @@ const DeleteButton = (props) => {
 
 const ActionSaveButton = (props) => {
   if (props.record && props.record.id) {
-    const redirect = `/actions/create/?source={"prevs": [{"prev" : "${props.record.id}", "conditionType": "ALWAYS" }]}`;
+    const redirect = `/actions/create/?source={'prevs': [{'prev' : '${props.record.id}', 'conditionType': 'ALWAYS' }]}`;
     return <SaveButton {...props} redirect={redirect} />;
   } else {
     return <SaveButton {...props} />;
@@ -197,7 +197,10 @@ const InputForm = (props) => {
                       label="接續"
                       source="prev"
                       reference="actions"
-                      sort={{ field: "lastupdate", order: "DESC" }}
+                      sort={{
+                        field: "lastupdate",
+                        order: "DESC",
+                      }}
                       perPage={1000}
                       className={classes.longInput}
                     >
@@ -273,7 +276,10 @@ const InputForm = (props) => {
                     label="互斥於"
                     source="exclusiveWith"
                     reference="actions"
-                    sort={{ field: "lastupdate", order: "DESC" }}
+                    sort={{
+                      field: "lastupdate",
+                      order: "DESC",
+                    }}
                     perPage={1000}
                   >
                     <AutocompleteArrayInput optionText="name" />
@@ -284,7 +290,10 @@ const InputForm = (props) => {
                         label="變數"
                         source="variable"
                         reference="variables"
-                        sort={{ field: "lastupdate", order: "DESC" }}
+                        sort={{
+                          field: "lastupdate",
+                          order: "DESC",
+                        }}
                         perPage={1000}
                       >
                         <SelectInput optionText="name" />
@@ -401,7 +410,10 @@ function NextButton(props) {
         state: {
           record: {
             prevs: [
-              { prev: getRecordField(props, "id"), conditionType: "ALWAYS" },
+              {
+                prev: getRecordField(props, "id"),
+                conditionType: "ALWAYS",
+              },
             ],
           },
         },

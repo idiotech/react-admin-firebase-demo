@@ -57,6 +57,7 @@ const dismissalDestinations = [
 const soundModes = [
   { id: "STATIC_VOLUME", name: "固定音量" },
   { id: "DYNAMIC_VOLUME", name: "越遠越小聲" },
+  { id: "BEACON_VOLUME", name: "依Beacon調整音量" },
 ];
 const soundTypes = [
   { id: "MAIN", name: "主劇情" },
@@ -453,25 +454,6 @@ const soundInput = (formData, enableDelay) => (
       </>
     )}
     <br />
-    {formData.mode === "STATIC_VOLUME" &&
-      formData.soundType === "MAIN" &&
-      formData.advancedSound && (
-        <div>
-          <NumberInput
-            label="正文秒數"
-            source="speechLength"
-            validate={[number()]}
-          />
-          播放到超過正文秒數之後，如果與下一個音檔重疊，則開始淡出。不淡出則不必設。
-          <br />
-          <NumberInput
-            label="淡出秒數"
-            source="fadeOutSeconds"
-            validate={[number()]}
-          />
-          在幾秒內淡出到消失。設為0代表立即停止。
-        </div>
-      )}
     {formData.mode === "DYNAMIC_VOLUME" && formData.advancedSound && (
       <>
         <span>中心點音量值為1(檔案原始音量)，到圓周的音量為「最小音量」</span>
@@ -502,6 +484,54 @@ const soundInput = (formData, enableDelay) => (
           公尺
         </div>
       </>
+    )}
+    {formData.mode === "BEACON_VOLUME" && formData.advancedSound && (
+      <>
+        <div>
+          <ReferenceInput
+            label="Beacon"
+            source="beaconForSound"
+            reference="beacons"
+            validate={[required()]}
+          >
+            <AutocompleteInput optionText="name" />
+          </ReferenceInput>
+          <br />
+          <NumberInput
+            label="最小音量"
+            source="beaconMinVolume"
+            validate={[required(), number()]}
+          />
+          <NumberInput
+            label="最小音量訊號值"
+            source="beaconMinValue"
+            validate={[required(), number()]}
+          />
+          <br />
+          <NumberInput
+            label="最大音量訊號值"
+            source="beaconMaxValue"
+            validate={[required(), number()]}
+          />
+        </div>
+      </>
+    )}
+    {formData.soundType === "MAIN" && formData.advancedSound && (
+      <div>
+        <NumberInput
+          label="正文秒數"
+          source="speechLength"
+          validate={[number()]}
+        />
+        播放到超過正文秒數之後，如果與下一個音檔重疊，則開始淡出。不淡出則不必設。
+        <br />
+        <NumberInput
+          label="淡出秒數"
+          source="fadeOutSeconds"
+          validate={[number()]}
+        />
+        在幾秒內淡出到消失。設為0代表立即停止。
+      </div>
     )}
     {enableDelay && addDelay(formData, "sound")}
   </>
@@ -579,7 +609,10 @@ const popupInput = (formData, enableDelay) => {
                       label="圖檔"
                       source="pictureId"
                       reference="images"
-                      sort={{ field: "lastupdate", order: "DESC" }}
+                      sort={{
+                        field: "lastupdate",
+                        order: "DESC",
+                      }}
                       perPage={1000}
                     />
                   </SimpleFormIterator>
@@ -1089,7 +1122,13 @@ const popupInput = (formData, enableDelay) => {
   return (
     <table border="0">
       <tr>
-        <td style={{ verticalAlign: "top", width: "1%", whiteSpace: "nowrap" }}>
+        <td
+          style={{
+            verticalAlign: "top",
+            width: "1%",
+            whiteSpace: "nowrap",
+          }}
+        >
           {contentPane}
         </td>
         <td style={{ verticalAlign: "top", horizontalAlign: "left" }}>

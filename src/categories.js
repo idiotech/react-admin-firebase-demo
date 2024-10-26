@@ -49,7 +49,7 @@ const Title = ({ record }) => {
   return (
     <span>
       分類
-      {record && record.name ? `："${record.name}"` : ""}
+      {record && record.name ? `：'${record.name}'` : ""}
     </span>
   );
 };

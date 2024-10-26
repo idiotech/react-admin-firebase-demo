@@ -28,7 +28,7 @@ const Title = ({ record }) => {
   return (
     <span>
       《{localStorage.getItem("scenarioName")}》聲音
-      {record && record.name ? `："${record.name}"` : ""}
+      {record && record.name ? `：'${record.name}'` : ""}
     </span>
   );
 };
