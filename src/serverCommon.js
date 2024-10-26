@@ -142,9 +142,9 @@ export const getActions = (currentNode, data, condition) => {
             beaconId: currentNode.beaconForSound
               ? beacons[currentNode.beaconForSound].beaconId
               : null,
+            mainVolume,
           },
           mode: currentNode.soundType || "MAIN",
-          mainVolume,
         },
         condition: condition,
       },
