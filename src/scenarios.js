@@ -337,6 +337,7 @@ function PublishButton(props) {
           }
         })
         .catch((e) => {
+          console.error("failed to publish", e);
           notify("發佈失敗；原因 = " + e, "error");
         })
         .finally(() => {
@@ -345,6 +346,7 @@ function PublishButton(props) {
           dispatch(fetchEnd());
         });
     } catch (e) {
+      console.error("failed to publish", e);
       notify("發佈失敗；原因 = " + e, "error");
       setLoading(false);
       setOpen(false);
@@ -556,6 +558,7 @@ function GpxButton(props) {
       dispatch(fetchEnd());
       link.click();
     } catch (e) {
+      console.e("error publishing", e);
       notify(e, "error");
       setLoading(false);
       setOpen(false);
@@ -674,18 +677,6 @@ function CloneButton(props) {
     broadcasts,
     variables,
   } = useAllData();
-  const createData = JSON.parse(JSON.stringify(props.record));
-  const cloneId = xid.next();
-  createData.id = cloneId;
-  createData.name = getRecordField(props, "name") + "-" + cloneId;
-  createData.cloned = true;
-  const [create] = useMutation({
-    type: "create",
-    resource: "scenarios",
-    payload: { data: createData },
-  });
-  const baseProvider = getProvider(createData.id);
-  // TODO copy UID
   const refresh = useRefresh();
   const idMap = new Map();
   Object.keys(actions).forEach((a) => idMap.set(a, xid.next()));
@@ -703,7 +694,23 @@ function CloneButton(props) {
       obj[field] = newValue ? newValue : null;
     }
   }
+  const createData = JSON.parse(JSON.stringify(props.record));
+  const cloneId = xid.next();
+  createData.id = cloneId;
+  createData.name = getRecordField(props, "name") + "-" + cloneId;
+  createData.cloned = true;
   updateValueFor(createData, "pictureId");
+  createData.passcode = null;
+  createData.categories = null;
+  createData.featured = false;
+  createData.public = false;
+  const [create] = useMutation({
+    type: "create",
+    resource: "scenarios",
+    payload: { data: createData },
+  });
+  const baseProvider = getProvider(createData.id);
+  // TODO copy UID
   async function handleConfirm() {
     setOpen(false);
     setLoading(true);
@@ -744,6 +751,7 @@ function CloneButton(props) {
       updateValueFor(a, "variable");
       updateValueFor(a, "guideImage");
       updateValueFor(a, "silencedSound");
+      updateValueFor(a, "beaconForSound");
       if (a.variableUpdates) {
         a.variableUpdates.forEach((u) => {
           updateValuesFor(u, "name");
