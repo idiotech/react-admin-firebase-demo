@@ -14,6 +14,7 @@ import { SoundList, SoundCreate, SoundEdit } from "./sounds";
 import { MapStyleList, MapStyleCreate, MapStyleEdit } from "./mapStyles";
 import { BroadcastList, BroadcastCreate, BroadcastEdit } from "./broadcasts";
 import { VariableList, VariableCreate, VariableEdit } from "./variables";
+import { PeopleList, PeopleCreate, PeopleEdit } from "./people";
 import { CategoryList, CategoryCreate, CategoryEdit } from "./categories";
 import { Admin, Resource, AppBar, Layout } from "react-admin";
 import { useState, useEffect } from "react";
@@ -186,6 +187,7 @@ function createDataProvider(scenario) {
       "mapStyles",
       "broadcasts",
       "variables",
+      "people",
     ],
     name: scenario,
   };
@@ -353,6 +355,13 @@ function Main() {
         list={VariableList}
         create={VariableCreate}
         edit={VariableEdit}
+      />
+      <Resource
+        name="people"
+        options={{ label: "朋友" }}
+        list={PeopleList}
+        create={PeopleCreate}
+        edit={PeopleEdit}
       />
       <Resource
         name="actions"

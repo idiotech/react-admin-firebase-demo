@@ -337,6 +337,19 @@ const InputForm = (props) => {
               <hr />
               {formData.advancedActionType && (
                 <>
+                  <ReferenceInput
+                    label="發送者"
+                    source="sender"
+                    reference="people"
+                    sort={{
+                      field: "lastupdate",
+                      order: "DESC",
+                    }}
+                    allowEmpty={true}
+                    perPage={1000}
+                  >
+                    <SelectInput optionText="name" />
+                  </ReferenceInput>
                   <BooleanInput label="停止聲音" source="hasSilence" />
                   {formData.hasSilence && silenceInput(formData, enableDelay)}
                   <hr />

@@ -29,6 +29,7 @@ import {
   AutocompleteInput,
   required,
   FormDataConsumer,
+  useGetList,
 } from "react-admin";
 import { createStore } from "redux";
 import { useState, useEffect } from "react";
@@ -195,6 +196,31 @@ function PublishButton(props) {
   const data = useAllData();
   const { actions, variables } = data;
   const [open, setOpen] = useState(false);
+  const peopleResult = useGetList(
+    "people",
+    { page: 1, perPage: 500 },
+    { field: "order", order: "ASC" }
+  );
+  const people = Object.values(peopleResult.data);
+  function getFriends(node, condition) {
+    return people.map((f) => {
+      return {
+        id: xid.next() + "-friend",
+        receiver: "?u",
+        sender: "ghost",
+        content: {
+          task: {
+            type: "FRIEND",
+            id: f.id,
+            icon: f.icon,
+            name: f.name,
+          },
+          condition: condition,
+        },
+        description: node.name,
+      };
+    });
+  }
 
   async function handleConfirm() {
     setOpen(false);
@@ -216,6 +242,9 @@ function PublishButton(props) {
       const condition = getCondition(tree.node, data);
       const serverActions = getActions(tree.node, data, condition);
       const isFirst = tree.node.firstAction;
+      if (isFirst) {
+        getFriends(tree.node, condition).forEach((f) => serverActions.push(f));
+      }
       return {
         name: isFirst ? "initial" : tree.node.id,
         children: tree.node.children || [],
@@ -286,7 +315,6 @@ function PublishButton(props) {
       const urlString = `${apiUrl}/v1/scenario/graphscript/${scenarioId}`;
       const url = new URL(urlString);
       const displayName = getRecordField(props, "displayName") || null;
-      console.log("omg props", props);
       const categories =
         getRecordField(props, "categories")?.map((c) => c.category) || [];
       const params = {
@@ -676,6 +704,7 @@ function CloneButton(props) {
     mapStyles,
     broadcasts,
     variables,
+    people,
   } = useAllData();
   const refresh = useRefresh();
   const idMap = new Map();
@@ -687,6 +716,7 @@ function CloneButton(props) {
   Object.keys(mapStyles).forEach((a) => idMap.set(a, xid.next()));
   Object.keys(broadcasts).forEach((a) => idMap.set(a, xid.next()));
   Object.keys(variables).forEach((a) => idMap.set(a, xid.next()));
+  Object.keys(people).forEach((a) => idMap.set(a, xid.next()));
   function updateValueFor(obj, field) {
     const value = obj[field];
     if (value) {
@@ -734,6 +764,7 @@ function CloneButton(props) {
       ...createFields(mapStyles, "mapStyles"),
       ...createFields(locations, "locations"),
       ...createFields(variables, "variables"),
+      ...createFields(people, "people"),
     ]);
     function updateValuesFor(a) {
       updateValueFor(a, "geofenceCenter");
@@ -752,6 +783,7 @@ function CloneButton(props) {
       updateValueFor(a, "guideImage");
       updateValueFor(a, "silencedSound");
       updateValueFor(a, "beaconForSound");
+      updateValueFor(a, "sender");
       if (a.variableUpdates) {
         a.variableUpdates.forEach((u) => {
           updateValuesFor(u, "name");

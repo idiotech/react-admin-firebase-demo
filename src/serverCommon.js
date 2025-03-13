@@ -83,6 +83,12 @@ export const useAllData = () => {
     { field: "published_at", order: "DESC" }
   );
   const variables = variableResult.data;
+  const peopleResult = useGetList(
+    "people",
+    { page: 1, perPage: 500 },
+    { field: "published_at", order: "DESC" }
+  );
+  const people = peopleResult.data;
   return {
     actions,
     locations,
@@ -92,6 +98,7 @@ export const useAllData = () => {
     mapStyles,
     broadcasts,
     variables,
+    people,
   };
 };
 
@@ -101,6 +108,7 @@ export const getActions = (currentNode, data, condition) => {
   // if (currentNode.hasSound && !sounds[currentNode.soundId]) {
   //   console.log('bad sound:', currentNode.name);
   // }
+  const sender = currentNode.sender || "ghost";
   if (currentNode.hasSound && sounds[currentNode.soundId]) {
     const sound = sounds[currentNode.soundId];
     if (!sound) {
@@ -120,7 +128,7 @@ export const getActions = (currentNode, data, condition) => {
     const soundAction = {
       id: currentNode.id + "-sound",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "SOUND",
@@ -167,7 +175,7 @@ export const getActions = (currentNode, data, condition) => {
     const popupAction = {
       id: currentNode.id + "-popup",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "POPUP",
@@ -199,7 +207,7 @@ export const getActions = (currentNode, data, condition) => {
     const incomingCallAction = {
       id: currentNode.id + "-incoming-call",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "INCOMING_CALL",
@@ -221,7 +229,7 @@ export const getActions = (currentNode, data, condition) => {
     const hangUpAction = {
       id: currentNode.id + "-hang-up",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "INCOMING_CALL",
@@ -247,7 +255,7 @@ export const getActions = (currentNode, data, condition) => {
     const markerAction = {
       id: currentNode.id + "-marker",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "MARKER",
@@ -271,7 +279,7 @@ export const getActions = (currentNode, data, condition) => {
     const markerRemovalAction = {
       id: currentNode.id + "-marker-removal",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "MARKER_REMOVAL",
@@ -289,7 +297,7 @@ export const getActions = (currentNode, data, condition) => {
     const popupDismissalAction = {
       id: currentNode.id + "-popup-dismissal",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "POPUP_DISMISSAL",
@@ -308,7 +316,7 @@ export const getActions = (currentNode, data, condition) => {
     const mapStyleAction = {
       id: currentNode.id + "-map-style",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "MAP_STYLE",
@@ -337,7 +345,7 @@ export const getActions = (currentNode, data, condition) => {
     const introImageAction = {
       id: currentNode.id + "-intro-image",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "INTRO_IMAGE",
@@ -363,7 +371,7 @@ export const getActions = (currentNode, data, condition) => {
     const buttonStyleAction = {
       id: currentNode.id + "-button-style",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "BUTTON_STYLE",
@@ -382,7 +390,7 @@ export const getActions = (currentNode, data, condition) => {
     const popupStyleAction = {
       id: currentNode.id + "-popup-style",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "POPUP_STYLE",
@@ -406,7 +414,7 @@ export const getActions = (currentNode, data, condition) => {
     const variableAction = {
       id: currentNode.id + "-variable-update" + "",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "VARIABLE_UPDATES",
@@ -431,7 +439,7 @@ export const getActions = (currentNode, data, condition) => {
     const variableAction = {
       id: currentNode.id + "-variable-default" + "",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "VARIABLE_UPDATES",
@@ -447,7 +455,7 @@ export const getActions = (currentNode, data, condition) => {
     const endgameAction = {
       id: currentNode.id + "-endgame",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "END_GAME",
@@ -466,7 +474,7 @@ export const getActions = (currentNode, data, condition) => {
     const guideImageAction = {
       id: currentNode.id + "-guide-image",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "GUIDE_IMAGE",
@@ -484,7 +492,7 @@ export const getActions = (currentNode, data, condition) => {
     const guideImageRemovalAction = {
       id: currentNode.id + "-guide-image-removal",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "GUIDE_IMAGE_REMOVAL",
@@ -502,7 +510,7 @@ export const getActions = (currentNode, data, condition) => {
     const silenceAction = {
       id: currentNode.id + "-silence",
       receiver: "?u",
-      sender: "ghost",
+      sender: sender,
       content: {
         task: {
           type: "SILENCE",
