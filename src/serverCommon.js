@@ -339,6 +339,9 @@ export const getActions = (currentNode, data, condition) => {
     const introBackground = images[currentNode.introBackground];
     // if (!introBackground) throw `背景不存在: ${currentNode.name}`;
     const introLogo = images[currentNode.introLogo];
+    const introLogoUrl = currentNode.noIntroLogo
+      ? "https://storage.googleapis.com/daqiaotou/images/Empty.png"
+      : introLogo?.image.src;
     // if (!introLogo) throw `Logo不存在: ${currentNode.name}`;
     const mapLogo = images[currentNode.mapLogo];
     // if (!mapLogo) throw `地圖Logo不存在: ${currentNode.name}`;
@@ -352,7 +355,7 @@ export const getActions = (currentNode, data, condition) => {
           backgroundUrl: currentNode.introBackground
             ? introBackground.image.src
             : null,
-          logoUrl: currentNode.introLogo ? introLogo.image.src : null,
+          logoUrl: introLogoUrl,
           textColor: currentNode.introTextColor || null,
           mapLogoUrl: currentNode.mapLogo ? mapLogo.image.src : null,
           logoMarginTop: currentNode.introLogoMarginTop,

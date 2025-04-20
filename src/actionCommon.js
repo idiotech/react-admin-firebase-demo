@@ -1290,16 +1290,49 @@ const introImageInput = (formData, enableDelay) => (
       sort={{ field: "lastupdate", order: "DESC" }}
       perPage={1000}
     />
-    首頁logo建議比例: 寬300 / 高280
-    <ImageReferenceInput
-      label="首頁logo"
-      source="introLogo"
-      reference="images"
-      sort={{ field: "lastupdate", order: "DESC" }}
-      perPage={1000}
+    <BooleanInput
+      label="不使用首頁Logo"
+      source="noIntroLogo"
+      initialValue={true}
     />
-    地圖logo建議比例: 寬62 / 高100
+    {!formData.noIntroLogo && (
+      <>
+        首頁logo建議比例: 寬300 / 高280
+        <ImageReferenceInput
+          label="首頁logo"
+          source="introLogo"
+          reference="images"
+          sort={{ field: "lastupdate", order: "DESC" }}
+          perPage={1000}
+        />
+        <BooleanInput
+          label="向下相容模式(不要用)"
+          source="advancedLogo"
+          initialValue={false}
+        />
+        {formData.advancedLogo && (
+          <>
+            <NumberInput
+              label="Logo距頂"
+              source="introLogoMarginTop"
+              validate={[number()]}
+            />
+            <NumberInput
+              label="Logo高度"
+              source="introLogoHeight"
+              validate={[number()]}
+            />
+            <NumberInput
+              label="Logo寬度"
+              source="introLogoWidth"
+              validate={[number()]}
+            />
+          </>
+        )}
+      </>
+    )}
     <ColorInput label="首頁文字顏色" source="introTextColor" />
+    地圖logo建議比例: 寬62 / 高100
     <ImageReferenceInput
       label="地圖頁logo"
       source="mapLogo"
@@ -1307,30 +1340,6 @@ const introImageInput = (formData, enableDelay) => (
       sort={{ field: "lastupdate", order: "DESC" }}
       perPage={1000}
     />
-    <BooleanInput
-      label="向下相容模式"
-      source="advancedLogo"
-      initialValue={false}
-    />
-    {formData.advancedLogo && (
-      <>
-        <NumberInput
-          label="Logo距頂"
-          source="introLogoMarginTop"
-          validate={[number()]}
-        />
-        <NumberInput
-          label="Logo高度"
-          source="introLogoHeight"
-          validate={[number()]}
-        />
-        <NumberInput
-          label="Logo寬度"
-          source="introLogoWidth"
-          validate={[number()]}
-        />
-      </>
-    )}
     <br />
     {modalButton(
       "https://storage.googleapis.com/daqiaotou/editor/image/intro-style.jpg",

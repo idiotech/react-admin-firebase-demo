@@ -218,6 +218,10 @@ function PublishButton(props) {
           condition: condition,
         },
         description: node.name,
+        session: {
+          scenario: "",
+          chapter: "",
+        },
       };
     });
   }
