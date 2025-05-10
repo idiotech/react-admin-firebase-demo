@@ -38,7 +38,6 @@ import { apiUrl } from "./serverCommon";
 import polyglotI18nProvider from "ra-i18n-polyglot"; // install the package
 import englishMessages from "ra-language-english"; // install the package
 import { UrbanBaker } from "./urbanbaker";
-import Menu from "./menu";
 
 const adminOptions = {
   logging: true,
@@ -254,10 +253,7 @@ export const MyAppBar = (props) => {
   );
 };
 
-// export const MyAppBar = () => <AppBar></AppBar>;
-export const MyLayout = ({ children }) => (
-  <Layout appBar={MyAppBar}>{children}</Layout>
-);
+const MyLayout = (props) => <Layout {...props} appBar={MyAppBar} />;
 
 const routes = [
   <Route key="urbanbaker" path="/urbanbaker" component={UrbanBaker} />,
@@ -294,7 +290,6 @@ function Main() {
       customReducers={customReducers}
       layout={MyLayout}
       customRoutes={routes}
-      menu={Menu}
     >
       <Resource
         name="scenarios"
