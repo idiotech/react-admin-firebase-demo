@@ -153,7 +153,7 @@ function getTriggerList(currentNode, parentNode) {
       return {
         id: "",
         actionId: actionId,
-        receiver: "ghost",
+        receiver: parentNode.sender,
         sender: "?u",
         payload: {
           type: condition.conditionType === "TEXT" ? "TEXT" : "END",
