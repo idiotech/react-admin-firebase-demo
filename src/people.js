@@ -9,7 +9,6 @@ import {
   TextField,
   EditButton,
   TextInput,
-  required,
 } from "react-admin";
 import { getDeleteButton } from "./deleteResource";
 import ImageReferenceInput from "./ImageReferenceInput";
@@ -69,7 +68,6 @@ const InputForm = (props) => {
           label="圖示"
           source="userPortrait"
           reference="images"
-          validate={[required()]}
           sort={{ field: "lastupdate", order: "DESC" }}
           perPage={1000}
           allowEmpty

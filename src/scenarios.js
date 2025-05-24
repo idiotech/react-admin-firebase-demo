@@ -153,7 +153,7 @@ function getTriggerList(currentNode, parentNode) {
       return {
         id: "",
         actionId: actionId,
-        receiver: parentNode.sender,
+        receiver: parentNode.sender || "ghost",
         sender: "?u",
         payload: {
           type: condition.conditionType === "TEXT" ? "TEXT" : "END",
@@ -194,7 +194,7 @@ function PublishButton(props) {
   const handleClick = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
   const data = useAllData();
-  const { actions, variables } = data;
+  const { actions, variables, images } = data;
   const [open, setOpen] = useState(false);
   const peopleResult = useGetList(
     "people",
@@ -204,6 +204,10 @@ function PublishButton(props) {
   const people = Object.values(peopleResult.data);
   function getFriends(node, condition) {
     return people.map((f) => {
+      let portrait = null;
+      if (f.userPortrait) {
+        portrait = images[f.userPortrait]?.image?.src;
+      }
       return {
         id: xid.next() + "-friend",
         receiver: "?u",
@@ -212,7 +216,7 @@ function PublishButton(props) {
           task: {
             type: "FRIEND",
             id: f.id,
-            icon: f.icon,
+            icon: portrait,
             name: f.name,
           },
           condition: condition,
