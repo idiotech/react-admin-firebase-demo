@@ -9,6 +9,7 @@ import {
   TextField,
   EditButton,
   TextInput,
+  required,
 } from "react-admin";
 import { getDeleteButton } from "./deleteResource";
 import ImageReferenceInput from "./ImageReferenceInput";
@@ -60,9 +61,9 @@ const InputForm = (props) => {
   return (
     <SimpleForm {...props}>
       <>
-        <TextInput label="姓名" source="name" />
+        <TextInput label="姓名" source="name" validate={required()} />
         <br />
-        <TextInput label="代號" source="id" />
+        <TextInput label="代號" source="id" validate={required()} />
         <br />
         <ImageReferenceInput
           label="圖示"

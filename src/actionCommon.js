@@ -89,6 +89,16 @@ const operationTypes = [
   { id: "=", name: "=" },
 ];
 
+const validateInteger = (value) => {
+  if (value === null || value === undefined || value === "") {
+    return undefined; // Let 'required' validator handle empty values if needed
+  }
+  if (!Number.isInteger(Number(value))) {
+    return "必須是整數"; // Or a custom message like 'Must be an integer'
+  }
+  return undefined; // No error
+};
+
 const getConditionIcon = (record) => {
   const conds = record.prevs
     ? new Set(record.prevs.flatMap((p) => p.conditionType))
@@ -149,9 +159,10 @@ const locationCondition = (getSource) => (
     </LocationReferenceInput>
     <br />
     <NumberInput
-      label="範圍"
+      label="範圍 (整數)"
       source={getSource("geofenceRadius")}
-      validate={[required(), number()]}
+      validate={[required(), number(), validateInteger]}
+      step={1}
     />
     公尺
   </>
@@ -174,9 +185,9 @@ const beaconCondition = (getSource) => (
     />
     <br />
     <NumberInput
-      label="訊號值"
+      label="訊號值 (整數)"
       source={getSource("beaconThreshold")}
-      validate={[required(), number()]}
+      validate={[required(), number(), validateInteger]}
     />
   </>
 );
@@ -468,18 +479,18 @@ const soundInput = (formData, enableDelay) => (
             <AutocompleteInput optionText="name" />
           </LocationReferenceInput>
           <NumberInput
-            label="最小音量"
+            label="最小音量 (整數)"
             source="minVolume"
             initialValue={0}
-            validate={[required(), number()]}
+            validate={[required(), number(), validateInteger]}
           />{" "}
           0-1之間
           <br />
           <NumberInput
-            label="半徑"
+            label="半徑 (整數)"
             source="range"
             initialValue={30}
-            validate={[required(), number()]}
+            validate={[required(), number(), validateInteger]}
           />
           公尺
         </div>
@@ -503,15 +514,15 @@ const soundInput = (formData, enableDelay) => (
             validate={[required(), number()]}
           />
           <NumberInput
-            label="最小音量訊號值"
+            label="最小音量訊號值 (整數)"
             source="beaconMinValue"
-            validate={[required(), number()]}
+            validate={[required(), number(), validateInteger]}
           />
           <br />
           <NumberInput
-            label="最大音量訊號值"
+            label="最大音量訊號值 (整數)"
             source="beaconMaxValue"
-            validate={[required(), number()]}
+            validate={[required(), number(), validateInteger]}
           />
         </div>
       </>
@@ -519,16 +530,16 @@ const soundInput = (formData, enableDelay) => (
     {formData.soundType === "MAIN" && formData.advancedSound && (
       <div>
         <NumberInput
-          label="正文秒數"
+          label="正文秒數 (整數)"
           source="speechLength"
-          validate={[number()]}
+          validate={[number(), validateInteger]}
         />
         播放到超過正文秒數之後，如果與下一個音檔重疊，則開始淡出。不淡出則不必設。
         <br />
         <NumberInput
-          label="淡出秒數"
+          label="淡出秒數 (整數)"
           source="fadeOutSeconds"
-          validate={[number()]}
+          validate={[number(), validateInteger]}
         />
         在幾秒內淡出到消失。設為0代表立即停止。
       </div>
@@ -1387,7 +1398,11 @@ const variableUpdateInput = () => (
         choices={operationTypes}
         validate={[required()]}
       />
-      <NumberInput label="值" source="value" validate={[required()]} />
+      <NumberInput
+        label="值 (整數)"
+        source="value"
+        validate={[required(), validateInteger]}
+      />
     </SimpleFormIterator>
   </ArrayInput>
 );
@@ -1435,9 +1450,9 @@ const silenceInput = (formData, enableDelay) => (
       <SelectInput optionText="name" />
     </ReferenceInput>
     <NumberInput
-      label="淡出秒數"
+      label="淡出秒數 (整數)"
       source="forceFadeOutSeconds"
-      validate={[number()]}
+      validate={[number(), validateInteger]}
     />
     在幾秒內淡出到消失。設為0代表立即停止。
     <br />

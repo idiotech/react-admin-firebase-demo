@@ -14,6 +14,7 @@ import {
   DateTimeInput,
   FileField,
   FileInput,
+  required,
 } from "react-admin";
 import { getDeleteButton } from "./deleteResource";
 
@@ -64,7 +65,7 @@ export const SoundCreate = (props) => (
   <Create title={<Title />} {...props}>
     <SimpleForm>
       <TextInput label="名稱" source="name" />
-      <FileInput label="音檔" source="sound">
+      <FileInput label="音檔" source="sound" validate={required()}>
         <FileField source="src" title="name" />
       </FileInput>
     </SimpleForm>
@@ -76,7 +77,7 @@ export const SoundEdit = (props) => (
     <SimpleForm>
       <TextInput disabled source="id" />
       <TextInput label="名稱" source="name" />
-      <FileInput label="音檔" source="sound">
+      <FileInput label="音檔" source="sound" validate={required()}>
         <FileField source="src" title="name" />
       </FileInput>
       <DateTimeInput label="建立時間" disabled source="createdate" />

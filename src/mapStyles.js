@@ -12,6 +12,7 @@ import {
   DateTimeInput,
   FileField,
   FileInput,
+  required,
 } from "react-admin";
 import { getDeleteButton } from "./deleteResource";
 
@@ -62,7 +63,7 @@ export const MapStyleCreate = (props) => (
   <Create title={<Title />} {...props}>
     <SimpleForm>
       <TextInput label="名稱" source="name" />
-      <FileInput label="地圖樣式" source="mapStyle">
+      <FileInput label="地圖樣式" source="mapStyle" validate={required()}>
         <FileField source="src" title="name" />
       </FileInput>
     </SimpleForm>
@@ -74,7 +75,7 @@ export const MapStyleEdit = (props) => (
     <SimpleForm>
       <TextInput disabled source="id" />
       <TextInput label="名稱" source="name" />
-      <FileInput label="地圖樣式" source="mapStyle">
+      <FileInput label="地圖樣式" source="mapStyle" validate={required()}>
         <FileField source="src" title="name" />
       </FileInput>
       <DateTimeInput label="建立時間" disabled source="createdate" />

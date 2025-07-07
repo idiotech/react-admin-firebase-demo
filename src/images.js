@@ -13,6 +13,7 @@ import {
   EditButton,
   DateTimeInput,
   ImageInput,
+  required,
 } from "react-admin";
 
 import { MyImageField } from "./MyImageField";
@@ -67,7 +68,7 @@ export const ImageCreate = (props) => (
   <Create title={<Title />} {...props}>
     <SimpleForm>
       <TextInput label="名稱" source="name" />
-      <ImageInput label="圖片" source="image">
+      <ImageInput label="圖片" source="image" validate={required()}>
         <MyImageField source="src" title="name" />
       </ImageInput>
       <>(圖釘建議大小： 150 x 150)</>
@@ -80,7 +81,7 @@ export const ImageEdit = (props) => (
     <SimpleForm>
       <TextInput disabled source="id" />
       <TextInput label="名稱" source="name" />
-      <ImageInput label="圖片" source="image">
+      <ImageInput label="圖片" source="image" validate={required()}>
         <MyImageField source="src" title="name" />
       </ImageInput>
       <>(圖釘建議大小： 150 x 150)</>

@@ -12,6 +12,7 @@ import {
   TextInput,
   EditButton,
   DateTimeInput,
+  required,
 } from "react-admin";
 import { getDeleteButton } from "./deleteResource";
 import { DummyList } from "./dummy";
@@ -56,8 +57,8 @@ export const BeaconList = (props) => {
 export const BeaconCreate = (props) => (
   <Create title={<Title />} {...props}>
     <SimpleForm>
-      <TextInput label="名稱" source="name" />
-      <TextInput label="Beacon ID" source="beaconId" />
+      <TextInput label="名稱" source="name" validate={required()} />
+      <TextInput label="Beacon ID" source="beaconId" validate={required()} />
       <TextInput label="說明" source="description" />
     </SimpleForm>
   </Create>
@@ -69,8 +70,8 @@ export const BeaconEdit = (props) => (
       <TextInput disabled source="id" />
       <DateTimeInput label="建立時間" disabled source="createdate" />
       <DateTimeInput label="修改時間" disabled source="lastupdate" />
-      <TextInput label="名稱" source="name" />
-      <TextInput label="Beacon ID" source="beaconId" />
+      <TextInput label="名稱" source="name" validate={required()} />
+      <TextInput label="Beacon ID" source="beaconId" validate={required()} />
       <TextInput label="說明" source="description" />
     </SimpleForm>
   </Edit>
