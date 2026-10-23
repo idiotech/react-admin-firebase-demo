@@ -1,11 +1,15 @@
 // LoginPage.js
 import React from "react";
 import { Login, LoginForm } from "react-admin";
-import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
+import StyledFirebaseAuthModule from "react-firebaseui/StyledFirebaseAuth";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { firebaseConfig } from "./FIREBASE_CONFIG";
 import { clearCurrentScenario } from "./currentScenario";
+
+// a webpack-built CommonJS module: Vite hands over its exports object, the component in .default
+const StyledFirebaseAuth =
+  StyledFirebaseAuthModule.default ?? StyledFirebaseAuthModule;
 
 // firebaseui needs the compat API; this wraps the app react-admin-firebase created
 firebase.initializeApp(firebaseConfig);
