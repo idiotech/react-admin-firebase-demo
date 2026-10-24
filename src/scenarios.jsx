@@ -41,9 +41,10 @@ import { RichTextInput } from "ra-input-rich-text";
 import { getRecordField, withoutDisplayFields } from "./utils";
 
 import { useAllData, getActions, apiUrl } from "./serverCommon";
-import { getPrevId, longInputSx } from "./actionCommon";
+import { getPrevId } from "./actionCommon";
 import { isSuperUser, getAuthUid } from "./App";
 import ImageReferenceInput from "./ImageReferenceInput";
+import { longInputSx } from "./inputWidth";
 import {
   scenarioResources,
   setCurrentScenario,
