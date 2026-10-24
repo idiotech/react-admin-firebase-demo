@@ -383,6 +383,7 @@ export const getActions = (currentNode, data, condition) => {
         task: {
           type: "POPUP_STYLE",
           alertTextColor: currentNode.alertTextColor,
+          panelColor: currentNode.panelColor,
         },
         condition: condition,
       },

@@ -1395,6 +1395,7 @@ const buttonStyleInput = (formData, enableDelay) => (
 const popupStyleInput = (formData, enableDelay) => (
   <>
     <ColorInput label="提示文字顏色" source="alertTextColor" />
+    <ColorInput label="面板顏色（含透明度，例如 #59202020）" source="panelColor" />
     {enableDelay && addDelay(formData, "popupStyle")}
   </>
 );
