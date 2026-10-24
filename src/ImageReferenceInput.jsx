@@ -13,7 +13,7 @@ const ImageQuickCreateButton = ({ source }) => (
     source={source}
     fields={["name", "image"]}
   >
-    <TextInput label="名稱" source="name" validate={required()} />
+    <TextInput label="名稱" source="name" validate={required()} fullWidth />
     <ImageInput label="圖片" source="image" validate={required()}>
       <ImageField source="src" title="name" />
     </ImageInput>

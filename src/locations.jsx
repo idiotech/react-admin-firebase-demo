@@ -14,6 +14,7 @@ import {
   DateTimeInput,
   useRecordContext,
 } from "react-admin";
+import { longInputSx } from "./inputWidth";
 
 import { getDeleteButton } from "./deleteResource";
 import { CoordinateInput, CoordinateField } from "./coordinates";
@@ -85,9 +86,9 @@ export const LocationShow = () => (
 export const LocationCreate = () => (
   <Create title={<Title />}>
     <SimpleForm>
-      <TextInput label="名稱" source="name" />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
       <CoordinateInput />
-      <TextInput label="說明" source="description" />
+      <TextInput label="說明" source="description" fullWidth />
     </SimpleForm>
   </Create>
 );
@@ -98,9 +99,9 @@ export const LocationEdit = () => (
       <TextInput readOnly source="id" />
       <DateTimeInput label="建立時間" readOnly source="createdate" />
       <DateTimeInput label="修改時間" readOnly source="lastupdate" />
-      <TextInput label="名稱" source="name" />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
       <CoordinateInput />
-      <TextInput label="說明" source="description" />
+      <TextInput label="說明" source="description" fullWidth />
     </SimpleForm>
   </Edit>
 );

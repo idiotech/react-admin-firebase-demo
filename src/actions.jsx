@@ -258,6 +258,7 @@ const InputForm = (props) => {
                 label="名稱"
                 source="name"
                 validate={[required()]}
+                sx={longInputSx}
               />{" "}
               <br />
               <h3>觸發順序</h3>
@@ -305,6 +306,7 @@ const InputForm = (props) => {
                                     multiline
                                     label="文字"
                                     source="userReply"
+                                    sx={longInputSx}
                                     validate={[required()]}
                                   />
                                 )}
@@ -352,7 +354,11 @@ const InputForm = (props) => {
                     }}
                     perPage={1000}
                   >
-                    <AutocompleteArrayInput label="互斥於" optionText="name" />
+                    <AutocompleteArrayInput
+                      label="互斥於"
+                      optionText="name"
+                      fullWidth
+                    />
                   </ReferenceArrayInput>
                   <ArrayInput label="附加條件" source="preconditions">
                     <SimpleFormIterator>
@@ -365,7 +371,11 @@ const InputForm = (props) => {
                         }}
                         perPage={1000}
                       >
-                        <SelectInput label="變數" optionText="name" />
+                        <SelectInput
+                          label="變數"
+                          optionText="name"
+                          sx={longInputSx}
+                        />
                       </ReferenceInput>
                       <SelectInput
                         label="比較"

@@ -4,7 +4,7 @@ import { Box, TextField } from "@mui/material";
 
 // Replaces react-admin-color-input, which has no react-admin v4/v5 release.
 // Stores the color as a hex string such as "#ffffff".
-export const ColorInput = ({ source, label }) => {
+export const ColorInput = ({ source, label, helperText }) => {
   const { id, field } = useInput({ source });
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
@@ -12,6 +12,7 @@ export const ColorInput = ({ source, label }) => {
         {...field}
         id={id}
         label={label}
+        helperText={helperText}
         size="small"
         value={field.value || ""}
       />

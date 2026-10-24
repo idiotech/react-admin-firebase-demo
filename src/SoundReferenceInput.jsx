@@ -12,7 +12,7 @@ const SoundQuickCreateButton = ({ source }) => (
     source={source}
     fields={["name", "sound"]}
   >
-    <TextInput label="名稱" source="name" validate={required()} />
+    <TextInput label="名稱" source="name" validate={required()} fullWidth />
     <FileInput label="音檔" source="sound" validate={required()}>
       <FileField source="src" title="name" />
     </FileInput>

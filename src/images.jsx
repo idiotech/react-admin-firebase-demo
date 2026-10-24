@@ -15,6 +15,7 @@ import {
   required,
   useRecordContext,
 } from "react-admin";
+import { longInputSx } from "./inputWidth";
 
 import { MyImageField } from "./MyImageField";
 import { DummyList } from "./dummy";
@@ -72,7 +73,7 @@ const ImageDelete = (props) => {
 export const ImageCreate = () => (
   <Create title={<Title />}>
     <SimpleForm>
-      <TextInput label="名稱" source="name" />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
       <ImageInput label="圖片" source="image" validate={required()}>
         <MyImageField source="src" title="name" />
       </ImageInput>
@@ -85,7 +86,7 @@ export const ImageEdit = () => (
   <Edit title={<Title />} mutationMode="pessimistic">
     <SimpleForm>
       <TextInput readOnly source="id" />
-      <TextInput label="名稱" source="name" />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
       <ImageInput label="圖片" source="image" validate={required()}>
         <MyImageField source="src" title="name" />
       </ImageInput>

@@ -16,6 +16,7 @@ import {
   required,
   useRecordContext,
 } from "react-admin";
+import { longInputSx } from "./inputWidth";
 import { getDeleteButton } from "./deleteResource";
 
 import { DummyList } from "./dummy";
@@ -66,7 +67,7 @@ export const SoundList = () => {
 export const SoundCreate = () => (
   <Create title={<Title />}>
     <SimpleForm>
-      <TextInput label="名稱" source="name" />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
       <FileInput label="音檔" source="sound" validate={required()}>
         <FileField source="src" title="name" />
       </FileInput>
@@ -78,7 +79,7 @@ export const SoundEdit = () => (
   <Edit title={<Title />} mutationMode="pessimistic">
     <SimpleForm>
       <TextInput readOnly source="id" />
-      <TextInput label="名稱" source="name" />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
       <FileInput label="音檔" source="sound" validate={required()}>
         <FileField source="src" title="name" />
       </FileInput>
