@@ -14,6 +14,7 @@ import {
   required,
   useRecordContext,
 } from "react-admin";
+import { longInputSx } from "./inputWidth";
 import { getDeleteButton } from "./deleteResource";
 
 import { DummyList } from "./dummy";
@@ -64,7 +65,7 @@ export const MapStyleList = () => {
 export const MapStyleCreate = () => (
   <Create title={<Title />}>
     <SimpleForm>
-      <TextInput label="名稱" source="name" />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
       <FileInput label="地圖樣式" source="mapStyle" validate={required()}>
         <FileField source="src" title="name" />
       </FileInput>
@@ -76,7 +77,7 @@ export const MapStyleEdit = () => (
   <Edit title={<Title />}>
     <SimpleForm>
       <TextInput readOnly source="id" />
-      <TextInput label="名稱" source="name" />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
       <FileInput label="地圖樣式" source="mapStyle" validate={required()}>
         <FileField source="src" title="name" />
       </FileInput>

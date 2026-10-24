@@ -25,6 +25,7 @@ import {
   SelectInput,
   useRecordContext,
 } from "react-admin";
+import { longInputSx } from "./inputWidth";
 
 import { useState } from "react";
 import { apiUrl } from "./serverCommon";
@@ -148,8 +149,8 @@ export const CategoryList = () => {
 export const CategoryCreate = () => (
   <Create title={<Title />}>
     <SimpleForm>
-      <TextInput label="名稱" source="name" />
-      <TextInput label="簡介" source="description" />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
+      <TextInput label="簡介" source="description" fullWidth />
       <SelectInput
         label="顯示方式"
         source="displayType"
@@ -167,8 +168,8 @@ export const CategoryEdit = () => (
   <Edit title={<Title />}>
     <SimpleForm>
       <TextInput readOnly source="id" />
-      <TextInput label="名稱" source="name" />
-      <TextInput label="簡介" source="description" />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
+      <TextInput label="簡介" source="description" fullWidth />
       <SelectInput
         label="顯示方式"
         source="displayType"

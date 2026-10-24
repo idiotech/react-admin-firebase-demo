@@ -17,6 +17,7 @@ import {
   NumberField,
   useRecordContext,
 } from "react-admin";
+import { longInputSx } from "./inputWidth";
 import { DummyList } from "./dummy";
 import { getCurrentScenario, getCurrentScenarioName } from "./currentScenario";
 import { getDeleteButton } from "./deleteResource";
@@ -61,13 +62,13 @@ export const VariableList = () => {
 export const VariableCreate = () => (
   <Create title={<Title />}>
     <SimpleForm>
-      <TextInput label="名稱" source="name" validate={[required()]} />
+      <TextInput label="名稱" source="name" sx={longInputSx} validate={[required()]} />
       <NumberInput
         label="初始值"
         source="value"
         validate={[required(), number()]}
       />
-      <TextInput label="說明" source="description" />
+      <TextInput label="說明" source="description" fullWidth />
     </SimpleForm>
   </Create>
 );
@@ -78,13 +79,13 @@ export const VariableEdit = () => (
       <TextInput readOnly source="id" />
       <DateTimeInput label="建立時間" readOnly source="createdate" />
       <DateTimeInput label="修改時間" readOnly source="lastupdate" />
-      <TextInput label="名稱" source="name" validate={[required()]} />
+      <TextInput label="名稱" source="name" sx={longInputSx} validate={[required()]} />
       <NumberInput
         label="初始值"
         source="value"
         validate={[required(), number()]}
       />
-      <TextInput label="說明" source="description" />
+      <TextInput label="說明" source="description" fullWidth />
     </SimpleForm>
   </Edit>
 );

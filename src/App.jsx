@@ -22,6 +22,8 @@ import {
   Layout,
   TitlePortal,
   useResourceDefinitions,
+  defaultLightTheme,
+  defaultDarkTheme,
 } from "react-admin";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -250,6 +252,22 @@ const i18nProvider = polyglotI18nProvider(() => englishMessages, "en", {
   onMissingKey: (key) => key,
 });
 
+// react-admin 5 stretches every input across the form; the forms place units
+// and related inputs beside each other, so inputs keep their natural width
+// and the few that need more room say so
+function withNaturalWidthInputs(theme) {
+  const components = { ...theme.components };
+  ["MuiAutocomplete", "MuiTextField", "MuiFormControl"].forEach((name) => {
+    components[name] = {
+      ...components[name],
+      defaultProps: { ...components[name]?.defaultProps, fullWidth: false },
+    };
+  });
+  return { ...theme, components };
+}
+const lightTheme = withNaturalWidthInputs(defaultLightTheme);
+const darkTheme = withNaturalWidthInputs(defaultDarkTheme);
+
 function App() {
   const filterUid = getAuthUid() || localStorage.getItem("uid") || "dead";
 
@@ -267,6 +285,8 @@ function App() {
       authProvider={authProvider}
       i18nProvider={i18nProvider}
       layout={MyLayout}
+      lightTheme={lightTheme}
+      darkTheme={darkTheme}
     >
       <Resource
         name="scenarios"

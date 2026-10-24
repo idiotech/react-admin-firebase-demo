@@ -7,6 +7,7 @@ import {
   useWrappedSource,
 } from "react-admin";
 import { Box } from "@mui/material";
+import { longInputSx } from "./inputWidth";
 
 const rowSx = {
   display: "inline-flex",
@@ -17,10 +18,11 @@ const rowSx = {
 };
 
 // A ReferenceInput with a quick-create button next to it and an optional
-// preview of the selected record. label and validate belong to the inner
+// preview of the selected record. label, helperText and validate belong to the inner
 // input since react-admin v4; allowEmpty is a v3 prop (Autocomplete can be cleared).
 const ReferenceWithQuickCreate = ({
   label,
+  helperText,
   validate,
   allowEmpty,
   quickCreate: QuickCreate,
@@ -36,7 +38,9 @@ const ReferenceWithQuickCreate = ({
           <AutocompleteInput
             optionText="name"
             label={label}
+            helperText={helperText}
             validate={validate}
+            sx={longInputSx}
           />
         </ReferenceInput>
         <QuickCreate source={finalSource} />

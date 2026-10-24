@@ -16,6 +16,8 @@ import {
 } from "react-admin";
 
 import "./modalImage.css";
+import InputAdornment from "@mui/material/InputAdornment";
+import { longInputSx } from "./inputWidth";
 
 import { ColorInput } from "./ColorInput";
 import TimeInput from "./timepicker";
@@ -161,8 +163,8 @@ const locationCondition = () => (
       source="geofenceRadius"
       validate={[required(), number(), validateInteger]}
       step={1}
+      slotProps={unit("公尺")}
     />
-    公尺
   </>
 );
 const beaconCondition = () => (
@@ -172,6 +174,7 @@ const beaconCondition = () => (
         label="Beacon"
         optionText="name"
         validate={[required()]}
+        sx={longInputSx}
       />
     </ReferenceInput>
     <SelectInput
@@ -330,7 +333,14 @@ function modalButton(img, caption) {
   return <Button label={caption} onClick={handleClick} />;
 }
 
-export const longInputSx = { width: "400px" };
+export { longInputSx };
+
+// shows a unit such as 公尺 inside a NumberInput
+const unit = (text) => ({
+  input: {
+    endAdornment: <InputAdornment position="end">{text}</InputAdornment>,
+  },
+});
 
 function addDelay(formData, name) {
   return (
@@ -344,7 +354,7 @@ function addDelay(formData, name) {
       {!formData[name + "AdvancedTime"] && (
         <NumberInput
           label="延遲時間(毫秒)"
-          style={{ width: 130 }}
+          style={{ width: 150 }}
           min={0}
           step={1}
           source={name + "Delay"}
@@ -496,16 +506,16 @@ const soundInput = (formData, enableDelay) => (
             source="minVolume"
             defaultValue={0}
             validate={[required(), number(), validateInteger]}
-          />{" "}
-          0-1之間
+            helperText="0-1之間"
+          />
           <br />
           <NumberInput
             label="半徑 (整數)"
             source="range"
             defaultValue={30}
             validate={[required(), number(), validateInteger]}
+            slotProps={unit("公尺")}
           />
-          公尺
         </div>
       </>
     )}
@@ -517,6 +527,7 @@ const soundInput = (formData, enableDelay) => (
               label="Beacon"
               validate={[required()]}
               optionText="name"
+              sx={longInputSx}
             />
           </ReferenceInput>
           <br />
@@ -527,12 +538,14 @@ const soundInput = (formData, enableDelay) => (
           />
           <NumberInput
             label="最小音量訊號值 (整數)"
+            sx={{ width: 220 }}
             source="beaconMinValue"
             validate={[required(), number(), validateInteger]}
           />
           <br />
           <NumberInput
             label="最大音量訊號值 (整數)"
+            sx={{ width: 220 }}
             source="beaconMaxValue"
             validate={[required(), number(), validateInteger]}
           />
@@ -1203,15 +1216,17 @@ const incomingCallInput = (formData, enableDelay) => (
       defaultValue={"CONNECTING"}
     />{" "}
     <br />
-    示意圖：
-    {modalButton(
-      "https://storage.googleapis.com/daqiaotou/editor/image/phone-calling.png",
-      "未接通"
-    )}
-    {modalButton(
-      "https://storage.googleapis.com/daqiaotou/editor/image/phone-connected.png",
-      "接通"
-    )}
+    <span>
+      示意圖：
+      {modalButton(
+        "https://storage.googleapis.com/daqiaotou/editor/image/phone-calling.png",
+        "未接通"
+      )}
+      {modalButton(
+        "https://storage.googleapis.com/daqiaotou/editor/image/phone-connected.png",
+        "接通"
+      )}
+    </span>
     <br />
     {enableDelay && addDelay(formData, "incomingCall")}
   </>
@@ -1273,7 +1288,12 @@ const markerRemovalInput = (formData, enableDelay) => (
       sort={{ field: "lastupdate", order: "DESC" }}
       perPage={1000}
     >
-      <SelectInput label="圖釘" validate={[required()]} optionText="title" />
+      <SelectInput
+        label="圖釘"
+        validate={[required()]}
+        optionText="title"
+        sx={longInputSx}
+      />
     </ReferenceInput>
     <br />
     {enableDelay && addDelay(formData, "markerRemoval")}
@@ -1289,7 +1309,7 @@ const mapStyleInput = (formData, enableDelay) => (
         sort={{ field: "lastupdate", order: "DESC" }}
         perPage={1000}
       >
-        <SelectInput label="樣式" optionText="name" />
+        <SelectInput label="樣式" optionText="name" sx={longInputSx} />
       </ReferenceInput>
     )}
     <BooleanInput label="衛星地圖" source="satellite" defaultValue={false} />
@@ -1326,9 +1346,9 @@ const introImageInput = (formData, enableDelay) => (
     />
     {!formData.noIntroLogo && (
       <>
-        首頁logo建議比例: 寬300 / 高280
         <ImageReferenceInput
           label="首頁logo"
+          helperText="建議比例: 寬300 / 高280"
           source="introLogo"
           reference="images"
           sort={{ field: "lastupdate", order: "DESC" }}
@@ -1361,9 +1381,9 @@ const introImageInput = (formData, enableDelay) => (
       </>
     )}
     <ColorInput label="首頁文字顏色" source="introTextColor" />
-    地圖logo建議比例: 寬62 / 高100
     <ImageReferenceInput
       label="地圖頁logo"
+      helperText="建議比例: 寬62 / 高100"
       source="mapLogo"
       reference="images"
       sort={{ field: "lastupdate", order: "DESC" }}
@@ -1395,7 +1415,11 @@ const buttonStyleInput = (formData, enableDelay) => (
 const popupStyleInput = (formData, enableDelay) => (
   <>
     <ColorInput label="提示文字顏色" source="alertTextColor" />
-    <ColorInput label="面板顏色（含透明度，例如 #59202020）" source="panelColor" />
+    <ColorInput
+      label="面板顏色"
+      helperText="含透明度，例如 #59202020"
+      source="panelColor"
+    />
     {enableDelay && addDelay(formData, "popupStyle")}
   </>
 );
@@ -1408,6 +1432,7 @@ const variableUpdateInput = () => (
           label="變數"
           validate={[required()]}
           optionText="name"
+          sx={longInputSx}
         />
       </ReferenceInput>
       <SelectInput
@@ -1464,15 +1489,16 @@ const silenceInput = (formData, enableDelay) => (
       filter={{ hasSound: true }}
       perPage={1000}
     >
-      <SelectInput label="聲音" optionText="name" />
+      <SelectInput label="聲音" optionText="name" sx={longInputSx} />
     </ReferenceInput>
-    <NumberInput
-      label="淡出秒數 (整數)"
-      source="forceFadeOutSeconds"
-      validate={[number(), validateInteger]}
-    />
-    在幾秒內淡出到消失。設為0代表立即停止。
-    <br />
+    <div>
+      <NumberInput
+        label="淡出秒數 (整數)"
+        source="forceFadeOutSeconds"
+        validate={[number(), validateInteger]}
+      />
+      在幾秒內淡出到消失。設為0代表立即停止。
+    </div>
     {enableDelay && addDelay(formData, "silence")}
   </>
 );

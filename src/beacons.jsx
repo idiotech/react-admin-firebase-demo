@@ -14,6 +14,7 @@ import {
   required,
   useRecordContext,
 } from "react-admin";
+import { longInputSx } from "./inputWidth";
 import { getDeleteButton } from "./deleteResource";
 import { DummyList } from "./dummy";
 import { getCurrentScenario, getCurrentScenarioName } from "./currentScenario";
@@ -60,9 +61,9 @@ export const BeaconList = () => {
 export const BeaconCreate = () => (
   <Create title={<Title />}>
     <SimpleForm>
-      <TextInput label="名稱" source="name" validate={required()} />
-      <TextInput label="Beacon ID" source="beaconId" validate={required()} />
-      <TextInput label="說明" source="description" />
+      <TextInput label="名稱" source="name" sx={longInputSx} validate={required()} />
+      <TextInput label="Beacon ID" source="beaconId" sx={longInputSx} validate={required()} />
+      <TextInput label="說明" source="description" fullWidth />
     </SimpleForm>
   </Create>
 );
@@ -73,9 +74,9 @@ export const BeaconEdit = () => (
       <TextInput readOnly source="id" />
       <DateTimeInput label="建立時間" readOnly source="createdate" />
       <DateTimeInput label="修改時間" readOnly source="lastupdate" />
-      <TextInput label="名稱" source="name" validate={required()} />
-      <TextInput label="Beacon ID" source="beaconId" validate={required()} />
-      <TextInput label="說明" source="description" />
+      <TextInput label="名稱" source="name" sx={longInputSx} validate={required()} />
+      <TextInput label="Beacon ID" source="beaconId" sx={longInputSx} validate={required()} />
+      <TextInput label="說明" source="description" fullWidth />
     </SimpleForm>
   </Edit>
 );

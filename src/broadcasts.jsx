@@ -52,6 +52,7 @@ import {
   mapStyleInput,
   validateBeforeSubmit,
   silenceInput,
+  longInputSx,
 } from "./actionCommon";
 
 import { useAllData, getActions } from "./serverCommon";
@@ -100,7 +101,7 @@ const InputForm = (props) => {
               ) : (
                 <></>
               )}
-              <TextInput label="名稱" source="name" validate={[required()]} />{" "}
+              <TextInput label="名稱" source="name" sx={longInputSx} validate={[required()]} />{" "}
               <br />
               <h3>觸發順序</h3>
               <hr />

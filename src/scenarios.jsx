@@ -41,7 +41,7 @@ import { RichTextInput } from "ra-input-rich-text";
 import { getRecordField, withoutDisplayFields } from "./utils";
 
 import { useAllData, getActions, apiUrl } from "./serverCommon";
-import { getPrevId } from "./actionCommon";
+import { getPrevId, longInputSx } from "./actionCommon";
 import { isSuperUser, getAuthUid } from "./App";
 import ImageReferenceInput from "./ImageReferenceInput";
 import {
@@ -950,9 +950,9 @@ const InputForm = (props) => {
   return (
     <SimpleForm>
       <TextInput readOnly source="id" />
-      <TextInput label="名稱" source="name" />
-      <TextInput label="顯示名稱" source="displayName" />
-      <TextInput label="說明" source="description" multiline />
+      <TextInput label="名稱" source="name" sx={longInputSx} />
+      <TextInput label="顯示名稱" source="displayName" sx={longInputSx} />
+      <TextInput label="說明" source="description" multiline fullWidth />
       {!props.create && (
         <NumberInput label="順序" source="ordinal" defaultValue={Date.now()} />
       )}
@@ -998,6 +998,7 @@ const InputForm = (props) => {
                         validate={[required()]}
                         optionText="name"
                         readOnly={!isSuper}
+                        sx={longInputSx}
                       />
                     </ReferenceInput>
                   </SimpleFormIterator>
@@ -1014,7 +1015,7 @@ const InputForm = (props) => {
           </>
         )}
       </FormDataConsumer>
-      <TextInput label="user id" source="uid" readOnly defaultValue={uid} />
+      <TextInput label="user id" source="uid" sx={longInputSx} readOnly defaultValue={uid} />
     </SimpleForm>
   );
 };
