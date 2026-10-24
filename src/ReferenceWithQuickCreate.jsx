@@ -7,11 +7,11 @@ import {
   useWrappedSource,
 } from "react-admin";
 import { Box } from "@mui/material";
-import { longInputSx } from "./inputWidth";
+import { longInputSx, besideInputSx } from "./inputWidth";
 
 const rowSx = {
   display: "inline-flex",
-  alignItems: "center",
+  alignItems: "flex-start",
   justifyItems: "flex-start",
   justifyContent: "flex-start",
   flexDirection: "row",
@@ -43,7 +43,9 @@ const ReferenceWithQuickCreate = ({
             sx={longInputSx}
           />
         </ReferenceInput>
-        <QuickCreate source={finalSource} />
+        <Box sx={besideInputSx}>
+          <QuickCreate source={finalSource} />
+        </Box>
       </Box>
       <br />
       {preview && (
