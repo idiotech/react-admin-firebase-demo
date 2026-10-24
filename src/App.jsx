@@ -263,6 +263,15 @@ function withNaturalWidthInputs(theme) {
       defaultProps: { ...components[name]?.defaultProps, fullWidth: false },
     };
   });
+  // list items stack their inputs like the form does, but stretch them by
+  // default; start-align them so the widths above still apply
+  components.RaSimpleFormIterator = {
+    ...components.RaSimpleFormIterator,
+    styleOverrides: {
+      ...components.RaSimpleFormIterator?.styleOverrides,
+      root: { "& .RaSimpleFormIterator-form": { alignItems: "flex-start" } },
+    },
+  };
   return { ...theme, components };
 }
 const lightTheme = withNaturalWidthInputs(defaultLightTheme);
