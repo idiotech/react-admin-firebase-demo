@@ -10,6 +10,8 @@ import {
   AutocompleteInput,
   required,
   number,
+  minValue,
+  maxValue,
   CheckboxGroupInput,
   Button,
   useGetOne,
@@ -88,6 +90,9 @@ const operationTypes = [
   { id: "-", name: "-" },
   { id: "=", name: "=" },
 ];
+
+// volumes are fractions of the file's own volume
+const validateVolume = [required(), number(), minValue(0), maxValue(1)];
 
 const validateInteger = (value) => {
   if (value === null || value === undefined || value === "") {
@@ -502,10 +507,13 @@ const soundInput = (formData, enableDelay) => (
             <AutocompleteInput optionText="name" />
           </LocationReferenceInput>
           <NumberInput
-            label="最小音量 (整數)"
+            label="最小音量"
             source="minVolume"
             defaultValue={0}
-            validate={[required(), number(), validateInteger]}
+            min={0}
+            max={1}
+            step={0.1}
+            validate={validateVolume}
             helperText="0-1之間"
           />
           <br />
@@ -534,7 +542,11 @@ const soundInput = (formData, enableDelay) => (
           <NumberInput
             label="最小音量"
             source="beaconMinVolume"
-            validate={[required(), number()]}
+            min={0}
+            max={1}
+            step={0.1}
+            validate={validateVolume}
+            helperText="0-1之間"
           />
           <NumberInput
             label="最小音量訊號值 (整數)"
